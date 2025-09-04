@@ -11,6 +11,7 @@ export interface UiState {
   moveToLayerDialogOpen: boolean;
   drawerOpen: boolean;
   annotationDialog: string | null;
+  loading: boolean;
 }
 
 const initialState: UiState = {
@@ -23,6 +24,7 @@ const initialState: UiState = {
   moveToLayerDialogOpen: false,
   newLayerPopupVisible: false,
   annotationDialog: null,
+  loading: false,
 };
 
 export const uiSlice = createSlice({
@@ -56,6 +58,9 @@ export const uiSlice = createSlice({
     setAnnotationDialog: (state, action: PayloadAction<string | null>) => {
       state.annotationDialog = action.payload;
     },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
   },
 });
 
@@ -69,6 +74,7 @@ export const {
   setCombineLayersDialogOpen,
   setMoveToLayerDialogOpen,
   setAnnotationDialog,
+  setLoading,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;
