@@ -11,6 +11,7 @@ import { Provider } from 'react-redux';
 import { createHashRouter, Outlet, RouterProvider } from 'react-router-dom';
 
 import AppRoutes from './app-route';
+import FullPageLoader from './components/FullPageLoader';
 import collections from './modules/collections';
 import Start from './modules/start';
 import { store } from './store';
@@ -46,6 +47,7 @@ const App: React.FC = () => {
           titleTemplate={`${meta.name} - ${meta.version} %s`}
           defaultTitle={`${meta.name} - ${meta.version}`}
         />
+        <FullPageLoader />
         <RouterProvider router={router} />
         <CssBaseline />
         <Outlet />

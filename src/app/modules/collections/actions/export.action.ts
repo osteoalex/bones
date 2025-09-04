@@ -1,5 +1,6 @@
 import { TAction } from '../../../../types/store.types';
 import { geojsonFormat } from '../../../../utils';
+import { setLoading } from '../slices/ui.slice';
 
 export function exportFragmentHandler(): TAction {
   return (_dispatch, getState) => {
@@ -18,7 +19,8 @@ export function exportFragmentHandler(): TAction {
 }
 
 export function exportItemHandler(): TAction {
-  return async (_dispatch, getState) => {
+  return async (dispatch, getState) => {
+    dispatch(setLoading(true));
     const { baseSourceRef, layers } = getState().layers;
     const geojson = layers
       .filter((l) => l.base.getVisible())
@@ -28,5 +30,6 @@ export function exportItemHandler(): TAction {
           .map((f) => geojsonFormat.writeFeatureObject(f));
       });
     await window.electron.exportSVG(baseSourceRef.getExtent(), geojson);
+    dispatch(setLoading(false));
   };
 }
