@@ -24,6 +24,7 @@ import EditorDrawer from '../editor-drawer/editor-drawer.component';
 import FragmentPropertiesDialog from '../fragment-properties-dialog/fragment-properties-dialog.component';
 import HelpBox from '../help-box/help-box.component';
 import Hint from '../hint/hint.component';
+import HotkeysToggle from '../hotkeys-toggle/hotkeys-toggle.component';
 import ItemsList from '../items-list/items-list.component';
 import LayerDetailsDialog from '../layer-details-dialog/layer-details-dialog.component';
 import LayersList from '../layers-list/layers-list.component';
@@ -74,7 +75,6 @@ const CollectionHome: React.FC = () => {
         </Box>
       </EditorDrawer>
       <EditorBody />
-      {/* eslint-enable */}
       {currentItem && <ToolBox />}
       {currentItem && mode === EDIT_MODE_TYPE.ADD_WHOLE && (
         <AddMultipleControls />
@@ -90,6 +90,7 @@ const CollectionHome: React.FC = () => {
       {currentItem && <FragmentPropertiesDialog />}
       {currentItem && <HelpBox />}
       <Hint />
+      <HotkeysToggle />
     </CollectionHomeWrapper>
   );
 };
