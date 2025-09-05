@@ -6,28 +6,36 @@ import { resetBaseFeatureStyle } from './reset.action';
 export function abortDrawing(): TAction {
   return async (_dispatch, getState) => {
     const { drawFragmentRef } = getState().interactions;
-    drawFragmentRef.abortDrawing();
+    if (drawFragmentRef) {
+      drawFragmentRef.abortDrawing();
+    }
   };
 }
 
 export function abortSubtract(): TAction {
   return async (_dispatch, getState) => {
     const { subtractFragmentRef } = getState().interactions;
-    subtractFragmentRef.abortDrawing();
+    if (subtractFragmentRef) {
+      subtractFragmentRef.abortDrawing();
+    }
   };
 }
 
 export function abortSplit(): TAction {
   return async (_dispatch, getState) => {
     const { splitFragmentRef } = getState().interactions;
-    splitFragmentRef.abortDrawing();
+    if (splitFragmentRef) {
+      splitFragmentRef.abortDrawing();
+    }
   };
 }
 
 export function abortDrawRectangle(): TAction {
   return async (_dispatch, getState) => {
     const { addByRectangleDrawRef } = getState().interactions;
-    addByRectangleDrawRef.abortDrawing();
+    if (addByRectangleDrawRef) {
+      addByRectangleDrawRef.abortDrawing();
+    }
   };
 }
 

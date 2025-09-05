@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import editorReducer from './modules/collections/slices/editor.slice';
+import hotkeysReducer from './modules/collections/slices/hotkeys.slice';
 import interactionsReducer from './modules/collections/slices/interactions.slice';
 import layersReducer from './modules/collections/slices/layers.slice';
 import selectedReducer from './modules/collections/slices/selected.splice';
@@ -13,6 +14,7 @@ export const store = configureStore({
     selected: selectedReducer,
     layers: layersReducer,
     interactions: interactionsReducer,
+    hotkeys: hotkeysReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
