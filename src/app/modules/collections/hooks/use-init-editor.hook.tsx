@@ -1,7 +1,11 @@
 /* eslint-disable */
 import { Map, View } from 'ol';
-import { DragRotateAndZoom, defaults } from 'ol/interaction';
+import { DragPan, DragRotateAndZoom, defaults } from 'ol/interaction';
+import type DragPanType from 'ol/interaction/DragPan';
+import type Interaction from 'ol/interaction/Interaction';
+import type MapBrowserEvent from 'ol/MapBrowserEvent';
 import { createMiddleMouseDragPan } from '../utils/middle-mouse-drag-pan';
+import { createAltLmbDragPan } from '../utils/alt-lmb-drag-pan';
 import { Projection } from 'ol/proj';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -39,6 +43,7 @@ export const useInitEditor = (
     (state: RootState) => state.layers.baseSourceRef,
   );
   const olMapRef = useSelector((state: RootState) => state.layers.olMapRef);
+  const altHotkey = useSelector((state: RootState) => state.hotkeys.alt);
 
   useEffect(() => {
     const abortDrawing = () => {
@@ -114,6 +119,40 @@ export const useInitEditor = (
       dispatch(setOlMapRef());
     };
   }, []);
+
+  // Alt+LMB pan interaction that checks Redux state
+  useEffect(() => {
+    if (!olMapRef) return;
+    // Remove any previous custom Alt+LMB pan interaction
+    let prevAltPan: DragPanType | null = null;
+    olMapRef.getInteractions().forEach((interaction: Interaction) => {
+      if (
+        interaction &&
+        typeof interaction.get === 'function' &&
+        interaction.get('isAltLmbPan')
+      ) {
+        olMapRef.removeInteraction(interaction);
+      }
+    });
+    // Only add if Alt is toggled in state
+    if (altHotkey) {
+      const altLmbPan = new DragPan({
+        condition: (event: MapBrowserEvent<UIEvent>) => {
+          const originalEvent = event.originalEvent as MouseEvent;
+          return originalEvent && originalEvent.button === 0 && altHotkey;
+        },
+      });
+      altLmbPan.set('isAltLmbPan', true);
+      olMapRef.addInteraction(altLmbPan);
+      prevAltPan = altLmbPan;
+    }
+    // Cleanup
+    return () => {
+      if (prevAltPan) {
+        olMapRef.removeInteraction(prevAltPan);
+      }
+    };
+  }, [olMapRef, altHotkey]);
 
   useEffect(() => {
     let pressed = false;
