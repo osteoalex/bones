@@ -13,6 +13,8 @@ import { setCurrentItem } from '../slices/editor.slice';
 import { setOlMapRef } from '../slices/layers.slice';
 import { setInfoDetails, setMultipleAddIds } from '../slices/selected.splice';
 import { setShowPropsDialog } from '../slices/ui.slice';
+import { map } from 'leaflet';
+import { abortAll } from '../actions/abort.action';
 /* eslint-enable */
 
 export const useInitEditor = (
@@ -38,27 +40,30 @@ export const useInitEditor = (
   const olMapRef = useSelector((state: RootState) => state.layers.olMapRef);
 
   useEffect(() => {
+    const abortDrawing = () => {
+      if (drawFragmentRef) {
+        drawFragmentRef.abortDrawing();
+      }
+      if (splitFragmentRef) {
+        splitFragmentRef.abortDrawing();
+      }
+      if (subtractFragmentRef) {
+        subtractFragmentRef.abortDrawing();
+      }
+      if (multipleAddIds) {
+        dispatch(setMultipleAddIds([]));
+      }
+      if (baseSourceRef) {
+        baseSourceRef.forEachFeature((feature) =>
+          resetBaseFeatureStyle(feature),
+        );
+      }
+      dispatch(setShowPropsDialog(false));
+    };
     async function getInitialData() {
       await window.electron.onCollectionPageEnter();
       await window.electron.collectionPageEscHandler(async () => {
-        if (drawFragmentRef) {
-          drawFragmentRef.abortDrawing();
-        }
-        if (splitFragmentRef) {
-          splitFragmentRef.abortDrawing();
-        }
-        if (subtractFragmentRef) {
-          subtractFragmentRef.abortDrawing();
-        }
-        if (multipleAddIds) {
-          dispatch(setMultipleAddIds([]));
-        }
-        if (baseSourceRef) {
-          baseSourceRef.forEachFeature((feature) =>
-            resetBaseFeatureStyle(feature),
-          );
-        }
-        dispatch(setShowPropsDialog(false));
+        abortDrawing();
       });
       dispatch(setInfoDetails(null));
     }
@@ -84,6 +89,10 @@ export const useInitEditor = (
       dispatch(setOlMapRef(m));
     }
     window.addEventListener('resize', onResize);
+    window.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      dispatch(abortAll());
+    });
     return () => {
       async function saveConfig() {
         window.electron.collectionPageEscHandler(async () => undefined);
