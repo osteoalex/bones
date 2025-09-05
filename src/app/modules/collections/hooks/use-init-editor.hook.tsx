@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { Map, View } from 'ol';
 import { DragRotateAndZoom, defaults } from 'ol/interaction';
+import { createMiddleMouseDragPan } from '../utils/middle-mouse-drag-pan';
 import { Projection } from 'ol/proj';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -75,7 +76,10 @@ export const useInitEditor = (
     if (mapRef.current && !olMapRef) {
       const m = new Map({
         target: mapRef.current || undefined,
-        interactions: defaults().extend([new DragRotateAndZoom()]),
+        interactions: defaults({ dragPan: false }).extend([
+          new DragRotateAndZoom(),
+          createMiddleMouseDragPan(),
+        ]),
         layers: [],
         view: new View({
           center: [0, 0],
