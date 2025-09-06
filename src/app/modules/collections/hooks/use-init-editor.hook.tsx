@@ -19,7 +19,7 @@ import { setOlMapRef } from '../slices/layers.slice';
 import { setInfoDetails, setMultipleAddIds } from '../slices/selected.splice';
 import { setShowPropsDialog } from '../slices/ui.slice';
 import { map } from 'leaflet';
-import { abortAll } from '../actions/abort.action';
+import { handleRightClick } from '../actions/right-click.action';
 /* eslint-enable */
 
 export const useInitEditor = (
@@ -98,10 +98,11 @@ export const useInitEditor = (
       dispatch(setOlMapRef(m));
     }
     window.addEventListener('resize', onResize);
-    window.addEventListener('contextmenu', (e) => {
+    const handleRightClickListener = (e: MouseEvent) => {
       e.preventDefault();
-      dispatch(abortAll());
-    });
+      dispatch(handleRightClick(e));
+    };
+    window.addEventListener('contextmenu', handleRightClickListener);
     return () => {
       async function saveConfig() {
         window.electron.collectionPageEscHandler(async () => undefined);
@@ -115,6 +116,7 @@ export const useInitEditor = (
         dispatch(setInfoDetails(null));
       }
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('contextmenu', handleRightClickListener);
       saveConfig();
       dispatch(setOlMapRef());
     };
