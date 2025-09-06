@@ -15,6 +15,7 @@ import AnnotationDialog from '../annotation-dialog/annotation-dialog.component';
 import BonesList from '../bones-list/bones.list.component';
 import CollectionGlobalButtons from '../collection-global-buttons/collection-global-buttons.component';
 import CombineLayersDialog from '../combine-layers-dialog/combine-layers-dialog.component';
+import { ContextMenu } from '../context-menu/context-menu.component';
 import CreateNewItem from '../create-new-item/create-new-item.component';
 import DetailsBox from '../details-box/details-box.component';
 import DrawerToolBox from '../drawer-tool-box/drawer-tool-box.component';
@@ -91,6 +92,7 @@ const CollectionHome: React.FC = () => {
       {currentItem && <HelpBox />}
       <Hint />
       <HotkeysToggle />
+      <ContextMenu />
     </CollectionHomeWrapper>
   );
 };

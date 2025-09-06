@@ -1,6 +1,12 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
+export interface ContextMenuState {
+  x: number;
+  y: number;
+  visible: boolean;
+}
+
 export interface UiState {
   showPropsDialog: boolean;
   newLayerPopupVisible: boolean;
@@ -12,6 +18,11 @@ export interface UiState {
   drawerOpen: boolean;
   annotationDialog: string | null;
   loading: boolean;
+  contextMenu: {
+    x: number;
+    y: number;
+    visible: boolean;
+  };
 }
 
 const initialState: UiState = {
@@ -25,6 +36,7 @@ const initialState: UiState = {
   newLayerPopupVisible: false,
   annotationDialog: null,
   loading: false,
+  contextMenu: { x: 0, y: 0, visible: false },
 };
 
 export const uiSlice = createSlice({
@@ -61,6 +73,9 @@ export const uiSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
+    setContextMenu: (state, action: PayloadAction<ContextMenuState>) => {
+      state.contextMenu = action.payload;
+    },
   },
 });
 
@@ -75,6 +90,7 @@ export const {
   setMoveToLayerDialogOpen,
   setAnnotationDialog,
   setLoading,
+  setContextMenu,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;
