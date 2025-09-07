@@ -3,28 +3,28 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { AppDispatch } from '../../../../../types/store.types';
 import { RootState } from '../../../../store';
-import { moveToLayer } from '../../actions/move-to-layer.action';
-import { setMoveToLayerDialogOpen } from '../../slices/ui.slice';
+import { copyToLayer } from '../../actions/copy-to-layer.action';
+import { setCopyToLayerDialogOpen } from '../../slices/ui.slice';
 import LayerSelectDialog from '../layer-select-dialog/layer-select-dialog.component';
 
-const MoveToLayerDialog = () => {
+const CopyToLayerDialog = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const moveToLayerDialogOpen = useSelector(
-    (state: RootState) => state.ui.moveToLayerDialogOpen,
+  const copyToLayerDialogOpen = useSelector(
+    (state: RootState) => state.ui.copyToLayerDialogOpen,
   );
   const { layersData, activeLayerIdx } = useSelector(
     (state: RootState) => state.layers,
   );
   return (
     <LayerSelectDialog
-      open={moveToLayerDialogOpen}
-      onClose={() => dispatch(setMoveToLayerDialogOpen(false))}
+      open={copyToLayerDialogOpen}
+      onClose={() => dispatch(setCopyToLayerDialogOpen(false))}
       layersData={layersData}
       activeLayerIdx={activeLayerIdx}
-      title="Move to other layer"
-      onSubmit={(targetLayer) => dispatch(moveToLayer(targetLayer))}
+      title="Copy to other layer"
+      onSubmit={(targetLayer) => dispatch(copyToLayer(targetLayer))}
     />
   );
 };
 
-export default MoveToLayerDialog;
+export default CopyToLayerDialog;

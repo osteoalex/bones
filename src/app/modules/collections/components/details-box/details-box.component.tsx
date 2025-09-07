@@ -14,11 +14,13 @@ import { exportFragmentHandler } from '../../actions/export.action';
 import { setLayersData } from '../../slices/layers.slice';
 import {
   setAnnotationDialog,
+  setCopyToLayerDialogOpen,
   setMoveToLayerDialogOpen,
   setShowPropsDialog,
 } from '../../slices/ui.slice';
 import { SelectedBox } from '../collection-home/collection-home.styles';
 import DetailsButtons from './details-buttons.component';
+import { set } from 'ol/transform';
 /* eslint-enable */
 
 const DetailsBox: React.FC = () => {
@@ -96,6 +98,7 @@ const DetailsBox: React.FC = () => {
         <DetailsButtons
           isAnnotation={isAnnotation}
           onMoveClick={() => dispatch(setMoveToLayerDialogOpen(true))}
+          onCopyClick={() => dispatch(setCopyToLayerDialogOpen(true))}
           onExportClick={() => dispatch(exportFragmentHandler())}
           onEditClick={() => {
             if (isAnnotation) {
