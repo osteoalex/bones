@@ -3,8 +3,8 @@ import { styled } from '@mui/material/styles';
 
 export const HotKeysToggleWrapper = styled(Box)`
   position: absolute;
-  bottom: 5%;
-  right: 5%;
+  bottom: 40px;
+  right: 0;
 `;
 
 export const HotKeysToggleRow = styled(Box)`

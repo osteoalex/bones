@@ -13,6 +13,7 @@ import { setShowHints } from '../../slices/ui.slice';
 import AddMultipleControls from '../add-multiple-controls/add-multiple-controls.component';
 import AnnotationDialog from '../annotation-dialog/annotation-dialog.component';
 import BonesList from '../bones-list/bones.list.component';
+import BottomBar from '../bottom-bar/bottom-bar.component';
 import CollectionGlobalButtons from '../collection-global-buttons/collection-global-buttons.component';
 import CombineLayersDialog from '../combine-layers-dialog/combine-layers-dialog.component';
 import { ContextMenu } from '../context-menu/context-menu.component';
@@ -93,6 +94,7 @@ const CollectionHome: React.FC = () => {
       <Hint />
       <HotkeysToggle />
       <ContextMenu />
+      <BottomBar />
     </CollectionHomeWrapper>
   );
 };
