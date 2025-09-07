@@ -2,7 +2,7 @@ import AddCommentIcon from '@mui/icons-material/AddComment';
 import ContentCutIcon from '@mui/icons-material/ContentCut';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import InfoIcon from '@mui/icons-material/Info';
+import PanToolAltIcon from '@mui/icons-material/PanToolAlt';
 import PhotoSizeSelectSmallIcon from '@mui/icons-material/PhotoSizeSelectSmall';
 import QueueIcon from '@mui/icons-material/Queue';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -30,6 +30,11 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
+  {
+    label: 'Select fragment or bone',
+    icon: <PanToolAltIcon fontSize="small" />,
+    action: (dispatch) => dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT)),
+  },
   {
     label: 'Select with rectangle',
     icon: <PhotoSizeSelectSmallIcon fontSize="small" />,
@@ -65,11 +70,6 @@ const menuItems: MenuItem[] = [
     label: 'Save item as svg',
     icon: <SaveAltIcon fontSize="small" />,
     action: (dispatch) => dispatch(exportItemHandler()),
-  },
-  {
-    label: 'Get item info',
-    icon: <InfoIcon fontSize="small" />,
-    action: (dispatch) => dispatch(changeEditMode(EDIT_MODE_TYPE.INFO)),
   },
   {
     label: 'Add annotation',

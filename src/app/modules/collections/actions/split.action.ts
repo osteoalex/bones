@@ -18,7 +18,10 @@ import {
   getNextId,
 } from '../../../../utils';
 import { isPolygon } from '../../../../utils/type-guards';
-import { setSplitFragmentRef } from '../slices/interactions.slice';
+import {
+  setIsSplitting,
+  setSplitFragmentRef,
+} from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
 import {
   recalculateAreaByTargetId,
@@ -41,12 +44,14 @@ export function setupSplitFragmentInteraction(): TAction {
     splitDraw.setActive(false);
     olMapRef.addInteraction(splitDraw);
 
+    splitDraw.on('drawstart', () => dispatch(setIsSplitting(true)));
     splitDraw.on('drawend', (e: DrawEvent) => dispatch(splitDrawHandler(e)));
   };
 }
 
 export function splitDrawHandler(e: DrawEvent): TAction {
   return async (dispatch, getState) => {
+    dispatch(setIsSplitting(false));
     const { splitSourceRef } = getState().interactions;
     const { layers, activeLayerIdx, baseSourceRef, layersData } =
       getState().layers;

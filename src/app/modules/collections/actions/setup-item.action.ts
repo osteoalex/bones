@@ -35,7 +35,7 @@ import { setupSplitFragmentInteraction } from './split.action';
 export function getAndSetupItem(currentItem: string): TAction {
   return async (dispatch, getState) => {
     const { olMapRef } = getState().layers;
-    dispatch(setMode(EDIT_MODE_TYPE.INFO));
+    dispatch(setMode(EDIT_MODE_TYPE.SELECT));
     if (currentItem !== '') {
       const items = await window.electron.getAllItems();
       dispatch(setItems(items));
@@ -101,7 +101,7 @@ export function getAndSetupItem(currentItem: string): TAction {
       const infoClickRef = dispatch(setupInfoClickInteraction());
       dispatch(setInfoSelectRef(infoClickRef));
 
-      dispatch(changeEditMode(EDIT_MODE_TYPE.INFO));
+      dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT));
       olMapRef.render();
 
       await window.electron.collectionPageEscHandler(async () => {

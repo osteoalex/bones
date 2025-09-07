@@ -2,7 +2,6 @@ import AddCommentIcon from '@mui/icons-material/AddComment';
 import ContentCutIcon from '@mui/icons-material/ContentCut';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import InfoIcon from '@mui/icons-material/Info';
 import PhotoSizeSelectSmallIcon from '@mui/icons-material/PhotoSizeSelectSmall';
 import QueueIcon from '@mui/icons-material/Queue';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -21,14 +20,20 @@ import { ToolsBoxWrapper } from '../collection-home/collection-home.styles';
 const ToolBox: React.FC = () => {
   const mode = useSelector((state: RootState) => state.editor.mode);
   const dispatch = useDispatch<AppDispatch>();
+  // Helper to handle deselect logic
+  const handleToolClick = (toolMode: EDIT_MODE_TYPE) => {
+    if (mode === toolMode) {
+      dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT)); // Deselect: revert to default
+    } else {
+      dispatch(changeEditMode(toolMode));
+    }
+  };
   return (
     <ToolsBoxWrapper>
       {/* select many */}
       <Tooltip title="Select with rectangle">
         <IconButton
-          onClick={() => {
-            dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT_RECTANGLE));
-          }}
+          onClick={() => handleToolClick(EDIT_MODE_TYPE.SELECT_RECTANGLE)}
         >
           <PhotoSizeSelectSmallIcon
             color={
@@ -39,11 +44,7 @@ const ToolBox: React.FC = () => {
       </Tooltip>
       {/* addition */}
       <Tooltip title="Draw fragments to add">
-        <IconButton
-          onClick={() => {
-            dispatch(changeEditMode(EDIT_MODE_TYPE.ADDITION));
-          }}
-        >
+        <IconButton onClick={() => handleToolClick(EDIT_MODE_TYPE.ADDITION)}>
           <EditIcon
             color={mode === EDIT_MODE_TYPE.ADDITION ? 'success' : 'inherit'}
           />
@@ -51,11 +52,7 @@ const ToolBox: React.FC = () => {
       </Tooltip>
       {/* subtraction */}
       <Tooltip title="Draw fragments to subtract">
-        <IconButton
-          onClick={() => {
-            dispatch(changeEditMode(EDIT_MODE_TYPE.SUBTRACTION));
-          }}
-        >
+        <IconButton onClick={() => handleToolClick(EDIT_MODE_TYPE.SUBTRACTION)}>
           <RemoveIcon
             color={mode === EDIT_MODE_TYPE.SUBTRACTION ? 'success' : 'inherit'}
           />
@@ -63,11 +60,7 @@ const ToolBox: React.FC = () => {
       </Tooltip>
       {/* split */}
       <Tooltip title="Draw line to split by">
-        <IconButton
-          onClick={() => {
-            dispatch(changeEditMode(EDIT_MODE_TYPE.SPLIT));
-          }}
-        >
+        <IconButton onClick={() => handleToolClick(EDIT_MODE_TYPE.SPLIT)}>
           <ContentCutIcon
             color={mode === EDIT_MODE_TYPE.SPLIT ? 'success' : 'inherit'}
           />
@@ -75,11 +68,7 @@ const ToolBox: React.FC = () => {
       </Tooltip>
       {/* delete */}
       <Tooltip title="Select fragments to delete">
-        <IconButton
-          onClick={() => {
-            dispatch(changeEditMode(EDIT_MODE_TYPE.DELETE));
-          }}
-        >
+        <IconButton onClick={() => handleToolClick(EDIT_MODE_TYPE.DELETE)}>
           <DeleteIcon
             color={mode === EDIT_MODE_TYPE.DELETE ? 'success' : 'inherit'}
           />
@@ -87,11 +76,7 @@ const ToolBox: React.FC = () => {
       </Tooltip>
       {/* add whole + multiselect */}
       <Tooltip title="Add whole">
-        <IconButton
-          onClick={() => {
-            dispatch(changeEditMode(EDIT_MODE_TYPE.ADD_WHOLE));
-          }}
-        >
+        <IconButton onClick={() => handleToolClick(EDIT_MODE_TYPE.ADD_WHOLE)}>
           <QueueIcon
             color={mode === EDIT_MODE_TYPE.ADD_WHOLE ? 'success' : 'inherit'}
           />
@@ -103,25 +88,9 @@ const ToolBox: React.FC = () => {
           <SaveAltIcon />
         </IconButton>
       </Tooltip>
-      {/* info */}
-      <Tooltip title="Get item info">
-        <IconButton
-          onClick={() => {
-            dispatch(changeEditMode(EDIT_MODE_TYPE.INFO));
-          }}
-        >
-          <InfoIcon
-            color={mode === EDIT_MODE_TYPE.INFO ? 'success' : 'inherit'}
-          />
-        </IconButton>
-      </Tooltip>
       {/* annotation */}
       <Tooltip title="Add annotation">
-        <IconButton
-          onClick={() => {
-            dispatch(changeEditMode(EDIT_MODE_TYPE.ANNOTATION));
-          }}
-        >
+        <IconButton onClick={() => handleToolClick(EDIT_MODE_TYPE.ANNOTATION)}>
           <AddCommentIcon
             color={mode === EDIT_MODE_TYPE.ANNOTATION ? 'success' : 'inherit'}
           />

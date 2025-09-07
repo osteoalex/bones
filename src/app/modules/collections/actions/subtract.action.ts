@@ -21,6 +21,7 @@ import {
   isGeoJsonMultiPolygon,
   isGeoJsonPolygon,
 } from '../../../../utils/type-guards';
+import { setIsSubtracting } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
 import {
   recalculateAreaByTargetId,
@@ -44,6 +45,7 @@ export function setupSubtractFragmentInteraction(
     subtractDraw.setActive(false);
     olMapRef.addInteraction(subtractDraw);
 
+    subtractDraw.on('drawstart', () => dispatch(setIsSubtracting(true)));
     subtractDraw.on('drawend', (e: DrawEvent) =>
       dispatch(subtractDrawHandler(e)),
     );
@@ -53,6 +55,7 @@ export function setupSubtractFragmentInteraction(
 
 export function subtractDrawHandler(e: DrawEvent): TAction {
   return async (dispatch, getState) => {
+    dispatch(setIsSubtracting(false));
     const { layers, activeLayerIdx, baseSourceRef, layersData } =
       getState().layers;
     if (layers[activeLayerIdx].source) {

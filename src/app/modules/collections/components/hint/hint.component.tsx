@@ -44,8 +44,8 @@ const Hint: React.FC = () => {
         hint =
           'Click on bones to select or deselect them, after the selection is finished click ✓ icon on the right of the screen to add selected bones or click ✕ icon to cancel the selection.';
         break;
-      case EDIT_MODE_TYPE.INFO:
-        hint = 'Click on bone or fragment to display information about it.';
+      case EDIT_MODE_TYPE.SELECT:
+        hint = 'Click on bone or fragment to select and display its information.';
         break;
       default:
         hint = '';

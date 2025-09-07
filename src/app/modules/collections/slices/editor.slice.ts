@@ -6,7 +6,7 @@ import { EDIT_MODE_TYPE } from '../../../../utils/enums';
 export interface EditorState {
   items: string[];
   currentItem: string;
-  mode: EDIT_MODE_TYPE;
+  mode: EDIT_MODE_TYPE | '';
   editedLayer: number | null;
   layerDetails: number | null;
   showLayerColorPicker: number | null;
@@ -18,7 +18,7 @@ export interface EditorState {
 const initialState: EditorState = {
   items: [],
   currentItem: '',
-  mode: EDIT_MODE_TYPE.INFO,
+  mode: EDIT_MODE_TYPE.SELECT,
   editedLayer: null,
   layerDetails: null,
   showLayerColorPicker: null,
@@ -37,7 +37,7 @@ export const EditorSlice = createSlice({
     setCurrentItem: (state, action: PayloadAction<string>) => {
       state.currentItem = action.payload;
     },
-    setMode: (state, action: PayloadAction<EDIT_MODE_TYPE>) => {
+    setMode: (state, action: PayloadAction<EDIT_MODE_TYPE | ''>) => {
       state.mode = action.payload;
     },
     setEditedLayer: (state, action: PayloadAction<number | null>) => {

@@ -27,6 +27,7 @@ import {
   getNextId,
   multiPolygonToPolygons,
 } from '../../../../utils';
+import { setIsDrawing } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
 import { recalculateAreas } from './calculate-area.action';
 
@@ -47,6 +48,7 @@ export function setupDrawFragment(
     draw.setActive(false);
     olMapRef.addInteraction(draw);
 
+    draw.on('drawstart', () => dispatch(setIsDrawing(true)));
     draw.on('drawend', (e: DrawEvent) => dispatch(additionDrawEndHandler(e)));
     return draw;
   };
@@ -54,6 +56,7 @@ export function setupDrawFragment(
 
 export function additionDrawEndHandler(e: DrawEvent): TAction {
   return async (dispatch, getState) => {
+    dispatch(setIsDrawing(false));
     const { baseSourceRef, layers, activeLayerIdx } = getState().layers;
     const extent = e.feature;
     const existing = getFeaturesInFeatureExtent(
