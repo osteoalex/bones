@@ -1,3 +1,4 @@
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -7,6 +8,7 @@ import React from 'react';
 
 type Props = {
   onMoveClick: () => void;
+  onCopyClick: () => void;
   onExportClick: () => void;
   onEditClick: () => void;
   onDeleteClick: () => void;
@@ -15,6 +17,7 @@ type Props = {
 
 const DetailsButtons: React.FC<Props> = ({
   onMoveClick,
+  onCopyClick,
   onExportClick,
   onEditClick,
   onDeleteClick,
@@ -25,17 +28,25 @@ const DetailsButtons: React.FC<Props> = ({
       {!isAnnotation && (
         <>
           <IconButton
-            sx={{ position: 'absolute', right: '115px', top: '5px' }}
+            sx={{ position: 'absolute', right: '150px', top: '5px' }}
             onClick={onExportClick}
           >
             <FileDownloadIcon />
           </IconButton>
           <Tooltip title="Move to different layer">
             <IconButton
-              sx={{ position: 'absolute', right: '80px', top: '5px' }}
+              sx={{ position: 'absolute', right: '115px', top: '5px' }}
               onClick={onMoveClick}
             >
               <MoveUpIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Copy to different layer">
+            <IconButton
+              sx={{ position: 'absolute', right: '80px', top: '5px' }}
+              onClick={onCopyClick}
+            >
+              <ContentCopyIcon />
             </IconButton>
           </Tooltip>
         </>
