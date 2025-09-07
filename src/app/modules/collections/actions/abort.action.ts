@@ -1,31 +1,53 @@
 import { TAction } from '../../../../types/store.types';
+import { EDIT_MODE_TYPE } from '../../../../utils/enums';
+import {
+  setIsDrawing,
+  setIsSplitting,
+  setIsSubtracting,
+} from '../slices/interactions.slice';
 import { setMultipleAddIds } from '../slices/selected.splice';
 import { setShowPropsDialog } from '../slices/ui.slice';
+import { changeEditMode } from './mode.action';
 import { resetBaseFeatureStyle } from './reset.action';
 
 export function abortDrawing(): TAction {
-  return async (_dispatch, getState) => {
-    const { drawFragmentRef } = getState().interactions;
+  return async (dispatch, getState) => {
+    const { drawFragmentRef, isDrawing } = getState().interactions;
     if (drawFragmentRef) {
-      drawFragmentRef.abortDrawing();
+      if (isDrawing) {
+        drawFragmentRef.abortDrawing();
+        dispatch(setIsDrawing(false));
+      } else {
+        dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT));
+      }
     }
   };
 }
 
 export function abortSubtract(): TAction {
-  return async (_dispatch, getState) => {
-    const { subtractFragmentRef } = getState().interactions;
+  return async (dispatch, getState) => {
+    const { subtractFragmentRef, isSubtracting } = getState().interactions;
     if (subtractFragmentRef) {
-      subtractFragmentRef.abortDrawing();
+      if (isSubtracting) {
+        subtractFragmentRef.abortDrawing();
+        dispatch(setIsSubtracting(false));
+      } else {
+        dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT));
+      }
     }
   };
 }
 
 export function abortSplit(): TAction {
-  return async (_dispatch, getState) => {
-    const { splitFragmentRef } = getState().interactions;
+  return async (dispatch, getState) => {
+    const { splitFragmentRef, isSplitting } = getState().interactions;
     if (splitFragmentRef) {
-      splitFragmentRef.abortDrawing();
+      if (isSplitting) {
+        splitFragmentRef.abortDrawing();
+        dispatch(setIsSplitting(false));
+      } else {
+        dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT));
+      }
     }
   };
 }

@@ -13,7 +13,7 @@ const MODE_LABELS: Record<string, string> = {
   [EDIT_MODE_TYPE.SPLIT]: 'Draw line to split by',
   [EDIT_MODE_TYPE.DELETE]: 'Select fragments to delete',
   [EDIT_MODE_TYPE.ADD_WHOLE]: 'Add whole',
-  [EDIT_MODE_TYPE.INFO]: 'Info',
+  [EDIT_MODE_TYPE.SELECT]: 'Select',
   [EDIT_MODE_TYPE.ANNOTATION]: 'Add annotation',
 };
 

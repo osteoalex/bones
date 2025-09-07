@@ -16,7 +16,7 @@ export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
       snapFragmentRef,
       addMultipleRef,
       addByRectangleDrawRef,
-      infoSelectRef,
+      infoSelectRef: selectRef,
       drawAnnotationRef,
     } = getState().interactions;
     const { layers, activeLayerIdx } = getState().layers;
@@ -47,21 +47,21 @@ export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
         boneHoverRef.setActive(true);
         baseBoneHoverRef.setActive(true);
         break;
-      case EDIT_MODE_TYPE.INFO:
-        infoSelectRef.setActive(true);
+      case EDIT_MODE_TYPE.SELECT:
+        selectRef.setActive(true);
         baseBoneHoverRef.setActive(true);
         if (layers[activeLayerIdx]) {
           layers[activeLayerIdx].hover.setActive(true);
         }
         break;
       case EDIT_MODE_TYPE.ANNOTATION:
-        infoSelectRef.setActive(false);
+        selectRef.setActive(false);
         boneHoverRef.setActive(false);
         drawAnnotationRef.setActive(true);
         break;
 
       default:
-        infoSelectRef.setActive(true);
+        selectRef.setActive(true);
         boneHoverRef.setActive(true);
         baseBoneHoverRef.setActive(true);
         break;

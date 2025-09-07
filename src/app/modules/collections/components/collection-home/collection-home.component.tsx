@@ -81,7 +81,7 @@ const CollectionHome: React.FC = () => {
       {currentItem && mode === EDIT_MODE_TYPE.ADD_WHOLE && (
         <AddMultipleControls />
       )}
-      {currentItem && mode === EDIT_MODE_TYPE.INFO && <DetailsBox />}
+      {currentItem && mode === EDIT_MODE_TYPE.SELECT && <DetailsBox />}
       <CreateNewItem />
       <NewLayerDialog />
       <EditLayerDialog />

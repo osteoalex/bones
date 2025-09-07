@@ -6,10 +6,13 @@ import { Vector as VectorSource } from 'ol/source';
 export interface InteractionsState {
   // interactions
   drawFragmentRef: Draw | null;
+  isDrawing: boolean;
   splitFragmentRef: Draw | null;
+  isSplitting: boolean;
   drawAnnotationRef: Draw | null;
   splitSourceRef: VectorSource | null;
   subtractFragmentRef: Draw | null;
+  isSubtracting: boolean;
   deleteSelectRef: Select | null;
   snapFragmentRef: Snap | null;
   boneHoverRef: Select | null;
@@ -23,6 +26,9 @@ export interface InteractionsState {
 
 const initialState: InteractionsState = {
   drawFragmentRef: null,
+  isDrawing: false,
+  isSubtracting: false,
+  isSplitting: false,
   splitFragmentRef: null,
   drawAnnotationRef: null,
   subtractFragmentRef: null,
@@ -87,6 +93,15 @@ export const interactionsSlice = createSlice({
     setDrawAnnotationRef: (state, action: PayloadAction<Draw>) => {
       state.drawAnnotationRef = action.payload;
     },
+    setIsDrawing: (state, action: PayloadAction<boolean>) => {
+      state.isDrawing = action.payload;
+    },
+    setIsSubtracting: (state, action: PayloadAction<boolean>) => {
+      state.isSubtracting = action.payload;
+    },
+    setIsSplitting: (state, action: PayloadAction<boolean>) => {
+      state.isSplitting = action.payload;
+    },
   },
 });
 
@@ -105,6 +120,9 @@ export const {
   setAddByRectangleSourceRef,
   setCurrentLayerInfoClickRef,
   setDrawAnnotationRef,
+  setIsDrawing,
+  setIsSubtracting,
+  setIsSplitting,
 } = interactionsSlice.actions;
 
 export default interactionsSlice.reducer;

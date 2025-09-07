@@ -5,6 +5,6 @@ export enum EDIT_MODE_TYPE {
   DELETE = 'delete',
   SPLIT = 'split',
   ADD_WHOLE = 'add_whole',
-  INFO = 'info',
+  SELECT = 'select',
   ANNOTATION = 'annotation',
 }
