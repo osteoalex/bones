@@ -1,7 +1,8 @@
 import turfBooleanContains from '@turf/boolean-contains';
 import turfBooleanOverlap from '@turf/boolean-overlap';
+import { Polygon } from '@turf/helpers';
 import turfUnion from '@turf/union';
-import { Feature, FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection, MultiPolygon } from 'geojson';
 
 import { TAction } from '../../../../types/store.types';
 import { setLayerDetails } from '../slices/editor.slice';
@@ -134,7 +135,10 @@ function combineFutureCollections(
           turfBooleanContains(result[i], feature) ||
           turfBooleanContains(feature, result[i])
         ) {
-          const unioned = turfUnion(result[i] as any, feature as any);
+          const unioned = turfUnion(
+            result[i] as Feature<Polygon | MultiPolygon>,
+            feature as Feature<Polygon | MultiPolygon>,
+          );
 
           if (unioned) {
             unioned.properties = {
@@ -167,7 +171,13 @@ function combineFutureCollections(
   merged.features = finalMerged.map((f, i) => ({
     ...f,
     id: i,
-  })) as any;
+    properties: {
+      ...f.properties,
+      fill: a.features[0]?.properties.fill,
+      stroke: a.features[0]?.properties.stroke,
+      strokeWidth: a.features[0]?.properties.strokeWidth,
+    },
+  }));
 
   return merged;
 }

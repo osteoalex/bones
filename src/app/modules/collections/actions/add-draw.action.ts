@@ -6,7 +6,12 @@ import {
 } from '@turf/helpers';
 import turfIntersect from '@turf/intersect';
 import turfUnion from '@turf/union';
-import { Feature as GeoJSONFeature, MultiPolygon, Polygon } from 'geojson';
+import {
+  Feature as GeoJSONFeature,
+  Feature as GeojsonFeature,
+  MultiPolygon,
+  Polygon,
+} from 'geojson';
 import { Feature } from 'ol';
 import { Geometry } from 'ol/geom';
 import { Draw } from 'ol/interaction';
@@ -64,7 +69,9 @@ export function additionDrawEndHandler(e: DrawEvent): TAction {
           featureToTurfGeometry(e.feature),
         ) ||
         turfBooleanContains(
-          multiPolygonToPolygons(featureToTurfGeometry(e.feature) as any)[0],
+          multiPolygonToPolygons(
+            featureToTurfGeometry(e.feature) as GeojsonFeature<MultiPolygon>,
+          )[0],
           featureToTurfGeometry(f),
         )
       );

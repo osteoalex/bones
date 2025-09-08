@@ -17,7 +17,7 @@ export function updateProps(val: Record<string, string>): TAction {
         strokeWidth: val.strokeWidth,
         ...layersData[activeLayerIdx].propertiesConfig
           .map((item) => item.name)
-          .reduce<any>((acc, key) => {
+          .reduce<Record<string, string>>((acc, key) => {
             acc[key] = val[key];
             return acc;
           }, {}),

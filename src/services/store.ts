@@ -2,6 +2,7 @@ import electron from 'electron';
 import fs from 'fs';
 import path from 'path';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 interface Opts {
   configName: string;
   defaults: Record<string, any>;
