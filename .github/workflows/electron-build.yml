@@ -76,6 +76,19 @@ jobs:
           path: out/make
           retention-days: 14
 
+      - name: Comment PR with artifact link
+        if: ${{ matrix.os == 'ubuntu-latest' }} # only comment once
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: electron-artifacts
+          message: |
+            ✅ Build completed for **${{ steps.sanitize.outputs.branch }}**
+
+            - [Linux build artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - [Windows build artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            (_Artifacts are available for 14 days_)
+
   # 🧹 Cleanup after PR is merged/closed
   cleanup:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
