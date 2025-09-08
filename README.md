@@ -73,7 +73,7 @@ To save it correctly on your computer:
 -  Save it as `skeleton.svg` on your computer
 
 Click below to open and download:
-<a href="https://raw.githubusercontent.com/Nika72/TestBon/refs/heads/main/szkielet_base_plain_no_markings_ids.svg" download="skeleton.svg">⬇️ Download the SVG</a>
+<a href="https://raw.githubusercontent.com/osteoalex/bones/main/assets/szkielet_base_plain_no_markings_ids.svg" download="skeleton.svg">⬇️ Download the SVG</a>
 
  ---
 
