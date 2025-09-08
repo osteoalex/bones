@@ -19,6 +19,9 @@ const MODE_LABELS: Record<string, string> = {
 
 const BottomBar: React.FC = () => {
   const mode = useSelector((state: RootState) => state.editor.mode);
+  const selected = useSelector(
+    (state: RootState) => state.selected.infoDetails,
+  );
   const modeLabel = MODE_LABELS[mode] || mode || 'None';
   return (
     <StyledBottomBar>
@@ -29,7 +32,8 @@ const BottomBar: React.FC = () => {
           component="span"
           sx={{ lineHeight: 1 }}
         >
-          Selected: 0 items
+          Selected: {selected?.length || 0} item
+          {selected?.length === 1 ? '' : 's'}
         </Typography>
       </StyledBottomBarSection>
       <StyledBottomBarSection>

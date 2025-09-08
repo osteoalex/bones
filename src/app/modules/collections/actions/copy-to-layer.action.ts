@@ -1,6 +1,8 @@
 import turfBooleanContains from '@turf/boolean-contains';
 import turfBooleanOverlap from '@turf/boolean-overlap';
+import { MultiPolygon } from '@turf/helpers';
 import turfUnion from '@turf/union';
+import { Feature } from 'geojson';
 import { Fill, Stroke, Style } from 'ol/style';
 
 import { TAction } from '../../../../types/store.types';
@@ -18,8 +20,8 @@ import { recalculateAreas } from './calculate-area.action';
 export function copyToLayer(targetLayerName: string): TAction {
   return (dispatch, getState) => {
     const { layersData, layers } = getState().layers;
-    const { infoDetails } = getState().selected;
 
+    const { infoDetails } = getState().selected;
     const targetLayerData = layersData.find(
       (layer) => layer.name === targetLayerName,
     );
@@ -28,7 +30,8 @@ export function copyToLayer(targetLayerName: string): TAction {
     );
     const targetLayer = layers[targetLayerId];
 
-    const clonedFeature = infoDetails?.clone();
+    // Only operate on the first selected feature for copy (or update to support multi-copy as needed)
+    const clonedFeature = infoDetails[0]?.clone();
 
     clonedFeature.setStyle(
       new Style({
@@ -59,7 +62,7 @@ export function copyToLayer(targetLayerName: string): TAction {
         ) ||
         turfBooleanContains(
           multiPolygonToPolygons(
-            featureToTurfGeometry(clonedFeature) as any,
+            featureToTurfGeometry(clonedFeature) as Feature<MultiPolygon>,
           )[0],
           featureToTurfGeometry(f),
         )
@@ -75,7 +78,13 @@ export function copyToLayer(targetLayerName: string): TAction {
         );
         const f = geojsonFormat.readFeature(summedGeoJSON);
         mergedFeature.setProperties(feature.getProperties());
-        mergedFeature.setGeometry((f as any).getGeometry());
+        if (Array.isArray(f)) {
+          if (f.length > 0) {
+            mergedFeature.setGeometry(f[0].getGeometry());
+          }
+        } else {
+          mergedFeature.setGeometry(f.getGeometry());
+        }
         mergedFeature.setId(feature.getProperties().targetId);
         targetLayer.source.removeFeature(feature);
       }

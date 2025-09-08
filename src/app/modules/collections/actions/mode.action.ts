@@ -1,6 +1,8 @@
 import { TAction } from '../../../../types/store.types';
 import { EDIT_MODE_TYPE } from '../../../../utils/enums';
 import { setMode } from '../slices/editor.slice';
+import { setInfoDetails } from '../slices/selected.splice';
+import { resetFeatureStyle } from './reset.action';
 
 export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
   return (dispatch, getState) => {
@@ -20,6 +22,15 @@ export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
       drawAnnotationRef,
     } = getState().interactions;
     const { layers, activeLayerIdx } = getState().layers;
+    // Clear selection and reset styles if switching to a mode other than SELECT
+    if (newMode !== EDIT_MODE_TYPE.SELECT) {
+      dispatch(setInfoDetails([]));
+      if (layers[activeLayerIdx] && layers[activeLayerIdx].source) {
+        layers[activeLayerIdx].source.getFeatures().forEach((f) => {
+          resetFeatureStyle(f);
+        });
+      }
+    }
     switch (newMode) {
       case EDIT_MODE_TYPE.SELECT_RECTANGLE:
         addByRectangleDrawRef.setActive(true);

@@ -1,10 +1,11 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import Feature from 'ol/Feature';
+import { Geometry } from 'ol/geom';
 
 export interface SelectedState {
   selectedBone: Feature | null;
-  infoDetails: Feature | null;
+  infoDetails: Feature<Geometry>[];
   multipleAddIds: string[];
   fullArea: number;
   fragmentsArea: number;
@@ -14,7 +15,7 @@ const initialState: SelectedState = {
   multipleAddIds: [],
   fullArea: 1,
   selectedBone: null,
-  infoDetails: null,
+  infoDetails: [],
   fragmentsArea: 0,
 };
 
@@ -31,7 +32,7 @@ export const selectedSlice = createSlice({
     setSelectedBone: (state, action: PayloadAction<Feature>) => {
       state.selectedBone = action.payload;
     },
-    setInfoDetails: (state, action: PayloadAction<Feature>) => {
+    setInfoDetails: (state, action: PayloadAction<Feature<Geometry>[]>) => {
       state.infoDetails = action.payload;
     },
     setFragmentsArea: (state, action: PayloadAction<number>) => {

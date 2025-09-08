@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { Feature as GeoJSONFeature, MultiPolygon, Polygon } from 'geojson';
 
 import { TAction } from '../../../../types/store.types';
@@ -17,8 +16,8 @@ import {
 import { setLayers, setLayersData } from '../slices/layers.slice';
 import { setFullArea } from '../slices/selected.splice';
 import {
-  abortDrawRectangle,
   abortDrawing,
+  abortDrawRectangle,
   abortSplit,
   abortSubtract,
 } from './abort.action';
@@ -30,7 +29,6 @@ import { setupInfoClickInteraction } from './info-click.action';
 import { changeEditMode } from './mode.action';
 import { setupLayersAndSources } from './setup-layers-and-sources.action';
 import { setupSplitFragmentInteraction } from './split.action';
-/* eslint-enable */
 
 export function getAndSetupItem(currentItem: string): TAction {
   return async (dispatch, getState) => {

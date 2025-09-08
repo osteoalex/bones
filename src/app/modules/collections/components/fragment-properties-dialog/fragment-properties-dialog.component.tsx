@@ -10,6 +10,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import { Formik } from 'formik';
 import React from 'react';
 import { SketchPicker } from 'react-color';
@@ -28,16 +29,21 @@ const FragmentPropertiesDialog: React.FC = () => {
   const { layersData, activeLayerIdx } = useSelector(
     (state: RootState) => state.layers,
   );
-  const infoDetails = useSelector(
+  const infoDetailsArr = useSelector(
     (state: RootState) => state.selected.infoDetails,
   );
+  // const infoDetails = infoDetailsArr[0];
   const showPropsDialog = useSelector(
     (state: RootState) => state.ui.showPropsDialog,
   );
-  return (
-    layersData &&
-    layersData[activeLayerIdx] &&
-    infoDetails && (
+  // Show form if one fragment selected, else show table like LayerDetailsDialog
+  if (!layersData || !layersData[activeLayerIdx] || !infoDetailsArr?.length) {
+    return null;
+  }
+
+  if (infoDetailsArr.length === 1) {
+    const infoDetails = infoDetailsArr[0];
+    return (
       <Dialog open={showPropsDialog}>
         <IconButton
           aria-label="close"
@@ -143,7 +149,6 @@ const FragmentPropertiesDialog: React.FC = () => {
                 </Box>
               </DialogContent>
               <DialogActions>
-                {/* <SubmitButton /> */}
                 <Button onClick={() => formik.submitForm()} type="submit">
                   Save
                 </Button>
@@ -152,7 +157,69 @@ const FragmentPropertiesDialog: React.FC = () => {
           )}
         </Formik>
       </Dialog>
-    )
+    );
+  }
+
+  // Multiple selection: show table like LayerDetailsDialog
+  // Dynamically generate columns from propertiesConfig
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 25 },
+    { field: 'fill', headerName: 'Fill', width: 100, editable: true },
+    { field: 'stroke', headerName: 'Stroke', width: 100, editable: true },
+    {
+      field: 'strokeWidth',
+      headerName: 'Stroke Width (px)',
+      width: 100,
+      editable: true,
+    },
+    ...layersData[activeLayerIdx].propertiesConfig.map((property) => ({
+      field: property.name,
+      headerName: property.name,
+      width: 150,
+      editable: true,
+    })),
+  ];
+
+  // Prepare rows from infoDetailsArr
+  const rows = infoDetailsArr.map((f, idx) => ({
+    id: f.getId ? f.getId() : idx,
+    ...f.getProperties(),
+  }));
+
+  // Use DataGrid for editing
+  // Note: You may want to implement processRowUpdate for saving edits
+  // For now, just display the table
+  // You can add editing logic as needed
+  // Import DataGrid from @mui/x-data-grid if not already
+  // import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+
+  return (
+    <Dialog open={showPropsDialog} maxWidth="lg">
+      <IconButton
+        aria-label="close"
+        onClick={() => {
+          dispatch(setShowPropsDialog(false));
+        }}
+        sx={{
+          position: 'absolute',
+          right: 8,
+          top: 8,
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+      <DialogTitle>Fragments properties</DialogTitle>
+      <DialogContent>
+        <div style={{ height: 400, width: '100%' }}>
+          <DataGrid
+            columns={columns}
+            rows={rows}
+            disableRowSelectionOnClick
+            slots={{ toolbar: undefined }}
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
