@@ -151,7 +151,7 @@ const LayerDetailsDialog: React.FC = () => {
                     "Fragment's area": newRow["Fragment's area"], // eslint-disable-line
                     ...layersData[showDialog].propertiesConfig
                       .map((item) => item.name)
-                      .reduce<any>((acc, key) => {
+                      .reduce<Record<string, unknown>>((acc, key) => {
                         acc[key] = newRow[key];
                         return acc;
                       }, {}),

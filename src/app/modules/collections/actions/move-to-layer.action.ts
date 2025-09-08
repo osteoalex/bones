@@ -1,6 +1,10 @@
 import turfBooleanContains from '@turf/boolean-contains';
 import turfBooleanOverlap from '@turf/boolean-overlap';
+import { MultiPolygon } from '@turf/helpers';
 import turfUnion from '@turf/union';
+import { Feature } from 'geojson';
+import { Feature as OlFeature } from 'ol';
+import { Geometry } from 'ol/geom';
 import { Fill, Stroke, Style } from 'ol/style';
 
 import { TAction } from '../../../../types/store.types';
@@ -62,7 +66,7 @@ export function moveToLayer(targetLayerName: string): TAction {
         ) ||
         turfBooleanContains(
           multiPolygonToPolygons(
-            featureToTurfGeometry(clonedFeature) as any,
+            featureToTurfGeometry(clonedFeature) as Feature<MultiPolygon>,
           )[0],
           featureToTurfGeometry(f),
         )
@@ -78,9 +82,11 @@ export function moveToLayer(targetLayerName: string): TAction {
           featureToTurfGeometry(feature),
           featureToTurfGeometry(mergedFeature),
         );
-        const f = geojsonFormat.readFeature(summedGeoJSON);
+        const f = geojsonFormat.readFeature(
+          summedGeoJSON,
+        ) as OlFeature<Geometry>;
         mergedFeature.setProperties(feature.getProperties());
-        mergedFeature.setGeometry((f as any).getGeometry());
+        mergedFeature.setGeometry(f.getGeometry());
         mergedFeature.setId(feature.getProperties().targetId);
         targetLayer.source.removeFeature(feature);
       }

@@ -58,7 +58,7 @@ export async function addNewBackground(
   });
   const paths = svg.getElementsByTagName('path');
   const features: Feature<Polygon | MultiLineString, Record<string, string>>[] =
-    Array.from(paths).reduce<any[]>((acc, current) => {
+    Array.from(paths).reduce((acc, current) => {
       const d = current.getAttribute('d') || '';
       const regex = new RegExp('.+z$'); // eslint-disable-line
 
