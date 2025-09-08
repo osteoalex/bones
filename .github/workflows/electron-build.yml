@@ -10,9 +10,29 @@ on:
     types: [opened, synchronize, reopened, closed]
 
 jobs:
+  # 🔎 Linter check
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Linter
+        run: npm run lint
+
   # 🛠️ Build for feature branches / PRs
   build:
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    needs: lint
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
@@ -42,9 +62,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Linter
-        run: npm run lint
-
       - name: Build Electron App
         run: npm run make
 
@@ -70,6 +87,7 @@ jobs:
   # 🚀 Release job when pushing tags
   release:
     if: startsWith(github.ref, 'refs/tags/v')
+    needs: lint
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
@@ -100,9 +118,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Run Linter
-        run: npm run lint
 
       - name: Build Electron App
         run: npm run make
