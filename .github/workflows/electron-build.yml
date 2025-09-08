@@ -27,7 +27,7 @@ jobs:
         run: npm ci
 
       - name: Run Linter
-        run: npm run lint
+        run: npm run lint -- --max-warnings=0
 
   # 🛠️ Build for feature branches / PRs
   build:
@@ -64,6 +64,10 @@ jobs:
 
       - name: Build Electron App
         run: npm run make
+
+      - name: Sanitize branch name
+        id: sanitize
+        run: echo "branch=${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -121,6 +125,11 @@ jobs:
 
       - name: Build Electron App
         run: npm run make
+
+      - name: Sanitize branch name
+        id: sanitize
+        run: echo "branch=${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
+
 
       - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4
