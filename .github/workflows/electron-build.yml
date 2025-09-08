@@ -72,7 +72,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: electron-build-${{ github.ref_name }}-${{ matrix.os }}
+          name: electron-build-${{ steps.sanitize.outputs.branch }}-${{ matrix.os }}
           path: out/make
           retention-days: 14
 
@@ -81,12 +81,16 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
+      - name: Sanitize branch name
+        id: sanitize
+        run: echo "branch=${GITHUB_HEAD_REF//\//-}" >> $GITHUB_OUTPUT
+
       - name: Delete artifacts for branch (Linux + Windows)
         uses: geekyeggo/delete-artifact@v5
         with:
           name: |
-            electron-build-${{ github.event.pull_request.head.ref }}-ubuntu-latest
-            electron-build-${{ github.event.pull_request.head.ref }}-windows-latest
+            electron-build-${{ steps.sanitize.outputs.branch }}-ubuntu-latest
+            electron-build-${{ steps.sanitize.outputs.branch }}-windows-latest
 
   # 🚀 Release job when pushing tags
   release:
@@ -125,11 +129,6 @@ jobs:
 
       - name: Build Electron App
         run: npm run make
-
-      - name: Sanitize branch name
-        id: sanitize
-        run: echo "branch=${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
-
 
       - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4
