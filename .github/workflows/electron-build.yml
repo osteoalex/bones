@@ -1,5 +1,9 @@
 name: Electron Forge CI/CD
 
+permissions:
+  contents: read
+  pull-requests: write
+
 on:
   push:
     branches-ignore:
@@ -81,6 +85,7 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: electron-artifacts
+          number: ${{ github.event.pull_request.number }}
           message: |
             ✅ Build completed for **${{ steps.sanitize.outputs.branch }}**
 
