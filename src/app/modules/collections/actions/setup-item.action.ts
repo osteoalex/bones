@@ -14,7 +14,7 @@ import {
   setSubtractFragmentRef,
 } from '../slices/interactions.slice';
 import { setLayers, setLayersData } from '../slices/layers.slice';
-import { setFullArea } from '../slices/selected.splice';
+import { setFullArea } from '../slices/selected.slice';
 import {
   abortDrawing,
   abortDrawRectangle,

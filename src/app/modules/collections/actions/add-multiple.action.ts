@@ -13,7 +13,7 @@ import {
 } from '../components/collection-home/editor-styles';
 import { setAddMultipleRef } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
-import { setMultipleAddIds } from '../slices/selected.splice';
+import { setMultipleAddIds } from '../slices/selected.slice';
 import { recalculateAreas } from './calculate-area.action';
 
 export function setupAddMultipleInteraction(): TAction {

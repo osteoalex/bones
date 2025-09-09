@@ -16,7 +16,7 @@ import { resetBaseFeatureStyle } from '../actions/reset.action';
 import { onResizeHandler } from '../actions/resize.action';
 import { setCurrentItem } from '../slices/editor.slice';
 import { setOlMapRef } from '../slices/layers.slice';
-import { setInfoDetails, setMultipleAddIds } from '../slices/selected.splice';
+import { setInfoDetails, setMultipleAddIds } from '../slices/selected.slice';
 import { setShowPropsDialog } from '../slices/ui.slice';
 import { map } from 'leaflet';
 import { handleRightClick } from '../actions/right-click.action';

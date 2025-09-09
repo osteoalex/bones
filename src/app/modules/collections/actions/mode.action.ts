@@ -1,7 +1,7 @@
 import { TAction } from '../../../../types/store.types';
 import { EDIT_MODE_TYPE } from '../../../../utils/enums';
 import { setMode } from '../slices/editor.slice';
-import { setInfoDetails } from '../slices/selected.splice';
+import { setInfoDetails } from '../slices/selected.slice';
 import { resetFeatureStyle } from './reset.action';
 
 export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {

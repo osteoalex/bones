@@ -1,6 +1,6 @@
 import { TAction } from '../../../../types/store.types';
 import { setLayersData } from '../slices/layers.slice';
-import { setInfoDetails } from '../slices/selected.splice';
+import { setInfoDetails } from '../slices/selected.slice';
 
 export function deleteAnnotation(targetId: string): TAction {
   return async (dispatch, getState) => {

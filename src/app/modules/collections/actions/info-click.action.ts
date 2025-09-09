@@ -3,7 +3,7 @@ import { Select } from 'ol/interaction';
 
 import { TAction } from '../../../../types/store.types';
 import { infoSelectedStyle } from '../components/collection-home/editor-styles';
-import { setInfoDetails } from '../slices/selected.splice';
+import { setInfoDetails } from '../slices/selected.slice';
 import { resetFeatureStyle } from './reset.action';
 
 export function setupInfoClickInteraction(): TAction<Select> {

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '../../../../types/store.types';
 import { RootState } from '../../../store';
 import { getAndSetupItem } from '../actions/setup-item.action';
-import { setInfoDetails, setMultipleAddIds } from '../slices/selected.splice';
+import { setInfoDetails, setMultipleAddIds } from '../slices/selected.slice';
 
 export const useCurrentItem = () => {
   const dispatch = useDispatch<AppDispatch>();

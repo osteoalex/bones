@@ -7,7 +7,7 @@ import { TAction } from '../../../../types/store.types';
 import { geojsonFormat, getNextId } from '../../../../utils';
 import { setAddByRectangleDrawRef } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
-import { setMultipleAddIds } from '../slices/selected.splice';
+import { setMultipleAddIds } from '../slices/selected.slice';
 import { recalculateAreas } from './calculate-area.action';
 
 export function setupAddByRectangleDraw(): TAction {

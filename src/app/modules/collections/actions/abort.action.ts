@@ -5,7 +5,7 @@ import {
   setIsSplitting,
   setIsSubtracting,
 } from '../slices/interactions.slice';
-import { setMultipleAddIds } from '../slices/selected.splice';
+import { setMultipleAddIds } from '../slices/selected.slice';
 import { setShowPropsDialog } from '../slices/ui.slice';
 import { changeEditMode } from './mode.action';
 import { resetBaseFeatureStyle } from './reset.action';
