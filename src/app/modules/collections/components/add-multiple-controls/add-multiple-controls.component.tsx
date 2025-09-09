@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 
 import { AppDispatch } from '../../../../../types/store.types';
 import { addMultipleCommitHandler } from '../../actions/add-multiple.action';
-import { setMultipleAddIds } from '../../slices/selected.splice';
+import { setMultipleAddIds } from '../../slices/selected.slice';
 import { SelectedBox } from '../collection-home/collection-home.styles';
 
 const AddMultipleControls: React.FC = () => {

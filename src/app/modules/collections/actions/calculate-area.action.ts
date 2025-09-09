@@ -3,7 +3,7 @@ import { Feature, Geometry, MultiPolygon, Polygon } from 'geojson';
 import { TAction } from '../../../../types/store.types';
 import { calculateArea, geojsonFormat } from '../../../../utils';
 import { setLayers, setLayersData } from '../slices/layers.slice';
-import { setFragmentsArea } from '../slices/selected.splice';
+import { setFragmentsArea } from '../slices/selected.slice';
 
 export function recalculateAreas(): TAction {
   return async (dispatch, getState) => {

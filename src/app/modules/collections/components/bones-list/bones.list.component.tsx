@@ -17,7 +17,7 @@ import { changeEditMode } from '../../actions/mode.action';
 import {
   setMultipleAddIds,
   setSelectedBone,
-} from '../../slices/selected.splice';
+} from '../../slices/selected.slice';
 import { ListBox } from '../collection-home/collection-home.styles';
 
 const BonesList: React.FC = () => {

@@ -33,8 +33,9 @@ const DetailsBox: React.FC = () => {
     (state: RootState) => state.selected.fragmentsArea,
   );
   const fullArea = useSelector((state: RootState) => state.selected.fullArea);
-
-  // Removed showFill, showStroke, and isAnnotation state related to inline FragmentDetails
+  useEffect(() => {
+    console.log((infoDetails || []).map((f) => f.getProperties().fill));
+  }, [infoDetails]);
 
   return (
     <SelectedBox>
