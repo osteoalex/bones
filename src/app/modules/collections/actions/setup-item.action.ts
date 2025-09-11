@@ -20,9 +20,9 @@ import {
   abortSplit,
   abortSubtract,
 } from './abort.action';
-import { setupAddByRectangleDraw } from './add-by-rectangle.action';
 import { setupBoneSelectInteraction } from './bone-select.action';
 import { recalculateAreas } from './calculate-area.action';
+import { initializeAddByRectangleDraw } from './drag-select.action';
 import { setupInfoClickInteraction } from './info-click.action';
 import { changeEditMode } from './mode.action';
 import { setupLayersAndSources } from './setup-layers-and-sources.action';
@@ -79,7 +79,7 @@ export function getAndSetupItem(currentItem: string): TAction {
       }, 0);
       dispatch(setFullArea(area));
 
-      dispatch(setupAddByRectangleDraw());
+      dispatch(initializeAddByRectangleDraw());
       dispatch(setupSplitFragmentInteraction());
 
       dispatch(setLayers(layers));

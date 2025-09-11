@@ -1,6 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import { Draw, Select, Snap } from 'ol/interaction';
+import { DragBox, Draw, Select, Snap } from 'ol/interaction';
 import { Vector as VectorSource } from 'ol/source';
 
 export interface InteractionsState {
@@ -17,7 +17,7 @@ export interface InteractionsState {
   snapFragmentRef: Snap | null;
   infoSelectRef: Select | null;
   currentLayerInfoClickRef: Select | null;
-  addByRectangleDrawRef: Draw | null;
+  addByRectangleDrawRef: DragBox | null;
   addByRectangleSourceRef: VectorSource | null;
   boneSelectRef: Select | null;
 }
@@ -59,7 +59,7 @@ export const interactionsSlice = createSlice({
     setDeleteSelectRef: (state, action: PayloadAction<Select>) => {
       state.deleteSelectRef = action.payload;
     },
-    setAddByRectangleDrawRef: (state, action: PayloadAction<Draw>) => {
+    setAddByRectangleDrawRef: (state, action: PayloadAction<DragBox>) => {
       state.addByRectangleDrawRef = action.payload;
     },
     setBoneSelectRef: (state, action: PayloadAction<Select>) => {

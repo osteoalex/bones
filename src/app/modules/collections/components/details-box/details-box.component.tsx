@@ -53,7 +53,7 @@ const DetailsBox: React.FC = () => {
         />
       )}
       <Typography variant="h6">{detailsText}</Typography>
-      <Box>
+      <Box sx={{ overflowY: 'auto', maxHeight: 325, mb: 1 }}>
         {infoDetails && infoDetails.length > 0 ? (
           <>
             {infoDetails.map((feature) => (
