@@ -22,6 +22,7 @@ import { exportBoneSVG } from './services/exportBoneSVG';
 import { exportCollection } from './services/exportCollection';
 import { exportSVG } from './services/exportSVG';
 import { getAllItems } from './services/getAllItems';
+import { logErr } from './services/logger';
 import { openCollection } from './services/openCollection';
 import { openItem } from './services/openItem';
 import { saveAndCloseItem } from './services/saveAndCloseItem';
@@ -238,6 +239,10 @@ app.whenReady().then(() => {
   ipcMain.handle('set-config', (_e, data: CollectionConfigData) =>
     store.set('currentCollectionConfig', data),
   );
+
+  ipcMain.handle('log-error', (_e, message: string, error?: unknown) => {
+    logErr(message, error);
+  });
 
   if (process.env.NODE_ENV === 'development') {
     ipcMain.on('InspectMeAtPos', (ev, cursorPos) => {

@@ -8,6 +8,7 @@ import {
   CollectionConfigData,
   ItemContent,
 } from '../types/collection-config-data.interface';
+import { logErr } from './logger';
 import { Store } from './store';
 
 export async function exportCollection(
@@ -26,7 +27,7 @@ export async function exportCollection(
   const items = config.items;
   const outputFolder = join(folder[0], basename(config.name));
   if (!existsSync(outputFolder)) {
-    mkdirSync(outputFolder);
+    mkdirSync(outputFolder, { recursive: true });
   }
 
   let errorCount = 0;
@@ -89,6 +90,7 @@ export async function exportCollection(
     } catch (error) {
       errorCount++;
       errorFiles.push(item.itemPath);
+      logErr(error);
       console.error('Error exporting item:', error);
     }
   }

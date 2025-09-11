@@ -18,7 +18,10 @@ const EditCollectionDetails: React.FC = () => {
       const res = await window.electron.readCollection();
       setInitialValues(res);
     };
-    fetchData().catch(console.error);
+    fetchData().catch((error) => {
+      window.electron.logError?.('Error fetching collection details', error);
+      console.error(error);
+    });
   }, []);
   return (
     <Drawer>

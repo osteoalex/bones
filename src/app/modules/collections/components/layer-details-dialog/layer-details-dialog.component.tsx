@@ -175,6 +175,10 @@ const LayerDetailsDialog: React.FC = () => {
                 return newRow;
               }}
               onProcessRowUpdateError={(error) => {
+                window.electron.logError?.(
+                  'Error processing row update',
+                  error,
+                );
                 console.log(error);
               }}
               slots={{ toolbar: GridToolbar }}
