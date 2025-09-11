@@ -3,8 +3,6 @@ import ContentCutIcon from '@mui/icons-material/ContentCut';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import PanToolAltIcon from '@mui/icons-material/PanToolAlt';
-import PhotoSizeSelectSmallIcon from '@mui/icons-material/PhotoSizeSelectSmall';
-import QueueIcon from '@mui/icons-material/Queue';
 import RemoveIcon from '@mui/icons-material/Remove';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import { ListItemButton } from '@mui/material';
@@ -36,12 +34,6 @@ const menuItems: MenuItem[] = [
     action: (dispatch) => dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT)),
   },
   {
-    label: 'Select with rectangle',
-    icon: <PhotoSizeSelectSmallIcon fontSize="small" />,
-    action: (dispatch) =>
-      dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT_RECTANGLE)),
-  },
-  {
     label: 'Draw fragments to add',
     icon: <EditIcon fontSize="small" />,
     action: (dispatch) => dispatch(changeEditMode(EDIT_MODE_TYPE.ADDITION)),
@@ -60,11 +52,6 @@ const menuItems: MenuItem[] = [
     label: 'Select fragments to delete',
     icon: <DeleteIcon fontSize="small" />,
     action: (dispatch) => dispatch(changeEditMode(EDIT_MODE_TYPE.DELETE)),
-  },
-  {
-    label: 'Add whole',
-    icon: <QueueIcon fontSize="small" />,
-    action: (dispatch) => dispatch(changeEditMode(EDIT_MODE_TYPE.ADD_WHOLE)),
   },
   {
     label: 'Save item as svg',

@@ -2,7 +2,7 @@ import AddCommentIcon from '@mui/icons-material/AddComment';
 import ContentCutIcon from '@mui/icons-material/ContentCut';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import PhotoSizeSelectSmallIcon from '@mui/icons-material/PhotoSizeSelectSmall';
+// import PhotoSizeSelectSmallIcon from '@mui/icons-material/PhotoSizeSelectSmall';
 import QueueIcon from '@mui/icons-material/Queue';
 import RemoveIcon from '@mui/icons-material/Remove';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
@@ -34,18 +34,7 @@ const ToolBox: React.FC = () => {
   };
   return (
     <ToolsBoxWrapper>
-      {/* select many */}
-      <Tooltip title="Select with rectangle">
-        <IconButton
-          onClick={() => handleToolClick(EDIT_MODE_TYPE.SELECT_RECTANGLE)}
-        >
-          <PhotoSizeSelectSmallIcon
-            color={
-              mode === EDIT_MODE_TYPE.SELECT_RECTANGLE ? 'success' : 'inherit'
-            }
-          />
-        </IconButton>
-      </Tooltip>
+      {/* ...existing code... */}
       {/* addition */}
       <Tooltip title="Draw fragments to add">
         <IconButton onClick={() => handleToolClick(EDIT_MODE_TYPE.ADDITION)}>

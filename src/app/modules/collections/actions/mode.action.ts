@@ -30,9 +30,6 @@ export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
       }
     }
     switch (newMode) {
-      case EDIT_MODE_TYPE.SELECT_RECTANGLE:
-        addByRectangleDrawRef.setActive(true);
-        break;
       case EDIT_MODE_TYPE.ADDITION:
         drawFragmentRef.setActive(true);
         snapFragmentRef.setActive(true);
@@ -51,6 +48,7 @@ export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
       case EDIT_MODE_TYPE.SELECT:
         selectRef.setActive(true);
         boneSelectRef.setActive(true);
+        addByRectangleDrawRef.setActive(true);
         break;
       case EDIT_MODE_TYPE.ANNOTATION:
         selectRef.setActive(false);
@@ -60,6 +58,7 @@ export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
       default:
         selectRef.setActive(true);
         boneSelectRef.setActive(true);
+        addByRectangleDrawRef.setActive(true);
         break;
     }
 
