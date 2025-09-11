@@ -21,6 +21,7 @@ import {
   isGeoJsonMultiPolygon,
   isGeoJsonPolygon,
 } from '../../../../utils/type-guards';
+import { setIsSubtracting } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
 import {
   recalculateAreaByTargetId,
@@ -44,6 +45,7 @@ export function setupSubtractFragmentInteraction(
     subtractDraw.setActive(false);
     olMapRef.addInteraction(subtractDraw);
 
+    subtractDraw.on('drawstart', () => dispatch(setIsSubtracting(true)));
     subtractDraw.on('drawend', (e: DrawEvent) =>
       dispatch(subtractDrawHandler(e)),
     );
@@ -53,14 +55,23 @@ export function setupSubtractFragmentInteraction(
 
 export function subtractDrawHandler(e: DrawEvent): TAction {
   return async (dispatch, getState) => {
+    dispatch(setIsSubtracting(false));
     const { layers, activeLayerIdx, baseSourceRef, layersData } =
       getState().layers;
     if (layers[activeLayerIdx].source) {
       const toSubtractFeature = e.feature;
-      const features = getFeaturesInFeatureExtent(
+      // Restrict to fragments on selected bone(s) if any are selected
+      const selectedBones = getState().selected.selectedBone;
+      let features = getFeaturesInFeatureExtent(
         toSubtractFeature,
         layers[activeLayerIdx].source,
       );
+      if (selectedBones && selectedBones.length > 0) {
+        const selectedBoneIds = selectedBones.map((b) => b.getId());
+        features = features.filter((f) =>
+          selectedBoneIds.includes(f.getProperties().targetId),
+        );
+      }
 
       if (!features.length) {
         setTimeout(() => {

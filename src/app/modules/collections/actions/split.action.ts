@@ -6,6 +6,7 @@ import {
   MultiPolygon,
   Polygon,
 } from 'geojson';
+import { Feature } from 'ol';
 import { Draw } from 'ol/interaction';
 import { DrawEvent } from 'ol/interaction/Draw';
 import polygonSplitter from 'polygon-splitter';
@@ -18,7 +19,10 @@ import {
   getNextId,
 } from '../../../../utils';
 import { isPolygon } from '../../../../utils/type-guards';
-import { setSplitFragmentRef } from '../slices/interactions.slice';
+import {
+  setIsSplitting,
+  setSplitFragmentRef,
+} from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
 import {
   recalculateAreaByTargetId,
@@ -41,12 +45,14 @@ export function setupSplitFragmentInteraction(): TAction {
     splitDraw.setActive(false);
     olMapRef.addInteraction(splitDraw);
 
+    splitDraw.on('drawstart', () => dispatch(setIsSplitting(true)));
     splitDraw.on('drawend', (e: DrawEvent) => dispatch(splitDrawHandler(e)));
   };
 }
 
 export function splitDrawHandler(e: DrawEvent): TAction {
   return async (dispatch, getState) => {
+    dispatch(setIsSplitting(false));
     const { splitSourceRef } = getState().interactions;
     const { layers, activeLayerIdx, baseSourceRef, layersData } =
       getState().layers;
@@ -55,10 +61,29 @@ export function splitDrawHandler(e: DrawEvent): TAction {
       Record<string, string>
     >;
 
-    const featuresToSplit = getFeaturesInFeatureExtent(
-      e.feature,
-      layers[activeLayerIdx].source,
-    );
+    // Get selected bones from state
+    const selectedBones: Feature[] = getState().selected.selectedBone;
+    let featuresToSplit;
+    if (selectedBones && selectedBones.length > 0) {
+      // Only split selected bones
+      featuresToSplit = getFeaturesInFeatureExtent(
+        selectedBones,
+        layers[activeLayerIdx].source,
+      );
+    } else {
+      // Fallback: all overlapping fragments
+      featuresToSplit = getFeaturesInFeatureExtent(
+        e.feature,
+        layers[activeLayerIdx].source,
+      );
+    }
+    if (featuresToSplit.length === 0 && e.feature) {
+      setTimeout(() => {
+        splitSourceRef.removeFeature(e.feature);
+      }, 100);
+      return;
+    }
+
     for (const featureToSplit of featuresToSplit) {
       const current = baseSourceRef
         .getFeatures()

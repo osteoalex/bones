@@ -27,8 +27,10 @@ import {
   getNextId,
   multiPolygonToPolygons,
 } from '../../../../utils';
+import { setIsDrawing } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
 import { recalculateAreas } from './calculate-area.action';
+import { resetFeatureStyle } from './reset.action';
 
 export function setupDrawFragment(
   source: VectorSource<Feature<Geometry>>,
@@ -47,6 +49,7 @@ export function setupDrawFragment(
     draw.setActive(false);
     olMapRef.addInteraction(draw);
 
+    draw.on('drawstart', () => dispatch(setIsDrawing(true)));
     draw.on('drawend', (e: DrawEvent) => dispatch(additionDrawEndHandler(e)));
     return draw;
   };
@@ -54,13 +57,23 @@ export function setupDrawFragment(
 
 export function additionDrawEndHandler(e: DrawEvent): TAction {
   return async (dispatch, getState) => {
+    dispatch(setIsDrawing(false));
     const { baseSourceRef, layers, activeLayerIdx } = getState().layers;
     const extent = e.feature;
     const existing = getFeaturesInFeatureExtent(
       extent,
       layers[activeLayerIdx].source,
     );
-    const bones = getFeaturesInFeatureExtent(extent, baseSourceRef);
+    // Get selected bones from state
+    const selectedBones = getState().selected.selectedBone;
+    let bones;
+    if (selectedBones && selectedBones.length > 0) {
+      // Only use selected bones
+      bones = selectedBones;
+    } else {
+      // Fallback: all overlapping bones
+      bones = getFeaturesInFeatureExtent(extent, baseSourceRef);
+    }
 
     const intersects = existing.filter((f) => {
       return (
@@ -187,6 +200,8 @@ export function submitFragmentHandler(
       };
       newFeature.setProperties(fragmentProps);
       newFeature.setId(getNextId(layers[activeLayerIdx].source.getFeatures()));
+
+      resetFeatureStyle(newFeature);
     }
     olMapRef.render();
 

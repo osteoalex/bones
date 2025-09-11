@@ -11,6 +11,7 @@ import { Provider } from 'react-redux';
 import { createHashRouter, Outlet, RouterProvider } from 'react-router-dom';
 
 import AppRoutes from './app-route';
+import FullPageLoader from './components/FullPageLoader';
 import collections from './modules/collections';
 import Start from './modules/start';
 import { store } from './store';
@@ -32,6 +33,7 @@ const App: React.FC = () => {
         const data = await window.electron.getVersion();
         setMeta(data);
       } catch (error) {
+        window.electron.logError?.('Failed to fetch version', error);
         console.error('Failed to fetch version:', error);
         setMeta((prev) => ({ ...prev, version: 'Unknown' }));
       }
@@ -46,6 +48,7 @@ const App: React.FC = () => {
           titleTemplate={`${meta.name} - ${meta.version} %s`}
           defaultTitle={`${meta.name} - ${meta.version}`}
         />
+        <FullPageLoader />
         <RouterProvider router={router} />
         <CssBaseline />
         <Outlet />

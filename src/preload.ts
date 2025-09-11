@@ -66,6 +66,8 @@ contextBridge.exposeInMainWorld('electron', {
   getConfig: async () => await ipcRenderer.invoke('get-config'),
   setConfig: async (data: CollectionConfigData) =>
     await ipcRenderer.invoke('set-config', data),
+  logError: (message: string, error?: unknown) =>
+    ipcRenderer.invoke('log-error', message, error),
 });
 
 addEventListener('contextmenu', (ev) => {

@@ -4,6 +4,7 @@ import { readFileSync, rmSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
 import { join } from 'path';
 
+import { logErr } from './logger';
 import { Store } from './store';
 
 export async function saveAndCloseItem(
@@ -25,14 +26,17 @@ export async function saveAndCloseItem(
     try {
       deepEqual(source, temp);
     } catch (error) {
-      // console.log(error);
       const prompt = dialog.showMessageBoxSync(mainWindow, {
         title: 'Unsaved changes!',
         message: 'Do you want to save current file?',
         buttons: ['Yes', 'No'],
       });
       if (prompt === 0) {
-        writeFileSync(currentlyOpen, temp, { encoding: 'utf8' });
+        try {
+          writeFileSync(currentlyOpen, temp, { encoding: 'utf8' });
+        } catch (e) {
+          logErr('Error saving current file', e);
+        }
       }
     }
     store.set('currentlyOpenedItem', '');

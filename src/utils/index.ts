@@ -128,27 +128,32 @@ export const projection = new Projection({
 });
 
 export function getFeaturesInFeatureExtent(
-  extentFeature: OlFeature<Geometry>,
+  extentFeatures: OlFeature<Geometry>[] | OlFeature<Geometry>,
   source: VectorSource<OlFeature<Geometry>>,
 ): OlFeature<Geometry>[] {
-  const existingFeatures = source.getFeaturesInExtent(
-    extentFeature.getGeometry().getExtent(),
-  );
-  const extentTurfGeo = isLineString(extentFeature.getGeometry())
-    ? featureToTurLine(extentFeature)
-    : featureToTurfGeometry(extentFeature);
-  const featuresInExtent: OlFeature<Geometry>[] = [];
-  for (const feature of existingFeatures) {
-    const overlaps = turfIntersects(
-      extentTurfGeo,
-      featureToTurfGeometry(feature),
+  // Accept a single feature or an array
+  const featuresArr = Array.isArray(extentFeatures)
+    ? extentFeatures
+    : [extentFeatures];
+  const featuresInExtent: Set<OlFeature<Geometry>> = new Set();
+  for (const extentFeature of featuresArr) {
+    const existingFeatures = source.getFeaturesInExtent(
+      extentFeature.getGeometry().getExtent(),
     );
-    if (overlaps) {
-      featuresInExtent.push(feature);
+    const extentTurfGeo = isLineString(extentFeature.getGeometry())
+      ? featureToTurLine(extentFeature)
+      : featureToTurfGeometry(extentFeature);
+    for (const feature of existingFeatures) {
+      const overlaps = turfIntersects(
+        extentTurfGeo,
+        featureToTurfGeometry(feature),
+      );
+      if (overlaps) {
+        featuresInExtent.add(feature);
+      }
     }
   }
-
-  return featuresInExtent;
+  return Array.from(featuresInExtent);
 }
 
 export function getLayerDefaultName(layersLength: number): string {

@@ -39,9 +39,18 @@ interface Window extends Window {
     toggleHint: (data: boolean) => void;
     getConfig: () => Promise<CollectionConfigData>;
     setConfig: (data: CollectionConfigData) => Promise<void>;
+    logError: (message: string, error?: unknown) => Promise<void>;
   };
 }
 
 declare module 'svg-path-to-polygons';
 declare module 'polygon-splitter';
 declare module 'geojson-to-svg';
+declare module '*.svg' {
+  import * as React from 'react';
+  export const ReactComponent: React.FunctionComponent<
+    React.SVGProps<SVGSVGElement>
+  >;
+  const src: string;
+  export default src;
+}

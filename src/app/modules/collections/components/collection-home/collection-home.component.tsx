@@ -10,11 +10,13 @@ import { RootState } from '../../../../store';
 import { useHotkeys } from '../../hooks/use-hotkeys.hook';
 import { setItems } from '../../slices/editor.slice';
 import { setShowHints } from '../../slices/ui.slice';
-import AddMultipleControls from '../add-multiple-controls/add-multiple-controls.component';
 import AnnotationDialog from '../annotation-dialog/annotation-dialog.component';
 import BonesList from '../bones-list/bones.list.component';
+import BottomBar from '../bottom-bar/bottom-bar.component';
 import CollectionGlobalButtons from '../collection-global-buttons/collection-global-buttons.component';
 import CombineLayersDialog from '../combine-layers-dialog/combine-layers-dialog.component';
+import { ContextMenu } from '../context-menu/context-menu.component';
+import CopyToLayerDialog from '../copy-to-layer-dialog/copy-to-layer-dialog.component';
 import CreateNewItem from '../create-new-item/create-new-item.component';
 import DetailsBox from '../details-box/details-box.component';
 import DrawerToolBox from '../drawer-tool-box/drawer-tool-box.component';
@@ -24,6 +26,7 @@ import EditorDrawer from '../editor-drawer/editor-drawer.component';
 import FragmentPropertiesDialog from '../fragment-properties-dialog/fragment-properties-dialog.component';
 import HelpBox from '../help-box/help-box.component';
 import Hint from '../hint/hint.component';
+import HotkeysToggle from '../hotkeys-toggle/hotkeys-toggle.component';
 import ItemsList from '../items-list/items-list.component';
 import LayerDetailsDialog from '../layer-details-dialog/layer-details-dialog.component';
 import LayersList from '../layers-list/layers-list.component';
@@ -52,6 +55,7 @@ const CollectionHome: React.FC = () => {
     (state: RootState) => state.editor.currentItem,
   );
   const mode = useSelector((state: RootState) => state.editor.mode);
+  const { infoDetails } = useSelector((state: RootState) => state.selected);
 
   return (
     <CollectionHomeWrapper>
@@ -74,22 +78,24 @@ const CollectionHome: React.FC = () => {
         </Box>
       </EditorDrawer>
       <EditorBody />
-      {/* eslint-enable */}
       {currentItem && <ToolBox />}
-      {currentItem && mode === EDIT_MODE_TYPE.ADD_WHOLE && (
-        <AddMultipleControls />
-      )}
-      {currentItem && mode === EDIT_MODE_TYPE.INFO && <DetailsBox />}
+      {currentItem &&
+        mode === EDIT_MODE_TYPE.SELECT &&
+        !!infoDetails?.length && <DetailsBox />}
       <CreateNewItem />
       <NewLayerDialog />
       <EditLayerDialog />
       <CombineLayersDialog />
       <MoveToLayerDialog />
+      <CopyToLayerDialog />
       <LayerDetailsDialog />
       <AnnotationDialog />
       {currentItem && <FragmentPropertiesDialog />}
       {currentItem && <HelpBox />}
       <Hint />
+      <HotkeysToggle />
+      <ContextMenu />
+      <BottomBar />
     </CollectionHomeWrapper>
   );
 };

@@ -10,7 +10,7 @@ import {
   TextField,
 } from '@mui/material';
 import { Form, Formik } from 'formik';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as yup from 'yup';
 
@@ -25,12 +25,17 @@ const AnnotationDialog = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { annotationDialog } = useSelector((state: RootState) => state.ui);
   const { infoDetails } = useSelector((state: RootState) => state.selected);
+  const current = useMemo(() => {
+    return infoDetails?.find(
+      (infoDetail) => infoDetail.getId() === annotationDialog,
+    );
+  }, [annotationDialog, infoDetails]);
   return (
     <Dialog open={!!annotationDialog} maxWidth="lg">
       <IconButton
         aria-label="close"
         onClick={() => {
-          if (!infoDetails?.getProperties().annotation) {
+          if (!current?.getProperties().annotation) {
             dispatch(deleteAnnotation(annotationDialog));
           }
           dispatch(setAnnotationDialog(null));
@@ -46,7 +51,7 @@ const AnnotationDialog = () => {
       <DialogTitle sx={{ minWidth: '400px' }}>Add annotation</DialogTitle>
       <Formik
         initialValues={{
-          content: infoDetails ? infoDetails.getProperties().annotation : '',
+          content: current ? current.getProperties().annotation : '',
           targetId: annotationDialog || '',
         }}
         onSubmit={(values) => {

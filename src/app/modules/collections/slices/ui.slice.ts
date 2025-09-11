@@ -1,6 +1,12 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
+export interface ContextMenuState {
+  x: number;
+  y: number;
+  visible: boolean;
+}
+
 export interface UiState {
   showPropsDialog: boolean;
   newLayerPopupVisible: boolean;
@@ -9,8 +15,15 @@ export interface UiState {
   newItemNameDialogOpen: boolean;
   combineLayersDialogOpen: boolean;
   moveToLayerDialogOpen: boolean;
+  copyToLayerDialogOpen: boolean;
   drawerOpen: boolean;
   annotationDialog: string | null;
+  loading: boolean;
+  contextMenu: {
+    x: number;
+    y: number;
+    visible: boolean;
+  };
 }
 
 const initialState: UiState = {
@@ -23,6 +36,9 @@ const initialState: UiState = {
   moveToLayerDialogOpen: false,
   newLayerPopupVisible: false,
   annotationDialog: null,
+  loading: false,
+  contextMenu: { x: 0, y: 0, visible: false },
+  copyToLayerDialogOpen: false,
 };
 
 export const uiSlice = createSlice({
@@ -56,6 +72,15 @@ export const uiSlice = createSlice({
     setAnnotationDialog: (state, action: PayloadAction<string | null>) => {
       state.annotationDialog = action.payload;
     },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    setContextMenu: (state, action: PayloadAction<ContextMenuState>) => {
+      state.contextMenu = action.payload;
+    },
+    setCopyToLayerDialogOpen: (state, action: PayloadAction<boolean>) => {
+      state.copyToLayerDialogOpen = action.payload;
+    },
   },
 });
 
@@ -69,6 +94,9 @@ export const {
   setCombineLayersDialogOpen,
   setMoveToLayerDialogOpen,
   setAnnotationDialog,
+  setLoading,
+  setContextMenu,
+  setCopyToLayerDialogOpen,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

@@ -1,6 +1,8 @@
 import { TAction } from '../../../../types/store.types';
 import { EDIT_MODE_TYPE } from '../../../../utils/enums';
 import { setMode } from '../slices/editor.slice';
+import { setInfoDetails } from '../slices/selected.slice';
+import { resetFeatureStyle } from './reset.action';
 
 export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
   return (dispatch, getState) => {
@@ -10,25 +12,27 @@ export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
       drawFragmentRef,
       splitFragmentRef,
       subtractFragmentRef,
-      boneHoverRef,
-      baseBoneHoverRef,
       deleteSelectRef,
       snapFragmentRef,
-      addMultipleRef,
       addByRectangleDrawRef,
-      infoSelectRef,
+      infoSelectRef: selectRef,
       drawAnnotationRef,
+      boneSelectRef,
     } = getState().interactions;
     const { layers, activeLayerIdx } = getState().layers;
+    // Clear selection and reset styles if switching to a mode other than SELECT
+    if (newMode !== EDIT_MODE_TYPE.SELECT) {
+      dispatch(setInfoDetails([]));
+      if (layers[activeLayerIdx] && layers[activeLayerIdx].source) {
+        layers[activeLayerIdx].source.getFeatures().forEach((f) => {
+          resetFeatureStyle(f);
+        });
+      }
+    }
     switch (newMode) {
-      case EDIT_MODE_TYPE.SELECT_RECTANGLE:
-        addByRectangleDrawRef.setActive(true);
-        boneHoverRef.setActive(true);
-        break;
       case EDIT_MODE_TYPE.ADDITION:
         drawFragmentRef.setActive(true);
         snapFragmentRef.setActive(true);
-        boneHoverRef.setActive(false);
         break;
       case EDIT_MODE_TYPE.SUBTRACTION:
         subtractFragmentRef.setActive(true);
@@ -40,30 +44,21 @@ export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
         break;
       case EDIT_MODE_TYPE.DELETE:
         deleteSelectRef.setActive(true);
-        boneHoverRef.setActive(true);
         break;
-      case EDIT_MODE_TYPE.ADD_WHOLE:
-        addMultipleRef.setActive(true);
-        boneHoverRef.setActive(true);
-        baseBoneHoverRef.setActive(true);
-        break;
-      case EDIT_MODE_TYPE.INFO:
-        infoSelectRef.setActive(true);
-        baseBoneHoverRef.setActive(true);
-        if (layers[activeLayerIdx]) {
-          layers[activeLayerIdx].hover.setActive(true);
-        }
+      case EDIT_MODE_TYPE.SELECT:
+        selectRef.setActive(true);
+        boneSelectRef.setActive(true);
+        addByRectangleDrawRef.setActive(true);
         break;
       case EDIT_MODE_TYPE.ANNOTATION:
-        infoSelectRef.setActive(false);
-        boneHoverRef.setActive(false);
+        selectRef.setActive(false);
         drawAnnotationRef.setActive(true);
         break;
 
       default:
-        infoSelectRef.setActive(true);
-        boneHoverRef.setActive(true);
-        baseBoneHoverRef.setActive(true);
+        selectRef.setActive(true);
+        boneSelectRef.setActive(true);
+        addByRectangleDrawRef.setActive(true);
         break;
     }
 
@@ -77,10 +72,8 @@ export function turnOffAllModes(): TAction {
       drawFragmentRef,
       splitFragmentRef,
       subtractFragmentRef,
-      boneHoverRef,
       deleteSelectRef,
       snapFragmentRef,
-      addMultipleRef,
       addByRectangleDrawRef,
       infoSelectRef,
       drawAnnotationRef,
@@ -94,17 +87,11 @@ export function turnOffAllModes(): TAction {
     if (subtractFragmentRef) {
       subtractFragmentRef.setActive(false);
     }
-    if (boneHoverRef) {
-      boneHoverRef.setActive(false);
-    }
     if (deleteSelectRef) {
       deleteSelectRef.setActive(false);
     }
     if (snapFragmentRef) {
       snapFragmentRef.setActive(false);
-    }
-    if (addMultipleRef) {
-      addMultipleRef.setActive(false);
     }
     if (addByRectangleDrawRef) {
       addByRectangleDrawRef.setActive(false);

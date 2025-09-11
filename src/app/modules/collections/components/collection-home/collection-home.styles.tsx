@@ -22,6 +22,7 @@ export const SelectedBox = styled(Box)`
   border: solid 1px #ccc;
   padding: 10px;
   box-shadow: 1px 0 5px 0px #ddd;
+  max-height: 600px;
 `;
 
 export const ToolsBoxWrapper = styled(Box)`
