@@ -28,60 +28,77 @@ export async function exportCollection(
   if (!existsSync(outputFolder)) {
     mkdirSync(outputFolder);
   }
+
+  let errorCount = 0;
+  const errorFiles: string[] = [];
   for await (const item of items) {
-    const itemContent = readFileSync(item.itemPath, { encoding: 'utf8' });
-    const background = readFileSync(item.background, { encoding: 'utf8' });
-    const itemObject: ItemContent = JSON.parse(itemContent);
-    const backgroundFeaturesCollection: FeatureCollection<Polygon> =
-      JSON.parse(background);
+    try {
+      const itemContent = readFileSync(item.itemPath, { encoding: 'utf8' });
+      const background = readFileSync(item.background, { encoding: 'utf8' });
+      const itemObject: ItemContent = JSON.parse(itemContent);
+      const backgroundFeaturesCollection: FeatureCollection<Polygon> =
+        JSON.parse(background);
 
-    for (const layer of itemObject) {
-      const columns: string[] = layer.propertiesConfig.map((conf) => conf.name);
-      columns.push(
-        'id',
-        'targetId',
-        "Fragment's area", // eslint-disable-line
-        'fill',
-        'stroke',
-        'geometry',
-        'target geometry',
-        'item',
-        'layer',
-      );
+      for (const layer of itemObject) {
+        const columns: string[] = layer.propertiesConfig.map(
+          (conf) => conf.name,
+        );
+        columns.push(
+          'id',
+          'targetId',
+          "Fragment's area", // eslint-disable-line
+          'fill',
+          'stroke',
+          'geometry',
+          'target geometry',
+          'item',
+          'layer',
+        );
 
-      const filePath = join(
-        outputFolder,
-        `${basename(item.itemPath, '.json')}_${layer.name}.csv`,
-      );
-      const output = createWriteStream(filePath, { encoding: 'utf-8' });
-      const stringifier = stringify({ header: true, columns });
+        const filePath = join(
+          outputFolder,
+          `${basename(item.itemPath, '.json')}_${layer.name}.csv`,
+        );
+        const output = createWriteStream(filePath, { encoding: 'utf-8' });
+        const stringifier = stringify({ header: true, columns });
 
-      layer.fragments.features.forEach((row) => {
-        const rowContent = {
-          ...row.properties,
-          id: row.id,
-          geometry: JSON.stringify(
-            (row.geometry as Polygon).coordinates.map((p) =>
-              p.map(([x, y]) => [x, y * -1]),
+        layer.fragments.features.forEach((row) => {
+          const rowContent = {
+            ...row.properties,
+            id: row.id,
+            geometry: JSON.stringify(
+              (row.geometry as Polygon).coordinates.map((p) =>
+                p.map(([x, y]) => [x, y * -1]),
+              ),
             ),
-          ),
-          'target geometry': JSON.stringify(
-            backgroundFeaturesCollection.features
-              .find((fr) => fr.id === row.properties.targetId)
-              .geometry.coordinates.map((p) => p.map(([x, y]) => [x, y * -1])),
-          ),
-          item: basename(item.itemPath, '.json'),
-          layer: layer.name,
-        };
-        stringifier.write(rowContent, 'utf8');
-      });
+            'target geometry': JSON.stringify(
+              backgroundFeaturesCollection.features
+                .find((fr) => fr.id === row.properties.targetId)
+                .geometry.coordinates.map((p) =>
+                  p.map(([x, y]) => [x, y * -1]),
+                ),
+            ),
+            item: basename(item.itemPath, '.json'),
+            layer: layer.name,
+          };
+          stringifier.write(rowContent, 'utf8');
+        });
 
-      stringifier.pipe(output);
+        stringifier.pipe(output);
+      }
+    } catch (error) {
+      errorCount++;
+      errorFiles.push(item.itemPath);
+      console.error('Error exporting item:', error);
     }
   }
 
+  let message = `Exported successfully. Errors: ${errorCount}`;
+  if (errorFiles.length > 0) {
+    message += '\nFiles with errors:\n' + errorFiles.join('\n');
+  }
   dialog.showMessageBoxSync(mainWindow, {
     title: 'Success',
-    message: 'Exported successfully.',
+    message,
   });
 }

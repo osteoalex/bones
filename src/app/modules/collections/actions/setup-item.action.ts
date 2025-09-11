@@ -1,5 +1,6 @@
 import { Feature as GeoJSONFeature, MultiPolygon, Polygon } from 'geojson';
 
+import { ItemContent } from '../../../../types/collection-config-data.interface';
 import { TAction } from '../../../../types/store.types';
 import { calculateArea, geojsonFormat } from '../../../../utils';
 import { EDIT_MODE_TYPE } from '../../../../utils/enums';
@@ -30,9 +31,27 @@ export function getAndSetupItem(currentItem: string): TAction {
     if (currentItem !== '') {
       const items = await window.electron.getAllItems();
       dispatch(setItems(items));
+
       const { itemContentString, backgroundJSONString } =
         await window.electron.openItem(currentItem);
-      const itemContent = JSON.parse(itemContentString);
+      let itemContent: ItemContent = JSON.parse(itemContentString);
+
+      // Remove fragments with empty properties
+      itemContent = itemContent.map((layer) => {
+        if (!layer.fragments || !Array.isArray(layer.fragments.features))
+          return layer;
+        const filteredFeatures = layer.fragments.features.filter(
+          (fragment) =>
+            fragment.properties && Object.keys(fragment.properties).length > 0,
+        );
+        return {
+          ...layer,
+          fragments: {
+            ...layer.fragments,
+            features: filteredFeatures,
+          },
+        };
+      });
       dispatch(setLayersData(itemContent));
 
       olMapRef.getLayers().forEach((layer) => {

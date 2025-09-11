@@ -25,7 +25,6 @@ export async function saveAndCloseItem(
     try {
       deepEqual(source, temp);
     } catch (error) {
-      // console.log(error);
       const prompt = dialog.showMessageBoxSync(mainWindow, {
         title: 'Unsaved changes!',
         message: 'Do you want to save current file?',

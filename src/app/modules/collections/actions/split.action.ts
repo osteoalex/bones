@@ -66,7 +66,6 @@ export function splitDrawHandler(e: DrawEvent): TAction {
     let featuresToSplit;
     if (selectedBones && selectedBones.length > 0) {
       // Only split selected bones
-      console.log('first');
       featuresToSplit = getFeaturesInFeatureExtent(
         selectedBones,
         layers[activeLayerIdx].source,
@@ -85,7 +84,6 @@ export function splitDrawHandler(e: DrawEvent): TAction {
       return;
     }
 
-    console.log(featuresToSplit, selectedBones);
     for (const featureToSplit of featuresToSplit) {
       const current = baseSourceRef
         .getFeatures()
