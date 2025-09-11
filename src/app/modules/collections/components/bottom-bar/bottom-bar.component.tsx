@@ -7,7 +7,6 @@ import { RootState } from '../../../../store';
 import { StyledBottomBar, StyledBottomBarSection } from './bottom-bar.styles';
 
 const MODE_LABELS: Record<string, string> = {
-  [EDIT_MODE_TYPE.SELECT_RECTANGLE]: 'Select with rectangle',
   [EDIT_MODE_TYPE.ADDITION]: 'Draw fragments to add',
   [EDIT_MODE_TYPE.SUBTRACTION]: 'Draw fragments to subtract',
   [EDIT_MODE_TYPE.SPLIT]: 'Draw line to split by',

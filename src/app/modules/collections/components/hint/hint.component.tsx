@@ -36,14 +36,6 @@ const Hint: React.FC = () => {
         hint =
           'Using points draw outline of fragment to remove. Double click to finish drawing.';
         break;
-      case EDIT_MODE_TYPE.SELECT_RECTANGLE:
-        hint =
-          'Click to add top left corner of rectangle, move mouse in desired direction and click again to add bottom right corner of the rectangle. All bones fully inside the rectangle will be added.';
-        break;
-      case EDIT_MODE_TYPE.ADD_WHOLE:
-        hint =
-          'Click on bones to select or deselect them, after the selection is finished click ✓ icon on the right of the screen to add selected bones or click ✕ icon to cancel the selection.';
-        break;
       case EDIT_MODE_TYPE.SELECT:
         hint = 'Click on bone or fragment to select and display its information.';
         break;

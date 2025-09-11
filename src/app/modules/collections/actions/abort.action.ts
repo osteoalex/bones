@@ -52,21 +52,11 @@ export function abortSplit(): TAction {
   };
 }
 
-export function abortDrawRectangle(): TAction {
-  return async (_dispatch, getState) => {
-    const { addByRectangleDrawRef } = getState().interactions;
-    if (addByRectangleDrawRef) {
-      addByRectangleDrawRef.abortDrawing();
-    }
-  };
-}
-
 export function abortAll(): TAction {
   return async (dispatch, getState) => {
     dispatch(abortDrawing());
     dispatch(abortSubtract());
     dispatch(abortSplit());
-    dispatch(abortDrawRectangle());
     dispatch(setMultipleAddIds([]));
     const { baseSourceRef } = getState().layers;
     if (baseSourceRef) {
