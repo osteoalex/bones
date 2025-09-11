@@ -14,12 +14,7 @@ import {
 } from '../slices/interactions.slice';
 import { setLayers, setLayersData } from '../slices/layers.slice';
 import { setFullArea } from '../slices/selected.slice';
-import {
-  abortDrawing,
-  abortDrawRectangle,
-  abortSplit,
-  abortSubtract,
-} from './abort.action';
+import { abortDrawing, abortSplit, abortSubtract } from './abort.action';
 import { setupBoneSelectInteraction } from './bone-select.action';
 import { recalculateAreas } from './calculate-area.action';
 import { initializeAddByRectangleDraw } from './drag-select.action';
@@ -103,7 +98,6 @@ export function getAndSetupItem(currentItem: string): TAction {
         dispatch(abortDrawing());
         dispatch(abortSubtract());
         dispatch(abortSplit());
-        dispatch(abortDrawRectangle());
       });
     }
 
