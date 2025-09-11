@@ -9,7 +9,11 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { CollectionConfigData } from '../../../../../types/collection-config-data.interface';
-import { setDrawerOpen, setNewItemNameDialogOpen } from '../../slices/ui.slice';
+import {
+  setDrawerOpen,
+  setLoading,
+  setNewItemNameDialogOpen,
+} from '../../slices/ui.slice';
 
 const DrawerToolBox: React.FC = () => {
   const navigate = useNavigate();
@@ -59,7 +63,11 @@ const DrawerToolBox: React.FC = () => {
       </Tooltip>
       <Tooltip title="Export collection">
         <IconButton
-          onClick={async () => await window.electron.exportCollection()}
+          onClick={async () => {
+            dispatch(setLoading(true));
+            await window.electron.exportCollection();
+            dispatch(setLoading(false));
+          }}
         >
           <FileDownloadIcon />
         </IconButton>

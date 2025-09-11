@@ -31,7 +31,7 @@ export async function createNewItem(
       return false;
     }
   } catch (error) {
-    // console.log(error);
+    // File does not exist, continue
   }
   const itemContent: ItemContent = [];
   writeFileSync(itemPath, JSON.stringify(itemContent), { encoding: 'utf8' });
