@@ -28,7 +28,7 @@ const CollectionCreate = () => {
             helpers.setSubmitting(false);
             navigate(`/collections/open/${val.name}`);
           } catch (error) {
-            // ignore
+            window.electron.logError?.('Error creating collection', error);
           }
         }}
       />

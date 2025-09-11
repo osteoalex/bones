@@ -18,6 +18,7 @@ export function cleanConfigItems(
       .filter((f) => f.endsWith('.json'))
       .map((f) => join(config.path, 'items', f));
   } catch (e) {
+    console.error('Failed to read items directory:', e);
     return null;
   }
   const fileSet = new Set(files);

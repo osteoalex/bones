@@ -39,6 +39,7 @@ interface Window extends Window {
     toggleHint: (data: boolean) => void;
     getConfig: () => Promise<CollectionConfigData>;
     setConfig: (data: CollectionConfigData) => Promise<void>;
+    logError: (message: string, error?: unknown) => Promise<void>;
   };
 }
 

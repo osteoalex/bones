@@ -7,6 +7,7 @@ import { CollectionConfigData } from '../types/collection-config-data.interface'
 import { isCollectionConfigData } from '../utils/type-guards';
 import { cleanConfigItems } from './cleanConfigItems';
 import { cleanItemContent } from './cleanItemContent';
+import { logErr } from './logger';
 import { showError } from './showError';
 import { Store } from './store';
 
@@ -51,12 +52,13 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
           writeFileSync(item.itemPath, JSON.stringify(cleanedContent, null, 2));
         }
       } catch (e) {
-        // ignore errors for missing/corrupt items
+        logErr(`Error cleaning item file: ${item.itemPath}`, e);
       }
     }
     store.set('currentCollectionConfig', cleanedConfig);
     return cleanedConfig;
   } catch (error) {
+    logErr('Error opening collection', error);
     showError(
       'Missing configuration',
       'There is no configuration file in selected directory.',

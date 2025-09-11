@@ -1,14 +1,23 @@
 import { Box, Button, Chip } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useDispatch } from 'react-redux';
 import { Outlet, useNavigate } from 'react-router';
 
+import { setLoading } from '../collections/slices/ui.slice';
+
 const Start: React.FC = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const openCollection = async () => {
-    const config = await window.electron.openCollection();
-    if (config) {
-      navigate(`/collections/open/${config.name}`);
+    dispatch(setLoading(true));
+    try {
+      const config = await window.electron.openCollection();
+      if (config) {
+        navigate(`/collections/open/${config.name}`);
+      }
+    } finally {
+      dispatch(setLoading(false));
     }
   };
   useHotkeys('ctrl+n', () => navigate('/collections/create'));
