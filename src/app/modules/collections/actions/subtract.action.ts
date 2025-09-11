@@ -60,10 +60,18 @@ export function subtractDrawHandler(e: DrawEvent): TAction {
       getState().layers;
     if (layers[activeLayerIdx].source) {
       const toSubtractFeature = e.feature;
-      const features = getFeaturesInFeatureExtent(
+      // Restrict to fragments on selected bone(s) if any are selected
+      const selectedBones = getState().selected.selectedBone;
+      let features = getFeaturesInFeatureExtent(
         toSubtractFeature,
         layers[activeLayerIdx].source,
       );
+      if (selectedBones && selectedBones.length > 0) {
+        const selectedBoneIds = selectedBones.map((b) => b.getId());
+        features = features.filter((f) =>
+          selectedBoneIds.includes(f.getProperties().targetId),
+        );
+      }
 
       if (!features.length) {
         setTimeout(() => {

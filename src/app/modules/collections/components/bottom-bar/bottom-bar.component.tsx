@@ -12,17 +12,40 @@ const MODE_LABELS: Record<string, string> = {
   [EDIT_MODE_TYPE.SUBTRACTION]: 'Draw fragments to subtract',
   [EDIT_MODE_TYPE.SPLIT]: 'Draw line to split by',
   [EDIT_MODE_TYPE.DELETE]: 'Select fragments to delete',
-  [EDIT_MODE_TYPE.ADD_WHOLE]: 'Add whole',
   [EDIT_MODE_TYPE.SELECT]: 'Select',
   [EDIT_MODE_TYPE.ANNOTATION]: 'Add annotation',
 };
 
 const BottomBar: React.FC = () => {
+  const [selectedCount, setSelectedCount] = React.useState('0 items');
   const mode = useSelector((state: RootState) => state.editor.mode);
-  const selected = useSelector(
-    (state: RootState) => state.selected.infoDetails,
+  const { infoDetails, selectedBone } = useSelector(
+    (state: RootState) => state.selected,
   );
   const modeLabel = MODE_LABELS[mode] || mode || 'None';
+
+  React.useEffect(() => {
+    if (selectedBone && selectedBone.length > 0) {
+      if (selectedBone.length < 4) {
+        const names = selectedBone
+          .map((f) => f.get('name') || f.getId())
+          .filter((n) => n)
+          .join(', ');
+        setSelectedCount(names);
+        return;
+      }
+      setSelectedCount(`${selectedBone.length} bones`);
+      return;
+    }
+    if (infoDetails && infoDetails.length > 0) {
+      setSelectedCount(
+        `${infoDetails.length} item${infoDetails.length > 1 ? 's' : ''}`,
+      );
+      return;
+    }
+    setSelectedCount(`${infoDetails?.length || 0} items`);
+  }, [infoDetails, selectedBone]);
+
   return (
     <StyledBottomBar>
       <StyledBottomBarSection>
@@ -32,8 +55,7 @@ const BottomBar: React.FC = () => {
           component="span"
           sx={{ lineHeight: 1 }}
         >
-          Selected: {selected?.length || 0} item
-          {selected?.length === 1 ? '' : 's'}
+          Selected: {selectedCount}
         </Typography>
       </StyledBottomBarSection>
       <StyledBottomBarSection>

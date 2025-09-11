@@ -1,7 +1,5 @@
 import { Feature } from 'ol';
-import { singleClick } from 'ol/events/condition';
 import { Geometry } from 'ol/geom';
-import { Select } from 'ol/interaction';
 import { SelectEvent } from 'ol/interaction/Select';
 import { Fill, Stroke, Style } from 'ol/style';
 
@@ -11,36 +9,9 @@ import {
   baseStyle,
   selectMultipleStyle,
 } from '../components/collection-home/editor-styles';
-import { setAddMultipleRef } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
-import { setMultipleAddIds } from '../slices/selected.slice';
+import { setMultipleAddIds, setSelectedBone } from '../slices/selected.slice';
 import { recalculateAreas } from './calculate-area.action';
-
-export function setupAddMultipleInteraction(): TAction {
-  return (dispatch, getState) => {
-    const { olMapRef, baseLayerRef } = getState().layers;
-    const { addMultipleRef } = getState().interactions;
-    if (addMultipleRef) {
-      olMapRef.removeInteraction(addMultipleRef);
-    }
-    const selectMultipleClick = new Select({
-      layers: [baseLayerRef],
-      condition: singleClick,
-      multi: true,
-      style: selectMultipleStyle,
-    });
-
-    selectMultipleClick.setActive(false);
-
-    selectMultipleClick.on('select', (e: SelectEvent) =>
-      dispatch(addMultipleHandler(e)),
-    );
-
-    olMapRef.addInteraction(selectMultipleClick);
-
-    dispatch(setAddMultipleRef(selectMultipleClick));
-  };
-}
 
 export function addMultipleHandler(e: SelectEvent): TAction {
   return (dispatch, getState) => {
@@ -83,8 +54,8 @@ export function addMultipleCommitHandler(): TAction {
   return async (dispatch, getState) => {
     const { baseSourceRef, layers, activeLayerIdx, layersData } =
       getState().layers;
-    const { multipleAddIds } = getState().selected;
-    if (!multipleAddIds.length) {
+    const selectedBones = getState().selected.selectedBone;
+    if (!selectedBones.length) {
       return;
     }
     const properties = layersData[activeLayerIdx].propertiesConfig.reduce<
@@ -98,8 +69,10 @@ export function addMultipleCommitHandler(): TAction {
     properties.strokeWidth = layersData[activeLayerIdx].strokeWidth;
     const overlapping: Feature<Geometry>[] = [];
 
-    for (const id of multipleAddIds) {
+    for (const bone of selectedBones) {
+      const id = bone.getId();
       const base = baseSourceRef.getFeatureById(id);
+      if (!base) continue;
       base.setStyle(baseStyle);
       const cloned = base.clone();
       cloned.setId(id);
@@ -148,5 +121,6 @@ export function addMultipleCommitHandler(): TAction {
     await window.electron.saveFeaturesToTempFile(newLayersData);
 
     document.dispatchEvent(new CustomEvent('resetSelection'));
+    dispatch(setSelectedBone([]));
   };
 }

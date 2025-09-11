@@ -6,6 +6,7 @@ import {
   MultiPolygon,
   Polygon,
 } from 'geojson';
+import { Feature } from 'ol';
 import { Draw } from 'ol/interaction';
 import { DrawEvent } from 'ol/interaction/Draw';
 import polygonSplitter from 'polygon-splitter';
@@ -60,10 +61,31 @@ export function splitDrawHandler(e: DrawEvent): TAction {
       Record<string, string>
     >;
 
-    const featuresToSplit = getFeaturesInFeatureExtent(
-      e.feature,
-      layers[activeLayerIdx].source,
-    );
+    // Get selected bones from state
+    const selectedBones: Feature[] = getState().selected.selectedBone;
+    let featuresToSplit;
+    if (selectedBones && selectedBones.length > 0) {
+      // Only split selected bones
+      console.log('first');
+      featuresToSplit = getFeaturesInFeatureExtent(
+        selectedBones,
+        layers[activeLayerIdx].source,
+      );
+    } else {
+      // Fallback: all overlapping fragments
+      featuresToSplit = getFeaturesInFeatureExtent(
+        e.feature,
+        layers[activeLayerIdx].source,
+      );
+    }
+    if (featuresToSplit.length === 0 && e.feature) {
+      setTimeout(() => {
+        splitSourceRef.removeFeature(e.feature);
+      }, 100);
+      return;
+    }
+
+    console.log(featuresToSplit, selectedBones);
     for (const featureToSplit of featuresToSplit) {
       const current = baseSourceRef
         .getFeatures()

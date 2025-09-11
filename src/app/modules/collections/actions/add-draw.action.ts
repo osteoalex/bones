@@ -30,6 +30,7 @@ import {
 import { setIsDrawing } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
 import { recalculateAreas } from './calculate-area.action';
+import { resetFeatureStyle } from './reset.action';
 
 export function setupDrawFragment(
   source: VectorSource<Feature<Geometry>>,
@@ -63,7 +64,16 @@ export function additionDrawEndHandler(e: DrawEvent): TAction {
       extent,
       layers[activeLayerIdx].source,
     );
-    const bones = getFeaturesInFeatureExtent(extent, baseSourceRef);
+    // Get selected bones from state
+    const selectedBones = getState().selected.selectedBone;
+    let bones;
+    if (selectedBones && selectedBones.length > 0) {
+      // Only use selected bones
+      bones = selectedBones;
+    } else {
+      // Fallback: all overlapping bones
+      bones = getFeaturesInFeatureExtent(extent, baseSourceRef);
+    }
 
     const intersects = existing.filter((f) => {
       return (
@@ -190,6 +200,8 @@ export function submitFragmentHandler(
       };
       newFeature.setProperties(fragmentProps);
       newFeature.setId(getNextId(layers[activeLayerIdx].source.getFeatures()));
+
+      resetFeatureStyle(newFeature);
     }
     olMapRef.render();
 
