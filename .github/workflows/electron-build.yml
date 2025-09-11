@@ -39,7 +39,7 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -89,8 +89,10 @@ jobs:
           message: |
             ✅ Build completed for **${{ steps.sanitize.outputs.branch }}**
 
+
             - [Linux build artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             - [Windows build artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - [macOS build artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
             (_Artifacts are available for 14 days_)
 
@@ -116,7 +118,7 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
@@ -164,6 +166,7 @@ jobs:
       contents: write
 
     steps:
+
       - name: Download Linux build
         uses: actions/download-artifact@v4
         with:
@@ -176,6 +179,12 @@ jobs:
           name: release-build-windows-latest
           path: release/windows
 
+      - name: Download macOS build
+        uses: actions/download-artifact@v4
+        with:
+          name: release-build-macos-latest
+          path: release/macos
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -187,3 +196,4 @@ jobs:
           files: |
             release/linux/**
             release/windows/**
+            release/macos/**
