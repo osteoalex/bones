@@ -13,12 +13,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '../../../../../types/store.types';
 import { EDIT_MODE_TYPE } from '../../../../../utils/enums';
 import { RootState } from '../../../../store';
+import { addMultipleCommitHandler } from '../../actions/add-multiple.action';
 import { exportItemHandler } from '../../actions/export.action';
 import { changeEditMode } from '../../actions/mode.action';
 import { ToolsBoxWrapper } from '../collection-home/collection-home.styles';
 
 const ToolBox: React.FC = () => {
   const mode = useSelector((state: RootState) => state.editor.mode);
+  const selectedBones = useSelector(
+    (state: RootState) => state.selected.selectedBone,
+  );
   const dispatch = useDispatch<AppDispatch>();
   // Helper to handle deselect logic
   const handleToolClick = (toolMode: EDIT_MODE_TYPE) => {
@@ -76,10 +80,11 @@ const ToolBox: React.FC = () => {
       </Tooltip>
       {/* add whole + multiselect */}
       <Tooltip title="Add whole">
-        <IconButton onClick={() => handleToolClick(EDIT_MODE_TYPE.ADD_WHOLE)}>
-          <QueueIcon
-            color={mode === EDIT_MODE_TYPE.ADD_WHOLE ? 'success' : 'inherit'}
-          />
+        <IconButton
+          onClick={() => dispatch(addMultipleCommitHandler())}
+          disabled={!selectedBones?.length}
+        >
+          <QueueIcon />
         </IconButton>
       </Tooltip>
       {/* save svg */}

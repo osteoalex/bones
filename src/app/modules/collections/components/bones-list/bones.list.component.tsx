@@ -11,14 +11,10 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { AppDispatch } from '../../../../../types/store.types';
-import { EDIT_MODE_TYPE } from '../../../../../utils/enums';
 import { RootState } from '../../../../store';
-import { changeEditMode } from '../../actions/mode.action';
-import {
-  setMultipleAddIds,
-  setSelectedBone,
-} from '../../slices/selected.slice';
+import { setSelectedBone } from '../../slices/selected.slice';
 import { ListBox } from '../collection-home/collection-home.styles';
+import { baseStyle, selectedBoneStyle } from '../collection-home/editor-styles';
 
 const BonesList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -26,17 +22,23 @@ const BonesList: React.FC = () => {
   const baseSourceRef = useSelector(
     (state: RootState) => state.layers.baseSourceRef,
   );
-  const addMultipleRef = useSelector(
-    (state: RootState) => state.interactions.addMultipleRef,
+  const selectedBones = useSelector(
+    (state: RootState) => state.selected.selectedBone,
   );
 
   const resetSelection = () => {
     setSelected([]);
-    dispatch(setMultipleAddIds([]));
+    dispatch(setSelectedBone([]));
   };
 
   const updateSelection = (e: CustomEvent<string[]>) => {
     setSelected(e.detail);
+    if (baseSourceRef) {
+      const selectedFeatures = baseSourceRef
+        .getFeatures()
+        .filter((f) => e.detail.includes(f.getId().toString()));
+      dispatch(setSelectedBone(selectedFeatures));
+    }
   };
 
   useEffect(() => {
@@ -53,6 +55,35 @@ const BonesList: React.FC = () => {
     baseSourceRef ? baseSourceRef.getFeatures() : [],
   );
   const [selected, setSelected] = useState([]);
+
+  useEffect(() => {
+    if (
+      selectedBones &&
+      Array.isArray(selectedBones) &&
+      selectedBones.length > 0
+    ) {
+      setSelected(
+        selectedBones.map((f) =>
+          typeof f === 'object' && f.getId ? f.getId() : f,
+        ),
+      );
+    } else if (selected.length > 0) {
+      setSelected([]);
+    }
+  }, [selectedBones]);
+  // Update styles for selected bones
+  if (baseSourceRef) {
+    const selectedIds = selectedBones.map((f) =>
+      typeof f === 'object' && f.getId ? f.getId() : f,
+    );
+    baseSourceRef.getFeatures().forEach((f) => {
+      if (selectedIds.includes(f.getId())) {
+        f.setStyle(selectedBoneStyle);
+      } else {
+        f.setStyle(baseStyle);
+      }
+    });
+  }
 
   useEffect(() => {
     if (baseSourceRef) {
@@ -99,64 +130,45 @@ const BonesList: React.FC = () => {
               background: selected.includes(value.getId()) ? '#ebebeb' : '#fff',
             }}
             onClick={(e) => {
-              let currentlySelected = selected;
+              if (!baseSourceRef) return;
+              let currentlySelected = selected.slice();
+              const valueId = value.getId();
               const currentlySelectedIdx = currentlySelected.findIndex(
-                (el) => el === value.getId(),
+                (el) => el === valueId,
               );
               if (e.ctrlKey) {
-                dispatch(setSelectedBone(null));
-                addMultipleRef.getFeatures().clear();
                 if (currentlySelectedIdx !== -1) {
-                  const featuresToAdd = [
-                    ...items.filter(
-                      (el) =>
-                        currentlySelected.includes(el.getId()) &&
-                        el.getId() !== value.getId(),
-                    ),
-                  ];
-                  featuresToAdd.forEach((el) =>
-                    addMultipleRef.getFeatures().push(el),
-                  );
-                  currentlySelected = featuresToAdd.map((feature) =>
-                    feature.getId(),
+                  currentlySelected = currentlySelected.filter(
+                    (id) => id !== valueId,
                   );
                 } else {
-                  const featuresToAdd = [
-                    ...items.filter((el) =>
-                      currentlySelected.includes(el.getId()),
-                    ),
-                    value,
-                  ];
-                  featuresToAdd.forEach((el) =>
-                    addMultipleRef.getFeatures().push(el),
-                  );
-                  currentlySelected = [...currentlySelected, value.getId()];
+                  currentlySelected = [...currentlySelected, valueId];
                 }
                 setSelected(currentlySelected);
-                dispatch(changeEditMode(EDIT_MODE_TYPE.ADD_WHOLE));
-                dispatch(setMultipleAddIds(currentlySelected));
+                const selectedFeatures = baseSourceRef
+                  .getFeatures()
+                  .filter((f) => currentlySelected.includes(f.getId()));
+                dispatch(setSelectedBone(selectedFeatures));
+                // Update styles
+                baseSourceRef.getFeatures().forEach((f) => {
+                  if (currentlySelected.includes(f.getId())) {
+                    f.setStyle(selectedBoneStyle);
+                  } else {
+                    f.setStyle(baseStyle);
+                  }
+                });
               } else if (e.shiftKey) {
-                dispatch(setSelectedBone(null));
-                addMultipleRef.getFeatures().clear();
                 if (!currentlySelected.length) {
-                  addMultipleRef.getFeatures().push(value);
-                  currentlySelected = [value.getId()];
+                  currentlySelected = [valueId];
                 } else {
                   if (currentlySelectedIdx !== -1) {
-                    const featuresToAdd = [
-                      ...items.filter((el) =>
-                        currentlySelected.includes(el.getId()),
-                      ),
-                      value,
-                    ];
-                    featuresToAdd.splice(currentlySelectedIdx);
-                    currentlySelected = featuresToAdd.map((feature) =>
-                      feature.getId(),
+                    currentlySelected = currentlySelected.filter(
+                      (id) => id !== valueId,
                     );
                   } else {
                     const previous =
                       currentlySelected[currentlySelected.length - 1];
-                    const current = value.getId();
+                    const current = valueId;
                     const previousIndex = items.findIndex(
                       (feature) => feature.getId() === previous,
                     );
@@ -165,36 +177,45 @@ const BonesList: React.FC = () => {
                     );
                     let elements = [];
                     if (currentIndex > previousIndex) {
-                      elements = [
-                        ...items.filter((item) =>
-                          currentlySelected.includes(item.getId()),
-                        ),
-                        ...items.slice(previousIndex + 1, currentIndex + 1),
-                      ];
+                      elements = items.slice(previousIndex, currentIndex + 1);
                     } else {
                       elements = items.slice(currentIndex, previousIndex + 1);
                     }
-                    elements.forEach((el) =>
-                      addMultipleRef.getFeatures().push(el),
-                    );
-                    currentlySelected = [
-                      ...new Set([
+                    currentlySelected = Array.from(
+                      new Set([
                         ...currentlySelected,
                         ...elements.map((el) => el.getId()),
                       ]),
-                    ];
+                    );
                   }
                 }
-                dispatch(changeEditMode(EDIT_MODE_TYPE.ADD_WHOLE));
                 setSelected(currentlySelected);
-                dispatch(setMultipleAddIds(currentlySelected));
+                const selectedFeatures = baseSourceRef
+                  .getFeatures()
+                  .filter((f) => currentlySelected.includes(f.getId()));
+                dispatch(setSelectedBone(selectedFeatures));
+                // Update styles
+                baseSourceRef.getFeatures().forEach((f) => {
+                  if (currentlySelected.includes(f.getId())) {
+                    f.setStyle(selectedBoneStyle);
+                  } else {
+                    f.setStyle(baseStyle);
+                  }
+                });
               } else {
-                dispatch(setSelectedBone(value));
-                dispatch(changeEditMode(EDIT_MODE_TYPE.ADD_WHOLE));
-                dispatch(setMultipleAddIds([value.getId().toString()]));
-                addMultipleRef.getFeatures().clear();
-                addMultipleRef.getFeatures().push(value);
-                setSelected([value.getId()]);
+                setSelected([valueId]);
+                const selectedFeatures = baseSourceRef
+                  .getFeatures()
+                  .filter((f) => f.getId() === valueId);
+                dispatch(setSelectedBone(selectedFeatures));
+                // Update styles
+                baseSourceRef.getFeatures().forEach((f) => {
+                  if (f.getId() === valueId) {
+                    f.setStyle(selectedBoneStyle);
+                  } else {
+                    f.setStyle(baseStyle);
+                  }
+                });
               }
             }}
           >

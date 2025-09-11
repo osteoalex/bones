@@ -51,7 +51,6 @@ export interface DrawLayer {
   source: VectorSource<Feature<Geometry>>;
   snap: Snap;
   delete: Select;
-  hover: Select;
   draw: Draw;
   subtract: Draw;
   annotationLayer: VectorLayer<VectorSource<Feature<Point>>>;

@@ -10,7 +10,6 @@ import { RootState } from '../../../../store';
 import { useHotkeys } from '../../hooks/use-hotkeys.hook';
 import { setItems } from '../../slices/editor.slice';
 import { setShowHints } from '../../slices/ui.slice';
-import AddMultipleControls from '../add-multiple-controls/add-multiple-controls.component';
 import AnnotationDialog from '../annotation-dialog/annotation-dialog.component';
 import BonesList from '../bones-list/bones.list.component';
 import BottomBar from '../bottom-bar/bottom-bar.component';
@@ -56,6 +55,7 @@ const CollectionHome: React.FC = () => {
     (state: RootState) => state.editor.currentItem,
   );
   const mode = useSelector((state: RootState) => state.editor.mode);
+  const { infoDetails } = useSelector((state: RootState) => state.selected);
 
   return (
     <CollectionHomeWrapper>
@@ -79,10 +79,9 @@ const CollectionHome: React.FC = () => {
       </EditorDrawer>
       <EditorBody />
       {currentItem && <ToolBox />}
-      {currentItem && mode === EDIT_MODE_TYPE.ADD_WHOLE && (
-        <AddMultipleControls />
-      )}
-      {currentItem && mode === EDIT_MODE_TYPE.SELECT && <DetailsBox />}
+      {currentItem &&
+        mode === EDIT_MODE_TYPE.SELECT &&
+        !!infoDetails?.length && <DetailsBox />}
       <CreateNewItem />
       <NewLayerDialog />
       <EditLayerDialog />

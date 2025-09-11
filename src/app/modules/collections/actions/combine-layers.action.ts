@@ -7,7 +7,6 @@ import { Feature, FeatureCollection, MultiPolygon } from 'geojson';
 import { TAction } from '../../../../types/store.types';
 import { setLayerDetails } from '../slices/editor.slice';
 import {
-  setBoneHoverRef,
   setDeleteSelectRef,
   setDrawFragmentRef,
   setSnapFragmentRef,
@@ -73,10 +72,9 @@ export function combineLayers(combinedLayers: string[]): TAction {
     dispatch(changeLayer(targetLayerId));
     dispatch(setLayerDetails(null));
 
-    const { snap, hover, draw, subtract } = updatedLayers[targetLayerId];
+    const { snap, draw, subtract } = updatedLayers[targetLayerId];
     dispatch(setSnapFragmentRef(snap));
     dispatch(setDeleteSelectRef(updatedLayers[targetLayerId].delete));
-    dispatch(setBoneHoverRef(hover));
     dispatch(setDrawFragmentRef(draw));
     dispatch(setSubtractFragmentRef(subtract));
 

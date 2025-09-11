@@ -49,15 +49,6 @@ export const deleteStyle = new Style({
     color: 'rgba(0, 0, 255, 0.1)',
   }),
 });
-export const hoverStyle = new Style({
-  stroke: new Stroke({
-    color: 'blue',
-    width: 2,
-  }),
-  fill: new Fill({
-    color: 'rgba(0, 0, 255, 0.5)',
-  }),
-});
 
 export const fragmentsStyle = new Style({
   stroke: new Stroke({
@@ -73,6 +64,16 @@ export const baseStyle = new Style({
   stroke: new Stroke({
     color: 'rgba(0, 0, 0, 1)',
     width: 2,
+  }),
+  fill: new Fill({
+    color: 'rgba(0, 0, 0, 0)',
+  }),
+});
+
+export const selectedBoneStyle = new Style({
+  stroke: new Stroke({
+    color: 'rgba(0, 0, 0, 1)',
+    width: 8,
   }),
   fill: new Fill({
     color: 'rgba(0, 0, 0, 0)',

@@ -4,7 +4,7 @@ import Feature from 'ol/Feature';
 import { Geometry } from 'ol/geom';
 
 export interface SelectedState {
-  selectedBone: Feature | null;
+  selectedBone: Feature<Geometry>[];
   infoDetails: Feature<Geometry>[];
   multipleAddIds: string[];
   fullArea: number;
@@ -14,7 +14,7 @@ export interface SelectedState {
 const initialState: SelectedState = {
   multipleAddIds: [],
   fullArea: 1,
-  selectedBone: null,
+  selectedBone: [],
   infoDetails: [],
   fragmentsArea: 0,
 };
@@ -29,7 +29,7 @@ export const selectedSlice = createSlice({
     setFullArea: (state, action: PayloadAction<number>) => {
       state.fullArea = action.payload;
     },
-    setSelectedBone: (state, action: PayloadAction<Feature>) => {
+    setSelectedBone: (state, action: PayloadAction<Feature<Geometry>[]>) => {
       state.selectedBone = action.payload;
     },
     setInfoDetails: (state, action: PayloadAction<Feature<Geometry>[]>) => {

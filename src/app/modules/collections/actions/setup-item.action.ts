@@ -5,8 +5,7 @@ import { calculateArea, geojsonFormat } from '../../../../utils';
 import { EDIT_MODE_TYPE } from '../../../../utils/enums';
 import { setItems, setMode } from '../slices/editor.slice';
 import {
-  setBaseBoneHoverRef,
-  setBoneHoverRef,
+  setBoneSelectRef,
   setDeleteSelectRef,
   setDrawFragmentRef,
   setInfoSelectRef,
@@ -22,9 +21,8 @@ import {
   abortSubtract,
 } from './abort.action';
 import { setupAddByRectangleDraw } from './add-by-rectangle.action';
-import { setupAddMultipleInteraction } from './add-multiple.action';
+import { setupBoneSelectInteraction } from './bone-select.action';
 import { recalculateAreas } from './calculate-area.action';
-import { setupBoneHover } from './hover.action';
 import { setupInfoClickInteraction } from './info-click.action';
 import { changeEditMode } from './mode.action';
 import { setupLayersAndSources } from './setup-layers-and-sources.action';
@@ -81,23 +79,22 @@ export function getAndSetupItem(currentItem: string): TAction {
       }, 0);
       dispatch(setFullArea(area));
 
-      const baseBoneHoverRef = dispatch(setupBoneHover(vectorLayer));
       dispatch(setupAddByRectangleDraw());
-      dispatch(setupAddMultipleInteraction());
       dispatch(setupSplitFragmentInteraction());
 
       dispatch(setLayers(layers));
-      dispatch(setBaseBoneHoverRef(baseBoneHoverRef));
       if (layers.length > 0) {
-        const { snap, hover, draw, subtract } = layers[0];
+        const { snap, draw, subtract } = layers[0];
         dispatch(setSnapFragmentRef(snap));
         dispatch(setDeleteSelectRef(layers[0].delete));
-        dispatch(setBoneHoverRef(hover));
         dispatch(setDrawFragmentRef(draw));
         dispatch(setSubtractFragmentRef(subtract));
       }
       const infoClickRef = dispatch(setupInfoClickInteraction());
       dispatch(setInfoSelectRef(infoClickRef));
+
+      const selectBoneRef = dispatch(setupBoneSelectInteraction());
+      dispatch(setBoneSelectRef(selectBoneRef));
 
       dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT));
       olMapRef.render();

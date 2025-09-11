@@ -15,13 +15,11 @@ export interface InteractionsState {
   isSubtracting: boolean;
   deleteSelectRef: Select | null;
   snapFragmentRef: Snap | null;
-  boneHoverRef: Select | null;
-  baseBoneHoverRef: Select | null;
-  addMultipleRef: Select | null;
   infoSelectRef: Select | null;
   currentLayerInfoClickRef: Select | null;
   addByRectangleDrawRef: Draw | null;
   addByRectangleSourceRef: VectorSource | null;
+  boneSelectRef: Select | null;
 }
 
 const initialState: InteractionsState = {
@@ -32,16 +30,14 @@ const initialState: InteractionsState = {
   splitFragmentRef: null,
   drawAnnotationRef: null,
   subtractFragmentRef: null,
-  boneHoverRef: null,
-  baseBoneHoverRef: null,
   snapFragmentRef: null,
   deleteSelectRef: null,
-  addMultipleRef: null,
   addByRectangleDrawRef: null,
   infoSelectRef: null,
   currentLayerInfoClickRef: null,
   splitSourceRef: null,
   addByRectangleSourceRef: null,
+  boneSelectRef: null,
 };
 
 export const interactionsSlice = createSlice({
@@ -57,23 +53,17 @@ export const interactionsSlice = createSlice({
     setSubtractFragmentRef: (state, action: PayloadAction<Draw>) => {
       state.subtractFragmentRef = action.payload;
     },
-    setBoneHoverRef: (state, action: PayloadAction<Select>) => {
-      state.boneHoverRef = action.payload;
-    },
-    setBaseBoneHoverRef: (state, action: PayloadAction<Select>) => {
-      state.baseBoneHoverRef = action.payload;
-    },
     setSnapFragmentRef: (state, action: PayloadAction<Snap>) => {
       state.snapFragmentRef = action.payload;
     },
     setDeleteSelectRef: (state, action: PayloadAction<Select>) => {
       state.deleteSelectRef = action.payload;
     },
-    setAddMultipleRef: (state, action: PayloadAction<Select>) => {
-      state.addMultipleRef = action.payload;
-    },
     setAddByRectangleDrawRef: (state, action: PayloadAction<Draw>) => {
       state.addByRectangleDrawRef = action.payload;
+    },
+    setBoneSelectRef: (state, action: PayloadAction<Select>) => {
+      state.boneSelectRef = action.payload;
     },
     setInfoSelectRef: (state, action: PayloadAction<Select>) => {
       state.infoSelectRef = action.payload;
@@ -109,11 +99,8 @@ export const {
   setDrawFragmentRef,
   setSplitFragmentRef,
   setSubtractFragmentRef,
-  setBoneHoverRef,
-  setBaseBoneHoverRef,
   setSnapFragmentRef,
   setDeleteSelectRef,
-  setAddMultipleRef,
   setAddByRectangleDrawRef,
   setInfoSelectRef,
   setSplitSourceRef,
@@ -123,6 +110,7 @@ export const {
   setIsDrawing,
   setIsSubtracting,
   setIsSplitting,
+  setBoneSelectRef,
 } = interactionsSlice.actions;
 
 export default interactionsSlice.reducer;
