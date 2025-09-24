@@ -28,7 +28,10 @@ const HotkeysToggle: React.FC = () => {
     };
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === 'Control') dispatch(setCtrl(false));
-      if (e.key === 'Alt') dispatch(setAlt(false));
+      if (e.key === 'Alt') {
+        e.preventDefault();
+        dispatch(setAlt(false));
+      }
       if (e.key === 'Shift') dispatch(setShift(false));
     };
     const handleBlur = () => {

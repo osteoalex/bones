@@ -22,10 +22,13 @@ export function initializeAddByRectangleDraw(): TAction {
       olMapRef.removeInteraction(addByRectangleDrawRef);
     }
 
-    // Use DragBox for rectangle selection
+    // Use DragBox for rectangle selection, but disable when Alt toggle is on
     const dragBox = new DragBox({
-      // Remove condition: always-on drag selection, or use platformModifierKeyOnly for Ctrl/Meta only
-      // condition: platformModifierKeyOnly,
+      condition: () => {
+        const altToggle = getState().hotkeys.alt;
+        if (altToggle) return false;
+        return true;
+      },
     });
     dragBox.setActive(false);
     dispatch(setAddByRectangleDrawRef(dragBox));

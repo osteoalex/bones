@@ -20,12 +20,13 @@ export function setupBoneSelectInteraction(): TAction<Select> {
       layers: [baseLayerRef],
       style: selectedBoneStyle,
       condition: (event) => {
-        // Only allow selection on Ctrl+Click (and optionally Shift for multi-select)
+        // Allow selection on Ctrl+Click, Meta+Click, or Ctrl toggle
         const original = event.originalEvent;
+        const ctrlToggle = getState().hotkeys.ctrl;
         return (
           singleClick(event) &&
           original &&
-          (original.ctrlKey || original.metaKey)
+          (original.ctrlKey || original.metaKey || ctrlToggle)
         );
       },
     });
