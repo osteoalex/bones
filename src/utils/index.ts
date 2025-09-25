@@ -45,14 +45,20 @@ export function getNextId(features: OlFeature[]): number {
   if (features.length === 0) {
     return 0;
   }
-  const arr = Array.from({ length: features.length }, (_value, index) => index);
-  const ids = features.map<number>((f) => Number(f.getId()));
-  const max = Math.max(...ids);
-  if (Math.max(...arr) === max) {
-    return max + 1;
-  } else {
-    return arr.find((num) => !ids.includes(num));
+  const ids = new Set<number>();
+  let max = -1;
+  for (const f of features) {
+    const id = Number(f.getId());
+    if (!isNaN(id)) {
+      ids.add(id);
+      if (id > max) max = id;
+    }
   }
+  // Find the smallest non-negative integer not in the set
+  for (let i = 0; i <= max; i++) {
+    if (!ids.has(i)) return i;
+  }
+  return max + 1;
 }
 
 export function getValidation(config: Layer['propertiesConfig']) {
