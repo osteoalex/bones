@@ -10,11 +10,13 @@ import {
   setDeleteSelectRef,
   setDrawFragmentRef,
   setInfoSelectRef,
+  setMiddleMousePanRef,
   setSnapFragmentRef,
   setSubtractFragmentRef,
 } from '../slices/interactions.slice';
 import { setLayers, setLayersData } from '../slices/layers.slice';
 import { setFullArea } from '../slices/selected.slice';
+import { createMiddleMouseDragPan } from '../utils/middle-mouse-drag-pan';
 import { abortDrawing, abortSplit, abortSubtract } from './abort.action';
 import { setupBoneSelectInteraction } from './bone-select.action';
 import { recalculateAreas } from './calculate-area.action';
@@ -109,6 +111,16 @@ export function getAndSetupItem(currentItem: string): TAction {
 
       const selectBoneRef = dispatch(setupBoneSelectInteraction());
       dispatch(setBoneSelectRef(selectBoneRef));
+
+      let middleMousePan = getState().interactions.middleMousePanRef;
+
+      if (!middleMousePan) {
+        middleMousePan = createMiddleMouseDragPan();
+        dispatch(setMiddleMousePanRef(middleMousePan));
+        olMapRef.addInteraction(middleMousePan);
+      } else {
+        middleMousePan.setActive(true);
+      }
 
       dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT));
       olMapRef.render();

@@ -1,5 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
+import type { DragPan } from 'ol/interaction';
 import { DragBox, Draw, Select, Snap } from 'ol/interaction';
 import { Vector as VectorSource } from 'ol/source';
 
@@ -20,6 +21,7 @@ export interface InteractionsState {
   addByRectangleDrawRef: DragBox | null;
   addByRectangleSourceRef: VectorSource | null;
   boneSelectRef: Select | null;
+  middleMousePanRef: DragPan | null;
 }
 
 const initialState: InteractionsState = {
@@ -38,6 +40,7 @@ const initialState: InteractionsState = {
   splitSourceRef: null,
   addByRectangleSourceRef: null,
   boneSelectRef: null,
+  middleMousePanRef: null,
 };
 
 export const interactionsSlice = createSlice({
@@ -92,10 +95,14 @@ export const interactionsSlice = createSlice({
     setIsSplitting: (state, action: PayloadAction<boolean>) => {
       state.isSplitting = action.payload;
     },
+    setMiddleMousePanRef: (state, action: PayloadAction<DragPan>) => {
+      state.middleMousePanRef = action.payload;
+    },
   },
 });
 
 export const {
+  setMiddleMousePanRef,
   setDrawFragmentRef,
   setSplitFragmentRef,
   setSubtractFragmentRef,
