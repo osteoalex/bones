@@ -58,151 +58,136 @@ export function subtractDrawHandler(e: DrawEvent): TAction {
     dispatch(setIsSubtracting(false));
     const { layers, activeLayerIdx, baseSourceRef, layersData } =
       getState().layers;
-    if (!layers[activeLayerIdx].source) return;
-
-    const toSubtractFeature = e.feature;
-    // Restrict to fragments on selected bone(s) if any are selected
-    const selectedBones = getState().selected.selectedBone;
-    let features = getFeaturesInFeatureExtent(
-      toSubtractFeature,
-      layers[activeLayerIdx].source,
-    );
-    if (selectedBones && selectedBones.length > 0) {
-      const selectedBoneIds = selectedBones.map((b) => b.getId());
-      features = features.filter((f) =>
-        selectedBoneIds.includes(f.getProperties().targetId),
-      );
-    }
-
-    if (!features.length) {
-      setTimeout(() => {
-        layers[activeLayerIdx].source.removeFeature(toSubtractFeature);
-      }, 100);
-      return;
-    }
-
-    // Batch changes
-    const featuresToRemove = [];
-    const featuresToUpdate = [];
-    const featuresToAdd = [];
-    const recalcTargetIds = new Set<string>();
-
-    // Only get base features once
-    const baseFeatures = baseSourceRef.getFeatures();
-
-    for (let i = 0; i < features.length; i++) {
-      const feature = features[i];
-      const current = baseFeatures.find(
-        (f) => f.getId() === feature.getProperties().targetId,
-      );
-      const featureCoords = geojsonFormat.writeFeatureObject(
-        feature,
-      ) as GeoJSONFeature<MultiPolygon | Polygon>;
-      let mPoly: GeoJSONFeature<MultiPolygon | Polygon>;
-      if (isGeoJsonMultiPolygon(featureCoords)) {
-        mPoly = turfMultiPolygon(featureCoords.geometry.coordinates);
-      }
-      if (isGeoJsonPolygon(featureCoords)) {
-        mPoly = turfPolygon(featureCoords.geometry.coordinates);
-      }
-      const toSubtract = geojsonFormat.writeFeatureObject(
+    if (layers[activeLayerIdx].source) {
+      const toSubtractFeature = e.feature;
+      // Restrict to fragments on selected bone(s) if any are selected
+      const selectedBones = getState().selected.selectedBone;
+      let features = getFeaturesInFeatureExtent(
         toSubtractFeature,
-      ) as GeoJSONFeature<MultiPolygon>;
-      const toSubtractMPoly = turfMultiPolygon(toSubtract.geometry.coordinates);
-      const diff = turfDifference(mPoly, toSubtractMPoly);
-      if (
-        !diff ||
-        !diff.geometry ||
-        (Array.isArray(diff.geometry.coordinates) &&
-          diff.geometry.coordinates.length === 0)
-      ) {
-        featuresToRemove.push(feature);
-        recalcTargetIds.add(feature.getProperties().targetId);
-        continue;
-      } else if (isGeoJsonMultiPolygon(diff)) {
-        const polys = diff.geometry.coordinates.map((p) => turfPolygon(p));
-        const f = geojsonFormat.readFeature(polys.splice(0, 1)[0]);
-        const newGeom = Array.isArray(f) ? f[0].getGeometry() : f.getGeometry();
-        const newProps = {
-          ...feature.getProperties(),
-          "Fragment's area": `${( // eslint-disable-line
-            (calculateArea(diff) * 100) /
-            calculateArea(
-              geojsonFormat.writeFeatureObject(current) as GeoJSONFeature<
-                Polygon | MultiPolygon
-              >,
-            )
-          ).toFixed(2)}%`,
-        };
-        featuresToUpdate.push({ feature, newGeom, newProps });
-        const props = Object.fromEntries(
-          Object.entries(newProps).filter(([key]) => key !== 'geometry'),
-        );
-        for (const poly of polys) {
-          const f = geojsonFormat.readFeature(poly);
-          const nextFeature = Array.isArray(f) ? f[0] : f;
-          nextFeature.setProperties(props);
-          // Use imported getNextId, including pending additions
-          const allFeatures = [
-            ...layers[activeLayerIdx].source.getFeatures(),
-            ...featuresToAdd,
-          ];
-          nextFeature.setId(getNextId(allFeatures));
-          featuresToAdd.push(nextFeature);
-        }
-        recalcTargetIds.add(feature.getProperties().targetId);
-      } else {
-        const f = geojsonFormat.readFeature(diff);
-        const newGeom = Array.isArray(f) ? f[0].getGeometry() : f.getGeometry();
-        const newProps = {
-          ...feature.getProperties(),
-          "Fragment's area": `${( // eslint-disable-line
-            (calculateArea(diff) * 100) /
-            calculateArea(
-              geojsonFormat.writeFeatureObject(current) as GeoJSONFeature<
-                Polygon | MultiPolygon
-              >,
-            )
-          ).toFixed(2)}%`,
-        };
-        featuresToUpdate.push({ feature, newGeom, newProps });
-        recalcTargetIds.add(feature.getProperties().targetId);
-      }
-    }
-
-    // Apply all changes in one go
-    for (const f of featuresToRemove) {
-      layers[activeLayerIdx].source.removeFeature(f);
-    }
-    for (const { feature, newGeom, newProps } of featuresToUpdate) {
-      feature.setGeometry(newGeom);
-      feature.setProperties(newProps);
-    }
-    for (const f of featuresToAdd) {
-      layers[activeLayerIdx].source.addFeature(f);
-    }
-
-    // Remove the drawn subtract feature
-    setTimeout(() => {
-      layers[activeLayerIdx].source.removeFeature(toSubtractFeature);
-    }, 100);
-
-    // Save and recalc only once
-    setTimeout(async () => {
-      const geojson = geojsonFormat.writeFeaturesObject(
-        layers[activeLayerIdx].source.getFeatures(),
+        layers[activeLayerIdx].source,
       );
-      const newLayersData = [...layersData];
-      newLayersData[activeLayerIdx] = {
-        ...layersData[activeLayerIdx],
-        fragments: geojson,
-      };
-      dispatch(setLayersData(newLayersData));
-      await window.electron.saveFeaturesToTempFile(newLayersData);
-      dispatch(recalculateAreas());
-      for (const targetId of recalcTargetIds) {
-        dispatch(recalculateAreaByTargetId(targetId));
+      if (selectedBones && selectedBones.length > 0) {
+        const selectedBoneIds = selectedBones.map((b) => b.getId());
+        features = features.filter((f) =>
+          selectedBoneIds.includes(f.getProperties().targetId),
+        );
       }
-    }, 200);
+
+      if (!features.length) {
+        setTimeout(() => {
+          layers[activeLayerIdx].source.removeFeature(toSubtractFeature);
+        }, 100);
+        return;
+      }
+      for await (const feature of features) {
+        const current = baseSourceRef
+          .getFeatures()
+          .find((f) => f.getId() === feature.getProperties().targetId);
+        const featureCoords = geojsonFormat.writeFeatureObject(
+          feature,
+        ) as GeoJSONFeature<MultiPolygon | Polygon>;
+        let mPoly: GeoJSONFeature<MultiPolygon | Polygon>;
+        if (isGeoJsonMultiPolygon(featureCoords)) {
+          mPoly = turfMultiPolygon(featureCoords.geometry.coordinates);
+        }
+        if (isGeoJsonPolygon(featureCoords)) {
+          mPoly = turfPolygon(featureCoords.geometry.coordinates);
+        }
+        const toSubtract = geojsonFormat.writeFeatureObject(
+          toSubtractFeature,
+        ) as GeoJSONFeature<MultiPolygon>;
+        const toSubtractMPoly = turfMultiPolygon(
+          toSubtract.geometry.coordinates,
+        );
+        const diff = turfDifference(mPoly, toSubtractMPoly);
+        console.log(diff);
+        // If diff is null or has empty geometry, remove the feature entirely
+        if (
+          !diff ||
+          !diff.geometry ||
+          (Array.isArray(diff.geometry.coordinates) &&
+            diff.geometry.coordinates.length === 0)
+        ) {
+          // Remove the feature from the layer
+          console.log('here');
+          layers[activeLayerIdx].source.removeFeature(feature);
+        } else if (isGeoJsonMultiPolygon(diff)) {
+          const polys = diff.geometry.coordinates.map((p) => turfPolygon(p));
+          const f = geojsonFormat.readFeature(polys.splice(0, 1)[0]);
+          feature.setGeometry(
+            Array.isArray(f) ? f[0].getGeometry() : f.getGeometry(),
+          );
+          feature.setProperties({
+            ...feature.getProperties(),
+            "Fragment's area": `${// eslint-disable-line
+              (
+                (calculateArea(diff) * 100) /
+                calculateArea(
+                  geojsonFormat.writeFeatureObject(current) as GeoJSONFeature<
+                    Polygon | MultiPolygon
+                  >,
+                )
+              ).toFixed(2)
+            }%`,
+          });
+          const props = Object.fromEntries(
+            Object.entries(feature.getProperties()).filter(
+              ([key]) => key !== 'geometry',
+            ),
+          );
+          for (const poly of polys) {
+            const f = geojsonFormat.readFeature(poly);
+            const nextFeature = Array.isArray(f) ? f[0] : f;
+            nextFeature.setProperties(props);
+            nextFeature.setId(
+              getNextId(layers[activeLayerIdx].source.getFeatures()),
+            );
+            layers[activeLayerIdx].source.addFeature(nextFeature);
+          }
+        } else {
+          const f = geojsonFormat.readFeature(diff);
+          feature.setGeometry(
+            Array.isArray(f) ? f[0].getGeometry() : f.getGeometry(),
+          );
+          feature.setProperties({
+            ...feature.getProperties(),
+            "Fragment's area": `${// eslint-disable-line
+              (
+                (calculateArea(diff) * 100) /
+                calculateArea(
+                  geojsonFormat.writeFeatureObject(current) as GeoJSONFeature<
+                    Polygon | MultiPolygon
+                  >,
+                )
+              ).toFixed(2)
+            }%`,
+          });
+        }
+        setTimeout(() => {
+          layers[activeLayerIdx].source.removeFeature(toSubtractFeature);
+        }, 100);
+        setTimeout(async () => {
+          const geojson = geojsonFormat.writeFeaturesObject(
+            layers[activeLayerIdx].source.getFeatures(),
+          );
+          const newLayersData = [...layersData];
+
+          newLayersData[activeLayerIdx] = {
+            ...layersData[activeLayerIdx],
+            fragments: geojson,
+          };
+
+          dispatch(setLayersData(newLayersData));
+          await window.electron.saveFeaturesToTempFile(newLayersData);
+
+          dispatch(recalculateAreas());
+          for (const feature of features) {
+            dispatch(
+              recalculateAreaByTargetId(feature.getProperties().targetId),
+            );
+          }
+        }, 200);
+      }
+    }
   };
 }
