@@ -70,10 +70,17 @@ const ToolBox: React.FC = () => {
       {/* add whole + multiselect */}
       <Tooltip title="Add whole">
         <IconButton
-          onClick={() => dispatch(addMultipleCommitHandler())}
-          disabled={!selectedBones?.length}
+          onClick={() => {
+            if (selectedBones?.length) {
+              dispatch(addMultipleCommitHandler());
+            } else {
+              handleToolClick(EDIT_MODE_TYPE.ADD_WHOLE);
+            }
+          }}
         >
-          <QueueIcon />
+          <QueueIcon
+            color={mode === EDIT_MODE_TYPE.ADD_WHOLE ? 'success' : 'inherit'}
+          />
         </IconButton>
       </Tooltip>
       {/* save svg */}

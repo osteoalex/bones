@@ -18,6 +18,7 @@ export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
       infoSelectRef: selectRef,
       drawAnnotationRef,
       boneSelectRef,
+      addWholeRef,
     } = getState().interactions;
     const { layers, activeLayerIdx } = getState().layers;
     // Clear selection and reset styles if switching to a mode other than SELECT
@@ -44,6 +45,10 @@ export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
         break;
       case EDIT_MODE_TYPE.DELETE:
         deleteSelectRef.setActive(true);
+        break;
+      case EDIT_MODE_TYPE.ADD_WHOLE:
+        console.log('first');
+        addWholeRef.setActive(true);
         break;
       case EDIT_MODE_TYPE.SELECT:
         selectRef.setActive(true);
@@ -77,6 +82,7 @@ export function turnOffAllModes(): TAction {
       addByRectangleDrawRef,
       infoSelectRef,
       drawAnnotationRef,
+      addWholeRef,
     } = getState().interactions;
     if (drawFragmentRef) {
       drawFragmentRef.setActive(false);
@@ -101,6 +107,9 @@ export function turnOffAllModes(): TAction {
     }
     if (drawAnnotationRef) {
       drawAnnotationRef.setActive(false);
+    }
+    if (addWholeRef) {
+      addWholeRef.setActive(false);
     }
   };
 }

@@ -5,6 +5,7 @@ import { DragBox, Draw, Select, Snap } from 'ol/interaction';
 import { Vector as VectorSource } from 'ol/source';
 
 export interface InteractionsState {
+  addWholeRef: Select | null;
   // interactions
   drawFragmentRef: Draw | null;
   isDrawing: boolean;
@@ -25,6 +26,7 @@ export interface InteractionsState {
 }
 
 const initialState: InteractionsState = {
+  addWholeRef: null,
   drawFragmentRef: null,
   isDrawing: false,
   isSubtracting: false,
@@ -58,6 +60,9 @@ export const interactionsSlice = createSlice({
     },
     setSnapFragmentRef: (state, action: PayloadAction<Snap>) => {
       state.snapFragmentRef = action.payload;
+    },
+    setAddWholeRef: (state, action: PayloadAction<Select>) => {
+      state.addWholeRef = action.payload;
     },
     setDeleteSelectRef: (state, action: PayloadAction<Select>) => {
       state.deleteSelectRef = action.payload;
@@ -103,6 +108,7 @@ export const interactionsSlice = createSlice({
 
 export const {
   setMiddleMousePanRef,
+  setAddWholeRef,
   setDrawFragmentRef,
   setSplitFragmentRef,
   setSubtractFragmentRef,

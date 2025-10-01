@@ -5,4 +5,5 @@ export enum EDIT_MODE_TYPE {
   SPLIT = 'split',
   SELECT = 'select',
   ANNOTATION = 'annotation',
+  ADD_WHOLE = 'add_whole',
 }

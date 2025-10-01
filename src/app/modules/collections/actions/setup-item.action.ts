@@ -6,6 +6,7 @@ import { calculateArea, geojsonFormat } from '../../../../utils';
 import { EDIT_MODE_TYPE } from '../../../../utils/enums';
 import { setItems, setMode } from '../slices/editor.slice';
 import {
+  setAddWholeRef,
   setBoneSelectRef,
   setDeleteSelectRef,
   setDrawFragmentRef,
@@ -15,9 +16,10 @@ import {
   setSubtractFragmentRef,
 } from '../slices/interactions.slice';
 import { setLayers, setLayersData } from '../slices/layers.slice';
-import { setFullArea } from '../slices/selected.slice';
+import { setFullArea, setSelectedBone } from '../slices/selected.slice';
 import { createMiddleMouseDragPan } from '../utils/middle-mouse-drag-pan';
 import { abortDrawing, abortSplit, abortSubtract } from './abort.action';
+import { setupAddWholeInteraction } from './add-whole.action';
 import { setupBoneSelectInteraction } from './bone-select.action';
 import { recalculateAreas } from './calculate-area.action';
 import { initializeAddByRectangleDraw } from './drag-select.action';
@@ -112,6 +114,9 @@ export function getAndSetupItem(currentItem: string): TAction {
       const selectBoneRef = dispatch(setupBoneSelectInteraction());
       dispatch(setBoneSelectRef(selectBoneRef));
 
+      const addWholeRef = dispatch(setupAddWholeInteraction());
+      dispatch(setAddWholeRef(addWholeRef));
+
       let middleMousePan = getState().interactions.middleMousePanRef;
 
       if (!middleMousePan) {
@@ -121,6 +126,8 @@ export function getAndSetupItem(currentItem: string): TAction {
       } else {
         middleMousePan.setActive(true);
       }
+
+      dispatch(setSelectedBone([]));
 
       dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT));
       olMapRef.render();

@@ -27,8 +27,11 @@ export function setupInfoClickInteraction(): TAction<Select> {
         ]),
       ],
       condition: (event) => {
-        // Only allow selection on single click
-        return singleClick(event);
+        // Only allow selection on single click, but not when Ctrl is pressed
+        const original = event.originalEvent;
+        const ctrlPressed =
+          (original && original.ctrlKey) || getState().hotkeys.ctrl;
+        return singleClick(event) && !ctrlPressed;
       },
       style: () => {
         if (getState().hotkeys.ctrl) return null; // Let bone select handle style when Ctrl is pressed

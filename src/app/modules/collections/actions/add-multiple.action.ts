@@ -1,54 +1,13 @@
 import { Feature } from 'ol';
 import { Geometry } from 'ol/geom';
-import { SelectEvent } from 'ol/interaction/Select';
 import { Fill, Stroke, Style } from 'ol/style';
 
 import { TAction } from '../../../../types/store.types';
 import { geojsonFormat, getNextId } from '../../../../utils';
-import {
-  baseStyle,
-  selectMultipleStyle,
-} from '../components/collection-home/editor-styles';
+import { baseStyle } from '../components/collection-home/editor-styles';
 import { setLayersData } from '../slices/layers.slice';
-import { setMultipleAddIds, setSelectedBone } from '../slices/selected.slice';
+import { setSelectedBone } from '../slices/selected.slice';
 import { recalculateAreas } from './calculate-area.action';
-
-export function addMultipleHandler(e: SelectEvent): TAction {
-  return (dispatch, getState) => {
-    const { baseSourceRef } = getState().layers;
-    const { multipleAddIds } = getState().selected;
-    if (baseSourceRef) {
-      if (e.selected.length) {
-        const id = e.selected[0].getId().toString();
-        const ids = new Set(multipleAddIds).add(id);
-        dispatch(setMultipleAddIds([...ids]));
-        if (ids.size) {
-          ids.forEach((id) => {
-            const feature = baseSourceRef.getFeatureById(id);
-            feature.setStyle(selectMultipleStyle);
-          });
-        } else {
-          baseSourceRef.forEachFeature((feature) => {
-            feature.setStyle(baseStyle);
-          });
-        }
-        document.dispatchEvent(
-          new CustomEvent('updateSelection', {
-            detail: [...ids],
-          }),
-        );
-      } else {
-        dispatch(setMultipleAddIds([]));
-        baseSourceRef.forEachFeature((feature) => {
-          feature.setStyle(baseStyle);
-        });
-        document.dispatchEvent(new CustomEvent('resetSelection'));
-      }
-    }
-    e.selected = [];
-    e.deselected = [];
-  };
-}
 
 export function addMultipleCommitHandler(): TAction {
   return async (dispatch, getState) => {

@@ -124,6 +124,12 @@ menu.append(
     ],
   }),
 );
+menu.append(
+  new MenuItem({
+    accelerator: 'Alt',
+    visible: false,
+  }),
+);
 
 Menu.setApplicationMenu(menu);
 

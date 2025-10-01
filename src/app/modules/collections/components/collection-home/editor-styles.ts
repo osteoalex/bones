@@ -10,16 +10,6 @@ export const selectStyle = new Style({
   }),
 });
 
-export const selectMultipleStyle = new Style({
-  stroke: new Stroke({
-    color: 'rgba(255, 0, 0, 1)',
-    width: 4,
-  }),
-  fill: new Fill({
-    color: 'rgba(0, 0, 0, 0)',
-  }),
-});
-
 export const infoSelectedStyle = new Style({
   stroke: new Stroke({
     color: 'rgba(0, 0, 180, 1)',

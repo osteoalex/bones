@@ -100,7 +100,6 @@ export function subtractDrawHandler(e: DrawEvent): TAction {
           toSubtract.geometry.coordinates,
         );
         const diff = turfDifference(mPoly, toSubtractMPoly);
-        console.log(diff);
         // If diff is null or has empty geometry, remove the feature entirely
         if (
           !diff ||
@@ -109,7 +108,6 @@ export function subtractDrawHandler(e: DrawEvent): TAction {
             diff.geometry.coordinates.length === 0)
         ) {
           // Remove the feature from the layer
-          console.log('here');
           layers[activeLayerIdx].source.removeFeature(feature);
         } else if (isGeoJsonMultiPolygon(diff)) {
           const polys = diff.geometry.coordinates.map((p) => turfPolygon(p));
