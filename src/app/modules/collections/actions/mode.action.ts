@@ -47,7 +47,6 @@ export function changeEditMode(newMode?: EDIT_MODE_TYPE): TAction {
         deleteSelectRef.setActive(true);
         break;
       case EDIT_MODE_TYPE.ADD_WHOLE:
-        console.log('first');
         addWholeRef.setActive(true);
         break;
       case EDIT_MODE_TYPE.SELECT:

@@ -6,12 +6,13 @@ import { TAction } from '../../../../types/store.types';
 import { selectedBoneStyle } from '../components/collection-home/editor-styles';
 import { setBoneSelectRef } from '../slices/interactions.slice';
 import { setInfoDetails, setSelectedBone } from '../slices/selected.slice';
-import { resetBaseFeatureStyle } from './reset.action';
+import { resetBaseFeatureStyle, resetFeatureStyle } from './reset.action';
 
 export function setupBoneSelectInteraction(): TAction<Select> {
   return (dispatch, getState) => {
     const { olMapRef, baseLayerRef } = getState().layers;
     const { boneSelectRef } = getState().interactions;
+    const { layers, activeLayerIdx } = getState().layers;
     // Remove previous bone select
     if (boneSelectRef) {
       olMapRef.removeInteraction(boneSelectRef);
@@ -20,7 +21,7 @@ export function setupBoneSelectInteraction(): TAction<Select> {
       layers: [baseLayerRef],
       style: selectedBoneStyle,
       condition: (event) => {
-        // Allow selection on Ctrl+Click, Meta+Click, or Ctrl toggle
+        // Allow selection on Ctrl+Click, Meta+Click, or Ctrl toggle for single click; allow double click without modifiers
         const original = event.originalEvent;
         const ctrlToggle = getState().hotkeys.ctrl;
         return (
@@ -50,7 +51,20 @@ export function setupBoneSelectInteraction(): TAction<Select> {
       let newSelection: typeof selectedFeatures;
       const clickedFeature = e.selected[0];
       if (clickedFeature && ctrlPressed) {
-        dispatch(setInfoDetails([])); // Deselect any bones when selecting fragments/annotations
+        dispatch(setInfoDetails([])); // Deselect any fragments/annotations
+        if (layers[activeLayerIdx] && layers[activeLayerIdx].source) {
+          layers[activeLayerIdx].source.getFeatures().forEach((f) => {
+            resetFeatureStyle(f);
+          });
+        }
+        // Also reset all bone styles except the one being selected
+        allFeatures.forEach((f) => {
+          if (f !== clickedFeature) {
+            resetBaseFeatureStyle(f);
+          }
+        });
+        // Clear OpenLayers selection cache so re-select works
+        boneSelect.getFeatures().clear();
       }
       if (ctrlPressed && shiftPressed) {
         // Multi-select with Ctrl+Shift: toggle bone in selection

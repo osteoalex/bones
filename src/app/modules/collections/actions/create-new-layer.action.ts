@@ -24,7 +24,7 @@ import { setupAnnotationDraw } from './add-annotation.action';
 import { setupDrawFragment } from './add-draw.action';
 import { changeLayer } from './change-layer.action';
 import { setupDeleteSelectionInteraction } from './delete.action';
-import { setupInfoClickInteraction } from './info-click.action';
+import { setupFragmentSelectInteraction } from './fragment-select.action';
 import { setupSnapFragmentInteraction } from './snap.action';
 import { setupSubtractFragmentInteraction } from './subtract.action';
 
@@ -87,7 +87,7 @@ export function createNewLayer(config: Layer): TAction {
     dispatch(changeLayer(updatedLayers.length - 1));
     dispatch(setLayers(updatedLayers));
     dispatch(setNewLayerPopupVisible(false));
-    const infoClickRef = dispatch(setupInfoClickInteraction());
+    const infoClickRef = dispatch(setupFragmentSelectInteraction());
     dispatch(setInfoSelectRef(infoClickRef));
     await window.electron.saveFeaturesToTempFile(newLayersData);
     await window.electron.saveItem();

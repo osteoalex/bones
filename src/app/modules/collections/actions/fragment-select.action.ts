@@ -5,11 +5,11 @@ import { TAction } from '../../../../types/store.types';
 import { infoSelectedStyle } from '../components/collection-home/editor-styles';
 import { setInfoSelectRef } from '../slices/interactions.slice';
 import { setInfoDetails, setSelectedBone } from '../slices/selected.slice';
-import { resetFeatureStyle } from './reset.action';
+import { resetBaseFeatureStyle, resetFeatureStyle } from './reset.action';
 
-export function setupInfoClickInteraction(): TAction<Select> {
+export function setupFragmentSelectInteraction(): TAction<Select> {
   return (dispatch, getState) => {
-    const { olMapRef, baseLayerRef, layers, activeLayerIdx } =
+    const { olMapRef, baseLayerRef, layers, activeLayerIdx, baseSourceRef } =
       getState().layers;
     const { infoSelectRef } = getState().interactions;
     const { shift } = getState().hotkeys;
@@ -27,7 +27,7 @@ export function setupInfoClickInteraction(): TAction<Select> {
         ]),
       ],
       condition: (event) => {
-        // Only allow selection on single click, but not when Ctrl is pressed
+        // Only allow selection on single click, but not when Ctrl is pressed or on double click
         const original = event.originalEvent;
         const ctrlPressed =
           (original && original.ctrlKey) || getState().hotkeys.ctrl;
@@ -73,6 +73,17 @@ export function setupInfoClickInteraction(): TAction<Select> {
       let newSelection: typeof selectedFeatures;
       if (clickedFeature) {
         dispatch(setSelectedBone([])); // Deselect any bones when selecting fragments/annotations
+        baseSourceRef.getFeatures().forEach((f) => {
+          resetBaseFeatureStyle(f);
+        });
+        // Also reset all fragment styles except the one being selected
+        allFeatures.forEach((f) => {
+          if (f !== clickedFeature) {
+            resetFeatureStyle(f);
+          }
+        });
+        // Clear OpenLayers selection cache so re-select works
+        infoClick.getFeatures().clear();
       }
       if (isAnnotation) {
         // Only one annotation can be selected at a time
@@ -107,5 +118,3 @@ export function setupInfoClickInteraction(): TAction<Select> {
     return infoClick;
   };
 }
-
-// Bone select interaction moved to bone-select.action.ts

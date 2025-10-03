@@ -23,7 +23,7 @@ import { setupAddWholeInteraction } from './add-whole.action';
 import { setupBoneSelectInteraction } from './bone-select.action';
 import { recalculateAreas } from './calculate-area.action';
 import { initializeAddByRectangleDraw } from './drag-select.action';
-import { setupInfoClickInteraction } from './info-click.action';
+import { setupFragmentSelectInteraction } from './fragment-select.action';
 import { changeEditMode } from './mode.action';
 import { setupLayersAndSources } from './setup-layers-and-sources.action';
 import { setupSplitFragmentInteraction } from './split.action';
@@ -108,7 +108,7 @@ export function getAndSetupItem(currentItem: string): TAction {
         dispatch(setDrawFragmentRef(draw));
         dispatch(setSubtractFragmentRef(subtract));
       }
-      const infoClickRef = dispatch(setupInfoClickInteraction());
+      const infoClickRef = dispatch(setupFragmentSelectInteraction());
       dispatch(setInfoSelectRef(infoClickRef));
 
       const selectBoneRef = dispatch(setupBoneSelectInteraction());
