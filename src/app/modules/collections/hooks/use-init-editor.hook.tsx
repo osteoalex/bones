@@ -20,6 +20,7 @@ import { setInfoDetails, setMultipleAddIds } from '../slices/selected.slice';
 import { setShowPropsDialog } from '../slices/ui.slice';
 import { map } from 'leaflet';
 import { handleRightClick } from '../actions/right-click.action';
+import { setupClearBoneSelectionOnMapClick, setupClearFragmentSelectionOnMapClick } from '../actions/clear-selection-on-map-click';
 /* eslint-enable */
 
 export const useInitEditor = (
@@ -96,6 +97,9 @@ export const useInitEditor = (
         }),
       });
       dispatch(setOlMapRef(m));
+
+      dispatch(setupClearFragmentSelectionOnMapClick());
+      dispatch(setupClearBoneSelectionOnMapClick());
     }
     window.addEventListener('resize', onResize);
     const handleRightClickListener = (e: MouseEvent) => {

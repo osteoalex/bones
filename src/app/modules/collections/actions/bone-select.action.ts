@@ -13,7 +13,7 @@ export function setupBoneSelectInteraction(): TAction<Select> {
     const { olMapRef, baseLayerRef } = getState().layers;
     const { boneSelectRef } = getState().interactions;
     const { layers, activeLayerIdx } = getState().layers;
-    // Remove previous bone select
+
     if (boneSelectRef) {
       olMapRef.removeInteraction(boneSelectRef);
     }
@@ -21,7 +21,6 @@ export function setupBoneSelectInteraction(): TAction<Select> {
       layers: [baseLayerRef],
       style: selectedBoneStyle,
       condition: (event) => {
-        // Allow selection on Ctrl+Click, Meta+Click, or Ctrl toggle for single click; allow double click without modifiers
         const original = event.originalEvent;
         const ctrlToggle = getState().hotkeys.ctrl;
         return (
@@ -33,7 +32,7 @@ export function setupBoneSelectInteraction(): TAction<Select> {
     });
     boneSelect.setActive(false);
     olMapRef.addInteraction(boneSelect);
-    // Store ref for mutual exclusivity
+
     dispatch(setBoneSelectRef(boneSelect));
     boneSelect.on('select', (e) => {
       const ctrlPressed = !!getState().hotkeys.ctrl;
@@ -41,8 +40,9 @@ export function setupBoneSelectInteraction(): TAction<Select> {
       const shiftPressed = !!shift;
       const selectedFeatures: Feature[] =
         getState().selected.selectedBone || [];
+      const deselectedFeatures: Feature[] = e.deselected || [];
       const allFeatures = baseLayerRef.getSource().getFeatures();
-      // If click is outside any feature, always deselect all
+
       if (!e.selected?.length) {
         allFeatures.forEach((f) => resetBaseFeatureStyle(f));
         dispatch(setSelectedBone([]));
@@ -51,37 +51,43 @@ export function setupBoneSelectInteraction(): TAction<Select> {
       let newSelection: typeof selectedFeatures;
       const clickedFeature = e.selected[0];
       if (clickedFeature && ctrlPressed) {
-        dispatch(setInfoDetails([])); // Deselect any fragments/annotations
+        dispatch(setInfoDetails([]));
         if (layers[activeLayerIdx] && layers[activeLayerIdx].source) {
           layers[activeLayerIdx].source.getFeatures().forEach((f) => {
             resetFeatureStyle(f);
           });
         }
-        // Also reset all bone styles except the one being selected
+
         allFeatures.forEach((f) => {
           if (f !== clickedFeature) {
             resetBaseFeatureStyle(f);
           }
         });
-        // Clear OpenLayers selection cache so re-select works
-        boneSelect.getFeatures().clear();
       }
       if (ctrlPressed && shiftPressed) {
-        // Multi-select with Ctrl+Shift: toggle bone in selection
-        const idx = selectedFeatures.indexOf(clickedFeature);
-        if (idx === -1) {
+        const alreadySelected = !!selectedFeatures.find(
+          (f) => f.getId() === clickedFeature.getId(),
+        );
+        if (
+          deselectedFeatures.length &&
+          deselectedFeatures[0].getId() === clickedFeature.getId()
+        ) {
+          newSelection = selectedFeatures.filter(
+            (f) => f.getId() !== clickedFeature.getId(),
+          );
+        } else if (!alreadySelected) {
           newSelection = [...selectedFeatures, clickedFeature];
         } else {
-          newSelection = selectedFeatures.filter((f) => f !== clickedFeature);
+          newSelection = selectedFeatures.filter(
+            (f) => f.getId() !== clickedFeature.getId(),
+          );
         }
       } else if (ctrlPressed) {
-        // Single select with Ctrl only
         newSelection = [clickedFeature];
       } else {
-        // No selection if Ctrl is not pressed
         newSelection = selectedFeatures;
       }
-      // Update styles
+      boneSelect.getFeatures().clear();
       allFeatures.forEach((f) => {
         if (newSelection.includes(f)) {
           f.setStyle(selectedBoneStyle);

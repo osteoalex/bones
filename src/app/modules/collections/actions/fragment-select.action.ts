@@ -13,11 +13,11 @@ export function setupFragmentSelectInteraction(): TAction<Select> {
       getState().layers;
     const { infoSelectRef } = getState().interactions;
     const { shift } = getState().hotkeys;
-    // No boneSelectRef here; handled in bone-select.action.ts
+
     if (infoSelectRef) {
       olMapRef.removeInteraction(infoSelectRef);
     }
-    // Bone select interaction is handled in its own file and is mutually exclusive
+
     const infoClick = new Select({
       layers: [
         baseLayerRef,
@@ -27,14 +27,13 @@ export function setupFragmentSelectInteraction(): TAction<Select> {
         ]),
       ],
       condition: (event) => {
-        // Only allow selection on single click, but not when Ctrl is pressed or on double click
         const original = event.originalEvent;
         const ctrlPressed =
           (original && original.ctrlKey) || getState().hotkeys.ctrl;
         return singleClick(event) && !ctrlPressed;
       },
       style: () => {
-        if (getState().hotkeys.ctrl) return null; // Let bone select handle style when Ctrl is pressed
+        if (getState().hotkeys.ctrl) return null;
         return infoSelectedStyle;
       },
       filter: (_feature, layer) => {
@@ -49,7 +48,7 @@ export function setupFragmentSelectInteraction(): TAction<Select> {
     });
     infoClick.setActive(false);
     olMapRef.addInteraction(infoClick);
-    // Store ref for mutual exclusivity
+
     dispatch(setInfoSelectRef(infoClick));
     infoClick.on('select', (e) => {
       const event = e.mapBrowserEvent;
@@ -59,9 +58,9 @@ export function setupFragmentSelectInteraction(): TAction<Select> {
       const allFeatures = layers[activeLayerIdx].source.getFeatures();
       const ctrlPressed = getState().hotkeys.ctrl;
       if (ctrlPressed) {
-        return; // Ignore clicks when Ctrl is pressed to avoid conflict with bone select
+        return;
       }
-      // If click is outside any feature, always deselect all
+
       if (!e.selected?.length) {
         allFeatures.forEach((f) => resetFeatureStyle(f));
         dispatch(setInfoDetails([]));
@@ -72,40 +71,40 @@ export function setupFragmentSelectInteraction(): TAction<Select> {
       const isAnnotation = !!clickedFeature.getProperties().annotation;
       let newSelection: typeof selectedFeatures;
       if (clickedFeature) {
-        dispatch(setSelectedBone([])); // Deselect any bones when selecting fragments/annotations
+        dispatch(setSelectedBone([]));
         baseSourceRef.getFeatures().forEach((f) => {
           resetBaseFeatureStyle(f);
         });
-        // Also reset all fragment styles except the one being selected
+
         allFeatures.forEach((f) => {
           if (f !== clickedFeature) {
             resetFeatureStyle(f);
           }
         });
-        // Clear OpenLayers selection cache so re-select works
-        infoClick.getFeatures().clear();
       }
       if (isAnnotation) {
-        // Only one annotation can be selected at a time
         newSelection = [clickedFeature];
       } else if (shiftPressed) {
-        // Multi-select fragments with shift
-        const idx = selectedFeatures.indexOf(clickedFeature);
-        if (idx === -1) {
+        const alreadySelected = selectedFeatures.find(
+          (f) => f.getId() === clickedFeature.getId(),
+        );
+        console.log(alreadySelected, selectedFeatures, clickedFeature);
+        if (!alreadySelected) {
           newSelection = [
             ...selectedFeatures.filter((f) => !f.getProperties().annotation),
             clickedFeature,
           ];
         } else {
           newSelection = selectedFeatures.filter(
-            (f) => f !== clickedFeature && !f.getProperties().annotation,
+            (f) =>
+              f.getId() !== clickedFeature.getId() &&
+              !f.getProperties().annotation,
           );
         }
       } else {
-        // Single click: select only the clicked fragment
         newSelection = [clickedFeature];
       }
-      // Update styles: selected get infoSelectedStyle, others get resetFeatureStyle
+      infoClick.getFeatures().clear();
       allFeatures.forEach((f) => {
         if (newSelection.includes(f)) {
           f.setStyle(infoSelectedStyle);
