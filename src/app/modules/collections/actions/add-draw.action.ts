@@ -70,6 +70,20 @@ export function additionDrawEndHandler(e: DrawEvent): TAction {
     if (selectedBones && selectedBones.length > 0) {
       // Only use selected bones
       bones = selectedBones;
+      bones = bones.filter((f) => {
+        return (
+          turfBooleanOverlap(
+            featureToTurfGeometry(f),
+            featureToTurfGeometry(e.feature),
+          ) ||
+          turfBooleanContains(
+            multiPolygonToPolygons(
+              featureToTurfGeometry(e.feature) as GeojsonFeature<MultiPolygon>,
+            )[0],
+            featureToTurfGeometry(f),
+          )
+        );
+      });
     } else {
       // Fallback: all overlapping bones
       bones = getFeaturesInFeatureExtent(extent, baseSourceRef);
