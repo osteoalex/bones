@@ -22,11 +22,14 @@ export function initializeAddByRectangleDraw(): TAction {
       olMapRef.removeInteraction(addByRectangleDrawRef);
     }
 
-    // Use DragBox for rectangle selection, but disable when Alt toggle is on
+    // Use DragBox for rectangle selection, but disable when Alt toggle is on and only allow left mouse button
     const dragBox = new DragBox({
-      condition: () => {
+      condition: (event) => {
         const altToggle = getState().hotkeys.alt;
-        if (altToggle) return false;
+        const originalEvent = event.originalEvent as MouseEvent;
+        // Only allow left mouse button (0)
+        if (altToggle || !originalEvent || originalEvent.button !== 0)
+          return false;
         return true;
       },
     });
