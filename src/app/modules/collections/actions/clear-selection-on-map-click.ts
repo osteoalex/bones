@@ -11,6 +11,8 @@ export function setupClearBoneSelectionOnMapClick(): TAction {
   return (dispatch, getState) => {
     const handler = (evt: MapBrowserEvent<UIEvent>) => {
       const { olMapRef, baseLayerRef } = getState().layers;
+      const { currentItem } = getState().editor;
+      if (!currentItem) return;
       const origEvt = evt.originalEvent as MouseEvent | undefined;
       const ctrlPressed =
         !!(origEvt && (origEvt.ctrlKey || origEvt.metaKey)) ||
@@ -42,8 +44,9 @@ export function setupClearBoneSelectionOnMapClick(): TAction {
 export function setupClearFragmentSelectionOnMapClick(): TAction {
   return (dispatch, getState) => {
     const handler = (evt: MapBrowserEvent<UIEvent>) => {
-      const { olMapRef } = getState().layers;
-      const { layers, activeLayerIdx } = getState().layers;
+      const { olMapRef, layers, activeLayerIdx } = getState().layers;
+      const { currentItem } = getState().editor;
+      if (!currentItem) return;
       const origEvt = evt.originalEvent as MouseEvent | undefined;
       const ctrlPressed = !!(
         (origEvt && (origEvt.ctrlKey || origEvt.metaKey)) ||
