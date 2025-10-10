@@ -54,6 +54,8 @@ export async function exportCollection(
           'target geometry',
           'item',
           'layer',
+          'isAnnotation',
+          'annotation',
         );
 
         const filePath = join(
@@ -63,6 +65,7 @@ export async function exportCollection(
         const output = createWriteStream(filePath, { encoding: 'utf-8' });
         const stringifier = stringify({ header: true, columns });
 
+        // Export fragment features
         layer.fragments.features.forEach((row) => {
           const rowContent = {
             ...row.properties,
@@ -81,9 +84,27 @@ export async function exportCollection(
             ),
             item: basename(item.itemPath, '.json'),
             layer: layer.name,
+            annotation: '', // empty for fragments
+            isAnnotation: 'no',
           };
           stringifier.write(rowContent, 'utf8');
         });
+        // Export annotation features if present
+        if (Array.isArray(layer.annotations.features)) {
+          layer.annotations.features.forEach((annotation) => {
+            const rowContent = {
+              ...annotation.properties,
+              id: annotation.id,
+              geometry: JSON.stringify(annotation.geometry.coordinates),
+              'target geometry': '',
+              item: basename(item.itemPath, '.json'),
+              layer: layer.name,
+              isAnnotation: 'yes', // mark as annotation
+              annotation: JSON.stringify(annotation.properties.annotation),
+            };
+            stringifier.write(rowContent, 'utf8');
+          });
+        }
 
         stringifier.pipe(output);
       }

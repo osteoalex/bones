@@ -1,4 +1,4 @@
-import { FeatureCollection } from 'geojson';
+import { FeatureCollection, Point as GeoJsonPoint } from 'geojson';
 import { Feature } from 'ol';
 import { Geometry, Point } from 'ol/geom';
 import { Draw, Select, Snap } from 'ol/interaction';
@@ -28,7 +28,7 @@ export interface Layer {
     defaultValue: string;
   }[];
   fragments: FeatureCollection;
-  annotations: FeatureCollection;
+  annotations: FeatureCollection<GeoJsonPoint>;
   visible: boolean;
 }
 
@@ -54,6 +54,6 @@ export interface DrawLayer {
   draw: Draw;
   subtract: Draw;
   annotationLayer: VectorLayer<VectorSource<Feature<Point>>>;
-  annotationSource: VectorSource<Feature<Geometry>>;
+  annotationSource: VectorSource<Feature<Point>>;
   annotationDraw: Draw;
 }

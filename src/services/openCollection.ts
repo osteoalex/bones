@@ -8,6 +8,7 @@ import { isCollectionConfigData } from '../utils/type-guards';
 import { cleanConfigItems } from './cleanConfigItems';
 import { cleanItemContent } from './cleanItemContent';
 import { logErr } from './logger';
+import { migrateAnnotations } from './migrateAnnotations';
 import { showError } from './showError';
 import { Store } from './store';
 
@@ -40,7 +41,6 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
       cleanConfigItems(config as CollectionConfigData) ||
       (config as CollectionConfigData);
 
-    // For each item, clean fragments with empty properties
     for (const item of cleanedConfig.items) {
       try {
         const itemContentString = readFileSync(item.itemPath, {
@@ -51,6 +51,8 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
         if (JSON.stringify(itemContent) !== JSON.stringify(cleanedContent)) {
           writeFileSync(item.itemPath, JSON.stringify(cleanedContent, null, 2));
         }
+        // Migrate annotations to ensure targetId
+        migrateAnnotations(item.itemPath, item.background);
       } catch (e) {
         logErr(`Error cleaning item file: ${item.itemPath}`, e);
       }

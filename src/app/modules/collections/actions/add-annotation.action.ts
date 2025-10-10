@@ -1,3 +1,4 @@
+import { Feature as GeoJSONFeature, Point as GeoJsonPoint } from 'geojson';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import { Draw } from 'ol/interaction';
@@ -36,12 +37,13 @@ export function setupAnnotationDraw(
 
 function addAnnotationDrawEndHandler(e: DrawEvent): TAction {
   return async (dispatch, getState) => {
+    const feature = e.feature as Feature<Point>;
     const { layers, activeLayerIdx } = getState().layers;
     const source = layers[activeLayerIdx].annotationSource;
-    const f = e.feature.clone();
+    const f = feature.clone();
     f.setId(getNextId(source.getFeatures()));
     setTimeout(() => {
-      source.removeFeature(e.feature);
+      source.removeFeature(feature);
     }, 100);
     setTimeout(() => {
       source.addFeature(f);
@@ -55,11 +57,20 @@ export function submitAnnotation(
   targetId: string,
 ): TAction {
   return async (dispatch, getState) => {
-    const { layers, activeLayerIdx, layersData } = getState().layers;
+    const { layers, activeLayerIdx, layersData, baseSourceRef } =
+      getState().layers;
     const annotationFeature =
       layers[activeLayerIdx].annotationSource.getFeatureById(targetId);
-    annotationFeature.setProperties({ annotation });
-    const jsonFeature = geojsonFormat.writeFeatureObject(annotationFeature);
+    const targetBone = baseSourceRef.getClosestFeatureToCoordinate(
+      annotationFeature.getGeometry().getCoordinates(),
+    );
+    annotationFeature.setProperties({
+      annotation,
+      targetId: targetBone.getId(),
+    });
+    const jsonFeature = geojsonFormat.writeFeatureObject(
+      annotationFeature,
+    ) as GeoJSONFeature<GeoJsonPoint>;
 
     const updatedLayersData = [...layersData];
     const updatedAnnotations = [
