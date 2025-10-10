@@ -23,6 +23,7 @@ import {
 } from '../../../../utils/type-guards';
 import { setIsSubtracting } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
+import { setLoading } from '../slices/ui.slice';
 import {
   recalculateAreaByTargetId,
   recalculateAreas,
@@ -56,6 +57,7 @@ export function setupSubtractFragmentInteraction(
 export function subtractDrawHandler(e: DrawEvent): TAction {
   return async (dispatch, getState) => {
     dispatch(setIsSubtracting(false));
+    dispatch(setLoading(true));
     const { layers, activeLayerIdx, baseSourceRef, layersData } =
       getState().layers;
     if (layers[activeLayerIdx].source) {
@@ -184,6 +186,7 @@ export function subtractDrawHandler(e: DrawEvent): TAction {
               recalculateAreaByTargetId(feature.getProperties().targetId),
             );
           }
+          dispatch(setLoading(false));
         }, 200);
       }
     }
