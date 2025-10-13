@@ -30,11 +30,6 @@ export function migrateAnnotations(itemPath: string, backgroundPath: string) {
       }));
 
       for (const annotation of layer.annotations.features) {
-        console.log(
-          annotation,
-          !annotation.properties,
-          !annotation.properties.targetId,
-        );
         if (!annotation.properties) continue;
         if (!annotation.properties.targetId) {
           let minDist = Infinity;
@@ -43,7 +38,6 @@ export function migrateAnnotations(itemPath: string, backgroundPath: string) {
             try {
               const annCoord = annotation.geometry.coordinates;
               const fragCoord = frag.centroid.geometry.coordinates;
-              console.log(annCoord, fragCoord);
               const d = distance(annCoord, fragCoord);
               if (d < minDist) {
                 minDist = d;

@@ -14,7 +14,9 @@ export class Store {
 
   constructor(opts: Opts) {
     const userDataPath = electron.app.getPath('userData');
-    this.path = path.join(userDataPath, opts.configName + '.json');
+    this.path = path.normalize(
+      path.join(userDataPath, opts.configName + '.json'),
+    );
 
     this.data = parseDataFile(this.path, opts.defaults);
   }

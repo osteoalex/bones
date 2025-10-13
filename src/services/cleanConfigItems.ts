@@ -1,5 +1,5 @@
 import { readdirSync } from 'fs';
-import { join } from 'path';
+import { join, normalize } from 'path';
 
 import { CollectionConfigData } from '../types/collection-config-data.interface';
 
@@ -11,19 +11,19 @@ export function cleanConfigItems(
   config: CollectionConfigData,
 ): CollectionConfigData | null {
   if (!config.path) return null;
-  const itemsDir = join(config.path, 'items');
+  const itemsDir = normalize(join(config.path, 'items'));
   let files: string[] = [];
   try {
     files = readdirSync(itemsDir)
       .filter((f) => f.endsWith('.json'))
-      .map((f) => join(config.path, 'items', f));
+      .map((f) => normalize(join(itemsDir, f)));
   } catch (e) {
     console.error('Failed to read items directory:', e);
     return null;
   }
   const fileSet = new Set(files);
   const filteredItems = config.items.filter((item) =>
-    fileSet.has(item.itemPath),
+    fileSet.has(normalize(join(config.path, item.itemPath))),
   );
 
   if (filteredItems.length !== config.items.length) {

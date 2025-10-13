@@ -9,7 +9,7 @@ import {
 } from 'fs';
 import { Feature, GeoJSON, MultiLineString, Polygon, Position } from 'geojson';
 import yaml from 'js-yaml';
-import { basename, extname, join } from 'path';
+import { basename, extname, join, normalize } from 'path';
 import { pathDataToPolys } from 'svg-path-to-polygons';
 
 import { CollectionConfigData } from '../types/collection-config-data.interface';
@@ -33,13 +33,14 @@ export async function addNewBackground(
   if (!config?.path) {
     throw new Error('Something went wrong!');
   }
-  const folderPath = join(config.path, 'backgrounds');
+  const folderPath = normalize(join(config.path, 'backgrounds'));
   try {
     accessSync(folderPath, constants.F_OK);
   } catch (error) {
     mkdirSync(folderPath);
   }
-  const newBackgroundPath = join(folderPath, filename);
+  const newBackgroundPath = normalize(join(folderPath, filename));
+  const newBackgroundRelativePath = normalize(join('backgrounds', filename));
 
   const geojsonSting = readFileSync(file.filePaths[0], {
     encoding: 'utf8',
@@ -90,14 +91,14 @@ export async function addNewBackground(
   const data = {
     ...config,
     backgrounds: config.backgrounds?.length
-      ? [...new Set([...config.backgrounds, newBackgroundPath])]
-      : [newBackgroundPath],
+      ? [...new Set([...config.backgrounds, newBackgroundRelativePath])]
+      : [newBackgroundRelativePath],
   };
   if (!data.path) {
     throw new Error('Something went wrong!');
   }
   const configYaml = yaml.dump(data);
-  writeFileSync(join(data.path, 'config.yml'), configYaml);
+  writeFileSync(normalize(join(data.path, 'config.yml')), configYaml);
   store.set('currentCollectionConfig', data);
   await dialog.showMessageBox(mainWindow, {
     title: 'Success',

@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { Feature, MultiLineString, MultiPolygon, Polygon } from 'geojson';
 import { JSDOM } from 'jsdom';
 import { Extent } from 'ol/extent';
-import { join } from 'path';
+import { join, normalize } from 'path';
 import { v4 as uuid } from 'uuid';
 
 import { rgbToHex } from '../utils';
@@ -50,9 +50,12 @@ export async function exportSVG(
   svgElement.setAttribute('viewBox', '0 0 350.28576 834.81352');
 
   // parse background
-  const back = readFileSync(join(...userDataPath, 'currentBackground'), {
-    encoding: 'utf8',
-  });
+  const back = readFileSync(
+    normalize(join(...userDataPath, 'currentBackground')),
+    {
+      encoding: 'utf8',
+    },
+  );
   const backgroundContent: FeatureCollection<
     MultiPolygon | Polygon | MultiLineString
   > = JSON.parse(back);
@@ -149,7 +152,9 @@ export async function exportSVG(
     } ${Math.abs(extent[0] - extent[2])} ${Math.abs(extent[1] - extent[3])}`,
   );
 
-  writeFileSync(file.filePath, svgElement.outerHTML, { encoding: 'utf8' });
+  writeFileSync(normalize(file.filePath), svgElement.outerHTML, {
+    encoding: 'utf8',
+  });
 
   dialog.showMessageBox(mainWindow, {
     title: 'Success',

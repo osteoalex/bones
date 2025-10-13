@@ -2,7 +2,7 @@ import { deepEqual } from 'assert';
 import { BrowserWindow, dialog } from 'electron';
 import { readFileSync, rmSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
-import { join } from 'path';
+import { join, normalize } from 'path';
 
 import { logErr } from './logger';
 import { Store } from './store';
@@ -17,10 +17,10 @@ export async function saveAndCloseItem(
   const config = store.get('currentCollectionConfig');
   const configYaml = yaml.dump(config);
   if (currentlyOpen) {
-    const temp = readFileSync(join(...userDataPath, 'currentItem'), {
+    const temp = readFileSync(normalize(join(...userDataPath, 'currentItem')), {
       encoding: 'utf8',
     });
-    const source = readFileSync(currentlyOpen, {
+    const source = readFileSync(normalize(join(config.path, currentlyOpen)), {
       encoding: 'utf8',
     });
     try {
@@ -33,15 +33,17 @@ export async function saveAndCloseItem(
       });
       if (prompt === 0) {
         try {
-          writeFileSync(currentlyOpen, temp, { encoding: 'utf8' });
+          writeFileSync(join(config.path, currentlyOpen), temp, {
+            encoding: 'utf8',
+          });
         } catch (e) {
           logErr('Error saving current file', e);
         }
       }
     }
     store.set('currentlyOpenedItem', '');
-    writeFileSync(join(config.path, 'config.yml'), configYaml);
-    rmSync(join(...userDataPath, 'currentItem'));
-    rmSync(join(...userDataPath, 'currentBackground'));
+    writeFileSync(normalize(join(config.path, 'config.yml')), configYaml);
+    rmSync(normalize(join(...userDataPath, 'currentItem')));
+    rmSync(normalize(join(...userDataPath, 'currentBackground')));
   }
 }

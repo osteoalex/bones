@@ -1,5 +1,5 @@
 import { readdirSync } from 'fs';
-import { join } from 'path';
+import { join, normalize } from 'path';
 
 import { CollectionConfigData } from '../types/collection-config-data.interface';
 import { Store } from './store';
@@ -11,7 +11,7 @@ export async function getAllItems(store: Store) {
   if (!config.path) {
     return [];
   }
-  const path = join(config.path, 'items');
+  const path = normalize(join(config.path, 'items'));
   const allFiles = readdirSync(path, { withFileTypes: true });
   return allFiles.reduce<string[]>((acc, current) => {
     const name = current.name;

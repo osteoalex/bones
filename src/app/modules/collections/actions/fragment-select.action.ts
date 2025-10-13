@@ -88,7 +88,6 @@ export function setupFragmentSelectInteraction(): TAction<Select> {
         const alreadySelected = selectedFeatures.find(
           (f) => f.getId() === clickedFeature.getId(),
         );
-        console.log(alreadySelected, selectedFeatures, clickedFeature);
         if (!alreadySelected) {
           newSelection = [
             ...selectedFeatures.filter((f) => !f.getProperties().annotation),

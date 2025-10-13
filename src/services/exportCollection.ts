@@ -2,7 +2,7 @@ import { stringify } from 'csv-stringify';
 import { BrowserWindow, dialog } from 'electron';
 import { createWriteStream, existsSync, mkdirSync, readFileSync } from 'fs';
 import { FeatureCollection, Polygon } from 'geojson';
-import { basename, join } from 'path';
+import { basename, join, normalize } from 'path';
 
 import {
   CollectionConfigData,
@@ -25,7 +25,7 @@ export async function exportCollection(
 
   const config: CollectionConfigData = store.get('currentCollectionConfig');
   const items = config.items;
-  const outputFolder = join(folder[0], basename(config.name));
+  const outputFolder = normalize(join(folder[0], basename(config.name)));
   if (!existsSync(outputFolder)) {
     mkdirSync(outputFolder, { recursive: true });
   }
@@ -58,9 +58,11 @@ export async function exportCollection(
           'annotation',
         );
 
-        const filePath = join(
-          outputFolder,
-          `${basename(item.itemPath, '.json')}_${layer.name}.csv`,
+        const filePath = normalize(
+          join(
+            outputFolder,
+            `${basename(item.itemPath, '.json')}_${layer.name}.csv`,
+          ),
         );
         const output = createWriteStream(filePath, { encoding: 'utf-8' });
         const stringifier = stringify({ header: true, columns });

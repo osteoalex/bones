@@ -1,7 +1,7 @@
 import { BrowserWindow, dialog } from 'electron';
 import { readFileSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
-import { join, resolve } from 'path';
+import { join, normalize, relative, resolve } from 'path';
 
 import { CollectionConfigData } from '../types/collection-config-data.interface';
 import { isCollectionConfigData } from '../utils/type-guards';
@@ -22,7 +22,7 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
   }
   try {
     const file = readFileSync(
-      resolve(join(folder.filePaths[0], 'config.yml')),
+      resolve(normalize(join(folder.filePaths[0], 'config.yml'))),
       {
         encoding: 'utf8',
       },
@@ -36,14 +36,60 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
       return false;
     }
 
+    // Ensure config.path matches the selected folder path
+    if (config.path !== folder.filePaths[0]) {
+      config.path = folder.filePaths[0];
+      // Update the config file on disk
+    }
+
+    if (Array.isArray(config.items)) {
+      for (const item of config.items) {
+        if (
+          item.itemPath &&
+          config.path &&
+          !item.itemPath.startsWith('items/') &&
+          !item.itemPath.startsWith('.')
+        ) {
+          // Make itemPath relative to config.path using path.relative
+          const relPath = relative(config.path, item.itemPath).replace(
+            /\\/g,
+            '/',
+          );
+          item.itemPath = relPath;
+        }
+        if (
+          item.background &&
+          config.path &&
+          !item.background.startsWith('.') &&
+          !item.background.startsWith('backgrounds/')
+        ) {
+          // Make background relative to config.path using path.relative
+          const relBg = relative(config.path, item.background).replace(
+            /\\/g,
+            '/',
+          );
+          item.background = relBg;
+        }
+      }
+    }
+
     // Clean config items if any are missing
     const cleanedConfig =
       cleanConfigItems(config as CollectionConfigData) ||
       (config as CollectionConfigData);
 
+    writeFileSync(
+      resolve(normalize(join(folder.filePaths[0], 'config.yml'))),
+      yaml.dump(cleanedConfig),
+      { encoding: 'utf8' },
+    );
+
     for (const item of cleanedConfig.items) {
       try {
-        const itemContentString = readFileSync(item.itemPath, {
+        const filePath = normalize(
+          join(cleanedConfig.path || '', item.itemPath),
+        );
+        const itemContentString = readFileSync(filePath, {
           encoding: 'utf8',
         });
         const itemContent = JSON.parse(itemContentString);
