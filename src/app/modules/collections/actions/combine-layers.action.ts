@@ -2,7 +2,7 @@ import turfBooleanContains from '@turf/boolean-contains';
 import turfBooleanOverlap from '@turf/boolean-overlap';
 import { Polygon } from '@turf/helpers';
 import turfUnion from '@turf/union';
-import { Feature, FeatureCollection, MultiPolygon } from 'geojson';
+import { Feature, FeatureCollection, MultiPolygon, Point } from 'geojson';
 
 import { TAction } from '../../../../types/store.types';
 import { setLayerDetails } from '../slices/editor.slice';
@@ -84,12 +84,16 @@ export function combineLayers(combinedLayers: string[]): TAction {
 }
 
 function combineFuturePointCollections(
-  a: FeatureCollection,
-  b: FeatureCollection,
-): FeatureCollection {
-  const merged = {
+  a: FeatureCollection<Point>,
+  b: FeatureCollection<Point>,
+): FeatureCollection<Point> {
+  // Only allow Point features
+  const allFeatures = [...a.features, ...b.features].filter(
+    (f) => f.geometry.type === 'Point',
+  );
+  const merged: FeatureCollection<Point> = {
     ...a,
-    features: [...a.features, ...b.features].map((f, i) => ({
+    features: allFeatures.map((f, i) => ({
       ...f,
       id: i,
       properties: {
