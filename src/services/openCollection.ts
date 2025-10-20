@@ -47,10 +47,10 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
         if (
           item.itemPath &&
           config.path &&
-          !item.itemPath.startsWith('items/') &&
-          !item.itemPath.startsWith('.')
+          !item.itemPath.startsWith('items')
         ) {
           // Make itemPath relative to config.path using path.relative
+          console.log(item.itemPath, relative(config.path, item.itemPath));
           const relPath = relative(config.path, item.itemPath).replace(
             /\\/g,
             '/',
@@ -60,8 +60,7 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
         if (
           item.background &&
           config.path &&
-          !item.background.startsWith('.') &&
-          !item.background.startsWith('backgrounds/')
+          !item.background.startsWith('backgrounds')
         ) {
           // Make background relative to config.path using path.relative
           const relBg = relative(config.path, item.background).replace(
