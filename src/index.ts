@@ -12,7 +12,7 @@ import unhandled from 'electron-unhandled';
 import { readFileSync, rmSync, writeFileSync } from 'fs';
 import { Feature, GeoJSON, MultiPolygon, Polygon } from 'geojson';
 import { Extent } from 'ol/extent';
-import { join } from 'path';
+import { join, normalize } from 'path';
 
 import { name, version } from '../package.json';
 import { addNewBackground } from './services/addNewBackground';
@@ -70,11 +70,15 @@ const createWindow = (): void => {
   mainWindow.on('close', () => {
     const userDataPath = [app.getPath('appData'), app.getName()];
     const currentlyOpen = store.get('currentlyOpenedItem');
+    const config = store.get('currentCollectionConfig');
     if (currentlyOpen) {
-      const temp = readFileSync(join(...userDataPath, 'currentItem'), {
-        encoding: 'utf8',
-      });
-      const source = readFileSync(currentlyOpen, {
+      const temp = readFileSync(
+        normalize(join(...userDataPath, 'currentItem')),
+        {
+          encoding: 'utf8',
+        },
+      );
+      const source = readFileSync(normalize(join(config.path, currentlyOpen)), {
         encoding: 'utf8',
       });
       try {
@@ -87,14 +91,16 @@ const createWindow = (): void => {
           buttons: ['Yes', 'No'],
         });
         if (prompt === 0) {
-          writeFileSync(currentlyOpen, temp, { encoding: 'utf8' });
+          writeFileSync(normalize(join(config.path, currentlyOpen)), temp, {
+            encoding: 'utf8',
+          });
         }
       }
       store.set('currentlyOpenedItem', '');
-      rmSync(join(...userDataPath, 'currentItem'));
-      rmSync(join(...userDataPath, 'currentBackground'));
+      rmSync(normalize(join(...userDataPath, 'currentItem')));
+      rmSync(normalize(join(...userDataPath, 'currentBackground')));
     }
-    rmSync(join(...userDataPath, 'user-data.json'));
+    rmSync(normalize(join(...userDataPath, 'user-data.json')));
   });
 };
 
