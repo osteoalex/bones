@@ -18,6 +18,7 @@ import { name, version } from '../package.json';
 import { addNewBackground } from './services/addNewBackground';
 import { createCollection } from './services/createCollection';
 import { createNewItem } from './services/createNewItem';
+import { deleteItem } from './services/deleteItem';
 import { exportBoneSVG } from './services/exportBoneSVG';
 import { exportCollection } from './services/exportCollection';
 import { exportSVG } from './services/exportSVG';
@@ -25,6 +26,7 @@ import { getAllItems } from './services/getAllItems';
 import { logErr } from './services/logger';
 import { openCollection } from './services/openCollection';
 import { openItem } from './services/openItem';
+import { renameItem } from './services/renameItem';
 import { saveAndCloseItem } from './services/saveAndCloseItem';
 import { saveFeaturesToTempFile } from './services/saveFeaturesToTempFile';
 import { saveItem } from './services/saveItem';
@@ -210,6 +212,18 @@ app.whenReady().then(() => {
     'open-item',
     async (_e, filename: string) =>
       await openItem(filename, mainWindow, store, app),
+  );
+
+  ipcMain.handle(
+    'rename-item',
+    async (_e, oldFilename: string, newName: string) =>
+      await renameItem(oldFilename, newName, mainWindow, store),
+  );
+
+  ipcMain.handle(
+    'delete-item',
+    async (_e, filename: string) =>
+      await deleteItem(filename, mainWindow, store),
   );
 
   ipcMain.handle(

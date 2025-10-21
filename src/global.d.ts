@@ -13,6 +13,11 @@ interface Window extends Window {
     getAllItems: () => Promise<string[]>;
     addNewBackground: () => Promise<CollectionConfigData>;
     createNewItem: (name: string, background: string) => Promise<string>;
+    renameItem: (
+      oldFilename: string,
+      newName: string,
+    ) => Promise<string | boolean>;
+    deleteItem: (filename: string) => Promise<boolean>;
     openItem: (filename: string) => Promise<{
       itemContentString: string;
       backgroundJSONString: string;

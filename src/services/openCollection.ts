@@ -44,7 +44,6 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
           !item.itemPath.startsWith('items')
         ) {
           // Make itemPath relative to config.path using path.relative
-          console.log(item.itemPath, relative(config.path, item.itemPath));
           const relPath = relative(config.path, item.itemPath).replace(
             /\\/g,
             '/',

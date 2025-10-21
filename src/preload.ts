@@ -38,6 +38,10 @@ contextBridge.exposeInMainWorld('electron', {
   addNewBackground: async () => await ipcRenderer.invoke('add-new-background'),
   createNewItem: async (name: string, background: string) =>
     await ipcRenderer.invoke('create-new-item', name, background),
+  renameItem: async (oldFilename: string, newName: string) =>
+    await ipcRenderer.invoke('rename-item', oldFilename, newName),
+  deleteItem: async (filename: string) =>
+    await ipcRenderer.invoke('delete-item', filename),
   openItem: async (filename: string) =>
     await ipcRenderer.invoke('open-item', filename),
   saveAndCloseItem: async () => await ipcRenderer.invoke('save-and-close-item'),
