@@ -34,8 +34,14 @@ export async function exportCollection(
   const errorFiles: string[] = [];
   for await (const item of items) {
     try {
-      const itemContent = readFileSync(item.itemPath, { encoding: 'utf8' });
-      const background = readFileSync(item.background, { encoding: 'utf8' });
+      const itemContent = readFileSync(
+        normalize(join(config.path, item.itemPath)),
+        { encoding: 'utf8' },
+      );
+      const background = readFileSync(
+        normalize(join(config.path, item.background)),
+        { encoding: 'utf8' },
+      );
       const itemObject: ItemContent = JSON.parse(itemContent);
       const backgroundFeaturesCollection: FeatureCollection<Polygon> =
         JSON.parse(background);
@@ -116,6 +122,14 @@ export async function exportCollection(
       logErr(error);
       console.error('Error exporting item:', error);
     }
+  }
+
+  if (errorCount === items.length) {
+    dialog.showMessageBoxSync(mainWindow, {
+      title: 'Error',
+      message: 'All items failed to export.',
+    });
+    return;
   }
 
   let message = `Exported successfully. Errors: ${errorCount}`;

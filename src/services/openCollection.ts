@@ -1,7 +1,7 @@
 import { BrowserWindow, dialog } from 'electron';
 import { readFileSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
-import { join, normalize, relative, resolve } from 'path';
+import { basename, join, normalize, relative, resolve } from 'path';
 
 import { CollectionConfigData } from '../types/collection-config-data.interface';
 import { isCollectionConfigData } from '../utils/type-guards';
@@ -36,12 +36,6 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
       return false;
     }
 
-    // Ensure config.path matches the selected folder path
-    if (config.path !== folder.filePaths[0]) {
-      config.path = folder.filePaths[0];
-      // Update the config file on disk
-    }
-
     if (Array.isArray(config.items)) {
       for (const item of config.items) {
         if (
@@ -72,16 +66,21 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
       }
     }
 
+    // Ensure config.path matches the selected folder path
+    if (config.path !== folder.filePaths[0]) {
+      config.path = folder.filePaths[0];
+      // Update the config file on disk
+      writeFileSync(
+        resolve(normalize(join(folder.filePaths[0], 'config.yml'))),
+        yaml.dump(config),
+        { encoding: 'utf8' },
+      );
+    }
+
     // Clean config items if any are missing
     const cleanedConfig =
       cleanConfigItems(config as CollectionConfigData) ||
       (config as CollectionConfigData);
-
-    writeFileSync(
-      resolve(normalize(join(folder.filePaths[0], 'config.yml'))),
-      yaml.dump(cleanedConfig),
-      { encoding: 'utf8' },
-    );
 
     for (const item of cleanedConfig.items) {
       try {
@@ -102,6 +101,26 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
         logErr(`Error cleaning item file: ${item.itemPath}`, e);
       }
     }
+
+    // cleanup backgrounds paths if needed
+    const backgroundsSet = new Set<string>();
+    for (const bcg of cleanedConfig.backgrounds || []) {
+      if (bcg && !bcg.startsWith('backgrounds')) {
+        const relBg = normalize(join('backgrounds', basename(bcg)));
+        backgroundsSet.add(relBg);
+      }
+    }
+
+    if (backgroundsSet.size !== 0) {
+      cleanedConfig.backgrounds = Array.from(backgroundsSet);
+    }
+
+    writeFileSync(
+      resolve(normalize(join(folder.filePaths[0], 'config.yml'))),
+      yaml.dump(cleanedConfig),
+      { encoding: 'utf8' },
+    );
+
     store.set('currentCollectionConfig', cleanedConfig);
     return cleanedConfig;
   } catch (error) {

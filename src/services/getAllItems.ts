@@ -1,6 +1,6 @@
 import { readdirSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
-import { join, normalize } from 'path';
+import { basename, join, normalize } from 'path';
 
 import { CollectionConfigData } from '../types/collection-config-data.interface';
 import { Store } from './store';
@@ -29,7 +29,7 @@ export async function getAllItems(store: Store) {
   // Ensure config.items includes all files in the items folder
   config.items = config.items || [];
   const existingBasenames = new Set(
-    config.items.map((it) => normalize(it.itemPath).split('/').pop() || ''),
+    config.items.map((it) => basename(it.itemPath) || ''),
   );
 
   let changed = false;
