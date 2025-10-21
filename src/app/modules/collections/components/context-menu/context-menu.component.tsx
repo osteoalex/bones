@@ -2,7 +2,6 @@ import AddCommentIcon from '@mui/icons-material/AddComment';
 import ContentCutIcon from '@mui/icons-material/ContentCut';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import PanToolAltIcon from '@mui/icons-material/PanToolAlt';
 import RemoveIcon from '@mui/icons-material/Remove';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import { ListItemButton } from '@mui/material';
@@ -28,11 +27,6 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  {
-    label: 'Select fragment or bone',
-    icon: <PanToolAltIcon fontSize="small" />,
-    action: (dispatch) => dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT)),
-  },
   {
     label: 'Draw fragments to add',
     icon: <EditIcon fontSize="small" />,
