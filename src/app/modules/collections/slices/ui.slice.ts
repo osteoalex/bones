@@ -16,6 +16,7 @@ export interface UiState {
   combineLayersDialogOpen: boolean;
   moveToLayerDialogOpen: boolean;
   copyToLayerDialogOpen: boolean;
+  manageBackgroundsDialogOpen: boolean;
   drawerOpen: boolean;
   annotationDialog: string | null;
   loading: boolean;
@@ -32,6 +33,7 @@ const initialState: UiState = {
   windowSize: [window.innerHeight, window.innerWidth],
   newItemNameDialogOpen: false,
   drawerOpen: true,
+  manageBackgroundsDialogOpen: false,
   combineLayersDialogOpen: false,
   moveToLayerDialogOpen: false,
   newLayerPopupVisible: false,
@@ -56,6 +58,9 @@ export const uiSlice = createSlice({
     },
     setNewItemNameDialogOpen: (state, action: PayloadAction<boolean>) => {
       state.newItemNameDialogOpen = action.payload;
+    },
+    setManageBackgroundsDialogOpen: (state, action: PayloadAction<boolean>) => {
+      state.manageBackgroundsDialogOpen = action.payload;
     },
     setDrawerOpen: (state, action: PayloadAction<boolean>) => {
       state.drawerOpen = action.payload;
@@ -89,6 +94,7 @@ export const {
   setShowHints,
   setWindowSize,
   setNewItemNameDialogOpen,
+  setManageBackgroundsDialogOpen,
   setDrawerOpen,
   setNewLayerPopupVisible,
   setCombineLayersDialogOpen,

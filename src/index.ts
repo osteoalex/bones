@@ -18,6 +18,7 @@ import { name, version } from '../package.json';
 import { addNewBackground } from './services/addNewBackground';
 import { createCollection } from './services/createCollection';
 import { createNewItem } from './services/createNewItem';
+import { deleteBackground } from './services/deleteBackground';
 import { deleteItem } from './services/deleteItem';
 import { exportBoneSVG } from './services/exportBoneSVG';
 import { exportCollection } from './services/exportCollection';
@@ -218,6 +219,14 @@ app.whenReady().then(() => {
     'rename-item',
     async (_e, oldFilename: string, newName: string) =>
       await renameItem(oldFilename, newName, mainWindow, store),
+  );
+
+  ipcMain.handle(
+    'delete-background',
+    async (_e, backgroundRel: string) =>
+      await (async () => {
+        return await deleteBackground(backgroundRel, mainWindow, store);
+      })(),
   );
 
   ipcMain.handle(

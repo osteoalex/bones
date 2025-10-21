@@ -30,6 +30,7 @@ import HotkeysToggle from '../hotkeys-toggle/hotkeys-toggle.component';
 import ItemsList from '../items-list/items-list.component';
 import LayerDetailsDialog from '../layer-details-dialog/layer-details-dialog.component';
 import LayersList from '../layers-list/layers-list.component';
+import ManageBackgroundsDialog from '../manage-backgrounds/manage-backgrounds.component';
 import MoveToLayerDialog from '../move-to-layer-dialog/move-to-layer-dialog.component';
 import NewLayerDialog from '../new-layer-dialog/new-layer-dialog.component';
 import ToolBox from '../tool-box/tool-box.component';
@@ -90,6 +91,7 @@ const CollectionHome: React.FC = () => {
       <CopyToLayerDialog />
       <LayerDetailsDialog />
       <AnnotationDialog />
+      <ManageBackgroundsDialog />
       {currentItem && <FragmentPropertiesDialog />}
       {currentItem && <HelpBox />}
       <Hint />

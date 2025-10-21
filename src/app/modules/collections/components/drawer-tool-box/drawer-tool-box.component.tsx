@@ -1,4 +1,5 @@
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import EditIcon from '@mui/icons-material/Edit';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
@@ -12,6 +13,7 @@ import { CollectionConfigData } from '../../../../../types/collection-config-dat
 import {
   setDrawerOpen,
   setLoading,
+  setManageBackgroundsDialogOpen,
   setNewItemNameDialogOpen,
 } from '../../slices/ui.slice';
 
@@ -54,6 +56,15 @@ const DrawerToolBox: React.FC = () => {
           }}
         >
           <AddPhotoAlternateIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Manage backgrounds">
+        <IconButton
+          onClick={async () => {
+            dispatch(setManageBackgroundsDialogOpen(true));
+          }}
+        >
+          <AutoAwesomeMotionIcon />
         </IconButton>
       </Tooltip>
       <Tooltip title="Edit collection details">
