@@ -16,6 +16,7 @@ import { join, normalize } from 'path';
 
 import { name, version } from '../package.json';
 import { addNewBackground } from './services/addNewBackground';
+import { cancelNewItemIfEmpty } from './services/cancelNewItemIfEmpty';
 import { createCollection } from './services/createCollection';
 import { createNewItem } from './services/createNewItem';
 import { deleteBackground } from './services/deleteBackground';
@@ -233,6 +234,12 @@ app.whenReady().then(() => {
     'delete-item',
     async (_e, filename: string) =>
       await deleteItem(filename, mainWindow, store),
+  );
+
+  ipcMain.handle(
+    'cancel-new-item-if-empty',
+    async (_e, filename: string) =>
+      await cancelNewItemIfEmpty(filename, mainWindow, store),
   );
 
   ipcMain.handle(

@@ -42,6 +42,8 @@ contextBridge.exposeInMainWorld('electron', {
     await ipcRenderer.invoke('rename-item', oldFilename, newName),
   deleteItem: async (filename: string) =>
     await ipcRenderer.invoke('delete-item', filename),
+  cancelNewItemIfEmpty: async (filename: string) =>
+    await ipcRenderer.invoke('cancel-new-item-if-empty', filename),
   deleteBackground: async (background: string) =>
     await ipcRenderer.invoke('delete-background', background),
   openItem: async (filename: string) =>

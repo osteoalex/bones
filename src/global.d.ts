@@ -18,6 +18,7 @@ interface Window extends Window {
       newName: string,
     ) => Promise<string | boolean>;
     deleteItem: (filename: string) => Promise<boolean>;
+    cancelNewItemIfEmpty: (filename: string) => Promise<boolean>;
     deleteBackground: (
       background: string,
     ) => Promise<{ ok: boolean; reason?: string }>;
