@@ -4,12 +4,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import SaveIcon from '@mui/icons-material/Save';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { CollectionConfigData } from '../../../../../types/collection-config-data.interface';
+import { RootState } from '../../../../store';
 import {
   setDrawerOpen,
   setLoading,
@@ -21,6 +23,9 @@ const DrawerToolBox: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [config, setConfig] = useState<CollectionConfigData>(null);
+  const currentItem = useSelector(
+    (state: RootState) => state.editor.currentItem,
+  );
 
   useEffect(() => {
     window.electron.getConfig().then((config) => {
@@ -36,6 +41,14 @@ const DrawerToolBox: React.FC = () => {
         flexWrap: 'wrap',
       }}
     >
+      <Tooltip title="Save item">
+        <IconButton
+          disabled={!currentItem}
+          onClick={async () => await window.electron.saveItem()}
+        >
+          <SaveIcon />
+        </IconButton>
+      </Tooltip>
       <Tooltip title="New item">
         <IconButton
           disabled={!config?.backgrounds.length}
