@@ -5,7 +5,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import FileOpenIcon from '@mui/icons-material/FileOpen';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SaveIcon from '@mui/icons-material/Save';
+import SearchIcon from '@mui/icons-material/Search';
 import {
+  InputAdornment,
   List,
   ListItem,
   ListItemButton,
@@ -17,7 +19,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Form, Formik } from 'formik';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Yup from 'yup';
 
@@ -31,13 +33,15 @@ import { ListBox } from '../collection-home/collection-home.styles';
 const ItemsList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const items = useSelector((state: RootState) => state.editor.items);
+  const sourceItems = useSelector((state: RootState) => state.editor.items);
   const currentItem = useSelector(
     (state: RootState) => state.editor.currentItem,
   );
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [clickedItem, setClickedItem] = React.useState<string>('');
-  const [renamingItem, setRenamingItem] = React.useState<string>('');
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [clickedItem, setClickedItem] = useState<string>('');
+  const [renamingItem, setRenamingItem] = useState<string>('');
+  const [search, setSearch] = useState('');
+  const [items, setItems] = useState(sourceItems);
   const handleClick = (event: React.MouseEvent<HTMLElement>, item: string) => {
     event.stopPropagation();
     setClickedItem(item);
@@ -48,12 +52,51 @@ const ItemsList: React.FC = () => {
     setAnchorEl(null);
   };
 
+  useEffect(() => {
+    if (!search) {
+      console.log(sourceItems);
+      setItems(sourceItems);
+    } else {
+      setItems(
+        sourceItems.filter((feature) =>
+          feature.toString().includes(search.toLowerCase()),
+        ),
+      );
+    }
+  }, [search, sourceItems]);
+
+  useEffect(() => {
+    if (!currentItem) return;
+    const el = document.getElementById(`items-list-item-${currentItem}`);
+    if (el) {
+      try {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (e) {
+        // ignore if scrollIntoView isn't supported in some contexts
+      }
+    }
+  }, [currentItem, items]);
+
   return (
     <ListBox>
       <Typography variant="h6">Items</Typography>
+      <TextField
+        label="Search"
+        fullWidth
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
+      />
       <List>
         {items.map((value) => (
           <ListItem
+            id={`items-list-item-${value}`}
             key={value}
             disablePadding
             sx={{
