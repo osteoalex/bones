@@ -1,6 +1,7 @@
 import { TAction } from '../../../../types/store.types';
 import { setLayersData } from '../slices/layers.slice';
 import { setInfoDetails } from '../slices/selected.slice';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function deleteAnnotation(targetId: string): TAction {
   return async (dispatch, getState) => {
@@ -21,6 +22,8 @@ export function deleteAnnotation(targetId: string): TAction {
       };
       const updatedLayers = [...layersData];
       updatedLayers.splice(activeLayerIdx, 1, updatedLayer);
+      // save snapshot for undo
+      dispatch(saveSnapshot());
       dispatch(setLayersData(updatedLayers));
       await window.electron.saveFeaturesToTempFile(updatedLayers);
       dispatch(setInfoDetails(null));

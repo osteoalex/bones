@@ -119,8 +119,7 @@ export async function exportCollection(
     } catch (error) {
       errorCount++;
       errorFiles.push(item.itemPath);
-      logErr(error);
-      console.error('Error exporting item:', error);
+      logErr('Error exporting item', error);
     }
   }
 

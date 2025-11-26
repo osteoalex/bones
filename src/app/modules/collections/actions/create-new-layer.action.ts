@@ -25,6 +25,7 @@ import { setupDrawFragment } from './add-draw.action';
 import { changeLayer } from './change-layer.action';
 import { setupDeleteSelectionInteraction } from './delete.action';
 import { setupFragmentSelectInteraction } from './fragment-select.action';
+import { saveSnapshot } from './saveSnapshot.action';
 import { setupSnapFragmentInteraction } from './snap.action';
 import { setupSubtractFragmentInteraction } from './subtract.action';
 
@@ -33,6 +34,8 @@ export function createNewLayer(config: Layer): TAction {
     const {
       layers: { layers, layersData, olMapRef },
     } = getState();
+    // save snapshot for undo
+    dispatch(saveSnapshot());
     const source = new VectorSource();
     const base = new VectorLayer({
       className: config.name,

@@ -28,6 +28,7 @@ import {
   recalculateAreaByTargetId,
   recalculateAreas,
 } from './calculate-area.action';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function setupSplitFragmentInteraction(): TAction {
   return (dispatch, getState) => {
@@ -171,7 +172,10 @@ export function splitDrawHandler(e: DrawEvent): TAction {
     };
     dispatch(setLayersData(newLayersData));
 
-    dispatch(recalculateAreas());
+    // recalculate areas but avoid recalculateAreas saving a snapshot
+    dispatch(recalculateAreas({ saveSnapshot: false }));
+    // save a single snapshot for the entire split operation
+    dispatch(saveSnapshot());
     await window.electron.saveFeaturesToTempFile(newLayersData);
     setTimeout(() => {
       splitSourceRef.removeFeature(e.feature);

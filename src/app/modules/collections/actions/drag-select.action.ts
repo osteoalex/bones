@@ -12,6 +12,7 @@ import { setAddByRectangleDrawRef } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
 import { setInfoDetails, setMultipleAddIds } from '../slices/selected.slice';
 import { recalculateAreas } from './calculate-area.action';
+import { saveSnapshot } from './saveSnapshot.action';
 
 // Initialize and set up DragBox interaction for rectangle selection
 export function initializeAddByRectangleDraw(): TAction {
@@ -171,6 +172,9 @@ export function submitMultipleFragmentsHandler(): TAction {
       ...layersData[activeLayerIdx],
       fragments: geojson,
     };
+
+    // save snapshot for undo
+    dispatch(saveSnapshot());
 
     dispatch(setLayersData(newLayersData));
     dispatch(recalculateAreas());

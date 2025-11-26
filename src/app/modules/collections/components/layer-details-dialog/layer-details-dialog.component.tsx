@@ -16,6 +16,7 @@ import {
   setShowLayerColorPickerPosition,
   setShowLayerColorPickerType,
 } from '../../slices/editor.slice';
+import { pushSnapshot } from '../../slices/history.slice';
 import { setLayersData } from '../../slices/layers.slice';
 
 function generateColumns(layer: Layer, dispatch: AppDispatch): GridColDef[] {
@@ -170,6 +171,8 @@ const LayerDetailsDialog: React.FC = () => {
                 };
                 const updatedLayers = [...layersData];
                 updatedLayers.splice(showDialog, 1, updatedLayer);
+                // save snapshot for undo
+                dispatch(pushSnapshot(JSON.parse(JSON.stringify(layersData))));
                 dispatch(setLayersData(updatedLayers));
                 await window.electron.saveFeaturesToTempFile(updatedLayers);
                 return newRow;
@@ -179,7 +182,10 @@ const LayerDetailsDialog: React.FC = () => {
                   'Error processing row update',
                   error,
                 );
-                console.log(error);
+                window.electron.logError?.(
+                  'Error processing row update',
+                  error,
+                );
               }}
               slots={{ toolbar: GridToolbar }}
             />
@@ -223,6 +229,10 @@ const LayerDetailsDialog: React.FC = () => {
                       dispatch(setShowLayerColorPickerPosition(null));
                       dispatch(setShowLayerColorPickerType(null));
                       dispatch(setShowLayerColorPickerCurrentColor(null));
+                      // save snapshot for undo
+                      dispatch(
+                        pushSnapshot(JSON.parse(JSON.stringify(layersData))),
+                      );
                       dispatch(setLayersData(updatedLayers));
                       const f =
                         layers[showDialog].source.getFeatureById(

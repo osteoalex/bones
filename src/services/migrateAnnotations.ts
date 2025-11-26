@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { FeatureCollection, Polygon } from 'geojson';
 
 import { ItemContent } from '../types/collection-config-data.interface';
+import { logErr } from './logger';
 
 export function migrateAnnotations(itemPath: string, backgroundPath: string) {
   const itemContentString = readFileSync(itemPath, { encoding: 'utf8' });
@@ -44,7 +45,10 @@ export function migrateAnnotations(itemPath: string, backgroundPath: string) {
                 closestId = frag.id;
               }
             } catch (error) {
-              console.log(error);
+              logErr(
+                'Error calculating distance between annotation and fragment centroid',
+                error,
+              );
             }
           }
           annotation.properties.targetId = closestId;

@@ -2,7 +2,10 @@ import { Switch } from '@mui/material';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { AppDispatch } from '../../../../../types/store.types';
 import { RootState } from '../../../../store';
+import { redo } from '../../actions/redo.action';
+import { undo } from '../../actions/undo.action';
 import { setAlt, setCtrl, setShift } from '../../slices/hotkeys.slice';
 import Alt from './alt.svg';
 import Ctrl from './ctrl.svg';
@@ -14,7 +17,7 @@ import {
 import Shift from './shift.svg';
 
 const HotkeysToggle: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { ctrl, alt, shift } = useSelector((state: RootState) => state.hotkeys);
 
   React.useEffect(() => {
@@ -25,6 +28,15 @@ const HotkeysToggle: React.FC = () => {
         dispatch(setAlt(true));
       }
       if (e.key === 'Shift') dispatch(setShift(true));
+      // handle undo/redo when ctrl/meta is held
+      if (e.key.toLowerCase() === 'z' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        dispatch(undo());
+      }
+      if (e.key.toLowerCase() === 'y' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        dispatch(redo());
+      }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === 'Control') dispatch(setCtrl(false));
@@ -39,12 +51,13 @@ const HotkeysToggle: React.FC = () => {
       dispatch(setAlt(false));
       dispatch(setShift(false));
     };
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    // attach to document in capture phase so we receive keys before other handlers
+    document.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('keyup', handleKeyUp, true);
     window.addEventListener('blur', handleBlur);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('keyup', handleKeyUp, true);
       window.removeEventListener('blur', handleBlur);
     };
   }, [dispatch]);

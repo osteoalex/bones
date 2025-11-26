@@ -8,6 +8,7 @@ import { baseStyle } from '../components/collection-home/editor-styles';
 import { setLayersData } from '../slices/layers.slice';
 import { setSelectedBone } from '../slices/selected.slice';
 import { recalculateAreas } from './calculate-area.action';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function addMultipleCommitHandler(): TAction {
   return async (dispatch, getState) => {
@@ -68,6 +69,8 @@ export function addMultipleCommitHandler(): TAction {
     const geojson = geojsonFormat.writeFeaturesObject(
       layers[activeLayerIdx].source.getFeatures(),
     );
+    // save snapshot for undo
+    dispatch(saveSnapshot());
     const newLayersData = [...layersData];
 
     newLayersData[activeLayerIdx] = {

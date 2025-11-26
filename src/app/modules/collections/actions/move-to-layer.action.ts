@@ -19,6 +19,7 @@ import { setLayersData } from '../slices/layers.slice';
 import { setInfoDetails } from '../slices/selected.slice';
 import { setMoveToLayerDialogOpen } from '../slices/ui.slice';
 import { recalculateAreas } from './calculate-area.action';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function moveToLayer(targetLayerName: string): TAction {
   return (dispatch, getState) => {
@@ -159,6 +160,8 @@ export function moveToLayer(targetLayerName: string): TAction {
       }
     }
 
+    // save snapshot for undo
+    dispatch(saveSnapshot());
     dispatch(setLayersData(updatedLayersData));
     window.electron.saveFeaturesToTempFile(updatedLayersData);
     dispatch(setInfoDetails([]));

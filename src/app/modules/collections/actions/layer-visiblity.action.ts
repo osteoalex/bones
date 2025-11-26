@@ -1,5 +1,6 @@
 import { TAction } from '../../../../types/store.types';
 import { setLayersData } from '../slices/layers.slice';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function toggleLayerVisibility(
   index: number,
@@ -14,6 +15,8 @@ export function toggleLayerVisibility(
     };
     const updatedLayer = layers[index];
     updatedLayer.base.setVisible(visible);
+    // save snapshot for undo
+    dispatch(saveSnapshot());
     dispatch(setLayersData(updatedLayers));
     await window.electron.saveFeaturesToTempFile(updatedLayers);
   };

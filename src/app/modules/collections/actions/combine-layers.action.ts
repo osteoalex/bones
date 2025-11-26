@@ -16,6 +16,7 @@ import { setLayers, setLayersData } from '../slices/layers.slice';
 import { setCombineLayersDialogOpen } from '../slices/ui.slice';
 import { recalculateAreas } from './calculate-area.action';
 import { changeLayer } from './change-layer.action';
+import { saveSnapshot } from './saveSnapshot.action';
 import { setupDrawLayers } from './setup-layers-and-sources.action';
 
 export function combineLayers(combinedLayers: string[]): TAction {
@@ -49,6 +50,8 @@ export function combineLayers(combinedLayers: string[]): TAction {
       };
     }, target);
 
+    // save snapshot for undo
+    dispatch(saveSnapshot());
     const updatedLayersData = [...layersData]
       .map((layer) => (layer.name === target.name ? resultLayer : layer))
       .filter((layer) => !layersToCombineNames.includes(layer.name));

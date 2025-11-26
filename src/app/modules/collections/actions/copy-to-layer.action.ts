@@ -16,6 +16,7 @@ import {
 import { setLayersData } from '../slices/layers.slice';
 import { setMoveToLayerDialogOpen } from '../slices/ui.slice';
 import { recalculateAreas } from './calculate-area.action';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function copyToLayer(targetLayerName: string): TAction {
   return (dispatch, getState) => {
@@ -103,6 +104,8 @@ export function copyToLayer(targetLayerName: string): TAction {
           ],
         },
       });
+      // save snapshot for undo
+      dispatch(saveSnapshot());
       dispatch(setLayersData(updatedLayersData));
       window.electron.saveFeaturesToTempFile(updatedLayersData);
     } else {
@@ -119,6 +122,8 @@ export function copyToLayer(targetLayerName: string): TAction {
           ],
         },
       });
+      // save snapshot for undo
+      dispatch(saveSnapshot());
       dispatch(setLayersData(updatedLayersData));
       window.electron.saveFeaturesToTempFile(updatedLayersData);
     }

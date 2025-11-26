@@ -15,7 +15,7 @@ export function cancelNewItemIfNoLayers(): TAction<Promise<boolean>> {
         dispatch(setItems(items));
         return true;
       } catch (e) {
-        console.warn('cancelNewItemIfNoLayers: delete failed', e);
+        window.electron.logError?.('cancelNewItemIfNoLayers: delete failed', e);
         return false;
       }
     }

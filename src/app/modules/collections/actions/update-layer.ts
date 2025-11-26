@@ -3,6 +3,7 @@ import { Fill, Stroke, Style } from 'ol/style';
 import { Layer } from '../../../../types/collection-config-data.interface';
 import { TAction } from '../../../../types/store.types';
 import { setEditedLayer } from '../slices/editor.slice';
+import { pushSnapshot } from '../slices/history.slice';
 import { setLayers, setLayersData } from '../slices/layers.slice';
 
 export function updateLayer(config: Layer, editedLayerIdx: number): TAction {
@@ -32,6 +33,11 @@ export function updateLayer(config: Layer, editedLayerIdx: number): TAction {
 
     const updatedLayers = [...layers];
     updatedLayers[editedLayerIdx] = currentLayer;
+    // save snapshot for undo
+    const { layersData: currentLayersDataSnapshot } = getState().layers;
+    dispatch(
+      pushSnapshot(JSON.parse(JSON.stringify(currentLayersDataSnapshot))),
+    );
     const newLayersData = [...layersData];
     newLayersData[editedLayerIdx] = currentLayersData;
     dispatch(setLayersData(newLayersData));

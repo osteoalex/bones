@@ -4,8 +4,9 @@ import { TAction } from '../../../../types/store.types';
 import { calculateArea, geojsonFormat } from '../../../../utils';
 import { setLayers, setLayersData } from '../slices/layers.slice';
 import { setFragmentsArea } from '../slices/selected.slice';
+import { saveSnapshot } from './saveSnapshot.action';
 
-export function recalculateAreas(): TAction {
+export function recalculateAreas(opts?: { saveSnapshot?: boolean }): TAction {
   return async (dispatch, getState) => {
     const { layersData, layers } = getState().layers;
 
@@ -68,6 +69,10 @@ export function recalculateAreas(): TAction {
       };
     });
 
+    // save snapshot for undo unless caller requested otherwise
+    if (!opts || opts.saveSnapshot !== false) {
+      dispatch(saveSnapshot());
+    }
     dispatch(setLayersData(updatedLayersData));
     dispatch(calculateFragmentsArea());
     await window.electron.saveFeaturesToTempFile(updatedLayersData);
@@ -95,7 +100,10 @@ export function calculateFragmentsArea(): TAction {
   };
 }
 
-export function recalculateAreaByTargetId(targetId: string): TAction {
+export function recalculateAreaByTargetId(
+  targetId: string,
+  opts?: { saveSnapshot?: boolean },
+): TAction {
   return async (dispatch, getState) => {
     const { layers, layersData, activeLayerIdx, baseSourceRef } =
       getState().layers;
@@ -140,7 +148,7 @@ export function recalculateAreaByTargetId(targetId: string): TAction {
     };
     dispatch(setLayersData(newLayersData));
 
-    dispatch(recalculateAreas());
+    dispatch(recalculateAreas({ saveSnapshot: opts?.saveSnapshot }));
     await window.electron.saveFeaturesToTempFile(newLayersData);
   };
 }

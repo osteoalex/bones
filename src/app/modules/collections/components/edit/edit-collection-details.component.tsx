@@ -20,7 +20,6 @@ const EditCollectionDetails: React.FC = () => {
     };
     fetchData().catch((error) => {
       window.electron.logError?.('Error fetching collection details', error);
-      console.error(error);
     });
   }, []);
   return (

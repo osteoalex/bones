@@ -34,7 +34,6 @@ const App: React.FC = () => {
         setMeta(data);
       } catch (error) {
         window.electron.logError?.('Failed to fetch version', error);
-        console.error('Failed to fetch version:', error);
         setMeta((prev) => ({ ...prev, version: 'Unknown' }));
       }
     }

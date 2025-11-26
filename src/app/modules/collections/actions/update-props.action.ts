@@ -1,10 +1,13 @@
 import { TAction } from '../../../../types/store.types';
 import { setLayersData } from '../slices/layers.slice';
 import { setInfoDetails } from '../slices/selected.slice';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function updateProps(val: Record<string, string>[]): TAction {
   return async (dispatch, getState) => {
+    // save snapshot for undo/redo
     const { layersData, activeLayerIdx } = getState().layers;
+    dispatch(saveSnapshot());
     const { infoDetails } = getState().selected;
     if (
       !infoDetails ||

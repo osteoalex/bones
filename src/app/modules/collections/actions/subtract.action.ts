@@ -28,6 +28,7 @@ import {
   recalculateAreaByTargetId,
   recalculateAreas,
 } from './calculate-area.action';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function setupSubtractFragmentInteraction(
   source: VectorSource<Feature<Geometry>>,
@@ -81,7 +82,8 @@ export function subtractDrawHandler(e: DrawEvent): TAction {
         }, 100);
         return;
       }
-      for await (const feature of features) {
+
+      for (const feature of features) {
         const current = baseSourceRef
           .getFeatures()
           .find((f) => f.getId() === feature.getProperties().targetId);
@@ -163,32 +165,42 @@ export function subtractDrawHandler(e: DrawEvent): TAction {
             }%`,
           });
         }
+        // schedule removal of the drawn subtract feature shortly after
         setTimeout(() => {
           layers[activeLayerIdx].source.removeFeature(toSubtractFeature);
         }, 100);
-        setTimeout(async () => {
-          const geojson = geojsonFormat.writeFeaturesObject(
-            layers[activeLayerIdx].source.getFeatures(),
-          );
-          const newLayersData = [...layersData];
-
-          newLayersData[activeLayerIdx] = {
-            ...layersData[activeLayerIdx],
-            fragments: geojson,
-          };
-
-          dispatch(setLayersData(newLayersData));
-          await window.electron.saveFeaturesToTempFile(newLayersData);
-
-          dispatch(recalculateAreas());
-          for (const feature of features) {
-            dispatch(
-              recalculateAreaByTargetId(feature.getProperties().targetId),
-            );
-          }
-          dispatch(setLoading(false));
-        }, 200);
       }
+
+      // After processing all features, wait a short moment for OL to settle,
+      // then read the source once, save a single snapshot and update Redux.
+      setTimeout(async () => {
+        const geojson = geojsonFormat.writeFeaturesObject(
+          layers[activeLayerIdx].source.getFeatures(),
+        );
+        const newLayersData = [...layersData];
+
+        newLayersData[activeLayerIdx] = {
+          ...layersData[activeLayerIdx],
+          fragments: geojson,
+        };
+
+        // recalculate areas but avoid recalculateAreas saving a snapshot
+        dispatch(recalculateAreas({ saveSnapshot: false }));
+        // save a single snapshot for the entire subtract operation (after recalculation)
+        dispatch(saveSnapshot());
+
+        dispatch(setLayersData(newLayersData));
+        await window.electron.saveFeaturesToTempFile(newLayersData);
+
+        for (const feature of features) {
+          dispatch(
+            recalculateAreaByTargetId(feature.getProperties().targetId, {
+              saveSnapshot: false,
+            }),
+          );
+        }
+        dispatch(setLoading(false));
+      }, 200);
     }
   };
 }

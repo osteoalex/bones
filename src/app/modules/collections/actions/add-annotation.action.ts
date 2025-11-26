@@ -9,6 +9,7 @@ import { TAction } from '../../../../types/store.types';
 import { geojsonFormat, getNextId } from '../../../../utils';
 import { setLayersData } from '../slices/layers.slice';
 import { setAnnotationDialog } from '../slices/ui.slice';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function setupAnnotationDraw(
   source: VectorSource<Feature<Point>>,
@@ -72,6 +73,8 @@ export function submitAnnotation(
       annotationFeature,
     ) as GeoJSONFeature<GeoJsonPoint>;
 
+    // save snapshot for undo
+    dispatch(saveSnapshot());
     const updatedLayersData = [...layersData];
     const updatedAnnotations = [
       ...updatedLayersData[activeLayerIdx].annotations.features,

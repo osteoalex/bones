@@ -31,6 +31,7 @@ import { setIsDrawing } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
 import { recalculateAreas } from './calculate-area.action';
 import { resetFeatureStyle } from './reset.action';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function setupDrawFragment(
   source: VectorSource<Feature<Geometry>>,
@@ -222,6 +223,8 @@ export function submitFragmentHandler(
     const geojson = geojsonFormat.writeFeaturesObject(
       layers[activeLayerIdx].source.getFeatures(),
     );
+    // save snapshot for undo
+    dispatch(saveSnapshot());
     const newLayersData = [...layersData];
 
     newLayersData[activeLayerIdx] = {

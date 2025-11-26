@@ -5,6 +5,7 @@ import { TAction } from '../../../../types/store.types';
 import { calculateArea, geojsonFormat } from '../../../../utils';
 import { EDIT_MODE_TYPE } from '../../../../utils/enums';
 import { setItems, setMode } from '../slices/editor.slice';
+import { clearHistory, pushSnapshot } from '../slices/history.slice';
 import {
   setAddWholeRef,
   setBoneSelectRef,
@@ -56,6 +57,11 @@ export function getAndSetupItem(currentItem: string): TAction {
           },
         };
       });
+      // save snapshot of current state before replacing, then clear history
+      const { layersData: currentLayersData } = getState().layers;
+      dispatch(pushSnapshot(JSON.parse(JSON.stringify(currentLayersData))));
+      // Clear history to avoid carrying undo/redo entries across different items
+      dispatch(clearHistory());
       dispatch(setLayersData(itemContent));
 
       olMapRef.getLayers().forEach((layer) => {

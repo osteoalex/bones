@@ -67,8 +67,6 @@ const createWindow = (): void => {
     mainWindow.webContents.openDevTools();
   }
 
-  console.log(name, version);
-
   store.set('currentlyOpenedItem', '');
 
   mainWindow.on('close', () => {
@@ -88,7 +86,7 @@ const createWindow = (): void => {
       try {
         deepEqual(source, temp);
       } catch (error) {
-        // console.log(error);
+        logErr('Error comparing source and temp files during close', error);
         const prompt = dialog.showMessageBoxSync(mainWindow, {
           title: 'Unsaved changes!',
           message: 'Do you want to save current file?',

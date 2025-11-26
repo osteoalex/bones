@@ -5,6 +5,7 @@ import {
   setNewItemNameDialogOpen,
   setNewLayerPopupVisible,
 } from '../slices/ui.slice';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function createNewItem(data: {
   name: string;
@@ -18,6 +19,10 @@ export function createNewItem(data: {
     if (!itemPath) {
       return;
     }
+
+    // save snapshot for undo (previous item state)
+    dispatch(saveSnapshot());
+
     dispatch(setLayersData([]));
     dispatch(setLayers([]));
     dispatch(setCurrentItem(itemPath));
