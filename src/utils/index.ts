@@ -138,7 +138,10 @@ export function booleanContainsSafe(
 ): boolean {
   if (!isGeoJsonMultiPolygon(a) && !isGeoJsonMultiPolygon(b)) {
     try {
-      return turfBooleanContains(a as any, b as any);
+      return turfBooleanContains(
+        a as unknown as Feature<Polygon | MultiPolygon>,
+        b as unknown as Feature<Polygon | MultiPolygon>,
+      );
     } catch (e) {
       return false;
     }
@@ -154,7 +157,13 @@ export function booleanContainsSafe(
   for (const pa of partsA) {
     for (const pb of partsB) {
       try {
-        if (turfBooleanContains(pa as any, pb as any)) return true;
+        if (
+          turfBooleanContains(
+            pa as unknown as Feature<Polygon>,
+            pb as unknown as Feature<Polygon>,
+          )
+        )
+          return true;
       } catch (e) {
         // ignore
       }

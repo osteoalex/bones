@@ -1,7 +1,13 @@
 import turfBooleanOverlap from '@turf/boolean-overlap';
 import { Polygon } from '@turf/helpers';
 import turfUnion from '@turf/union';
-import { Feature, FeatureCollection, MultiPolygon, Point } from 'geojson';
+import {
+  Feature,
+  FeatureCollection,
+  Geometry,
+  MultiPolygon,
+  Point,
+} from 'geojson';
 
 import { TAction } from '../../../../types/store.types';
 import { booleanContainsSafe } from '../../../../utils';
@@ -111,10 +117,10 @@ function combineFuturePointCollections(
 }
 
 function combineFutureCollections(
-  a: FeatureCollection,
-  b: FeatureCollection,
-): FeatureCollection {
-  const merged = {
+  a: FeatureCollection<Geometry>,
+  b: FeatureCollection<Geometry>,
+): FeatureCollection<Geometry> {
+  const merged: FeatureCollection<Geometry> = {
     ...a,
     features: [...a.features, ...b.features].map((f, i) => ({
       ...f,
@@ -128,17 +134,38 @@ function combineFutureCollections(
     })),
   };
 
-  function mergeOverlapping(features: Feature[]): Feature[] {
-    const result: Feature[] = [];
+  function mergeOverlapping(
+    features: Feature<Geometry>[],
+  ): Feature<Geometry>[] {
+    const result: Feature<Geometry>[] = [];
 
     features.forEach((feature) => {
       let hasMerged = false;
 
       for (let i = 0; i < result.length; i++) {
+        // Only attempt geometric unions for polygonal geometries. If either
+        // side is not a Polygon/MultiPolygon, skip union checks for this pair.
+        const aIsPoly =
+          feature.geometry.type === 'Polygon' ||
+          feature.geometry.type === 'MultiPolygon';
+        const bIsPoly =
+          result[i].geometry.type === 'Polygon' ||
+          result[i].geometry.type === 'MultiPolygon';
+        if (!aIsPoly || !bIsPoly) continue;
+
         if (
-          turfBooleanOverlap(result[i], feature) ||
-          booleanContainsSafe(result[i] as any, feature as any) ||
-          booleanContainsSafe(feature as any, result[i] as any)
+          turfBooleanOverlap(
+            result[i] as Feature<Polygon | MultiPolygon>,
+            feature as Feature<Polygon | MultiPolygon>,
+          ) ||
+          booleanContainsSafe(
+            result[i] as Feature<Polygon | MultiPolygon>,
+            feature as Feature<Polygon | MultiPolygon>,
+          ) ||
+          booleanContainsSafe(
+            feature as Feature<Polygon | MultiPolygon>,
+            result[i] as Feature<Polygon | MultiPolygon>,
+          )
         ) {
           const unioned = turfUnion(
             result[i] as Feature<Polygon | MultiPolygon>,
