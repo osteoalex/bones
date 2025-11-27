@@ -54,7 +54,6 @@ const ItemsList: React.FC = () => {
 
   useEffect(() => {
     if (!search) {
-      console.log(sourceItems);
       setItems(sourceItems);
     } else {
       setItems(

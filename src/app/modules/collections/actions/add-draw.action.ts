@@ -1,4 +1,3 @@
-import turfBooleanContains from '@turf/boolean-contains';
 import turfBooleanOverlap from '@turf/boolean-overlap';
 import {
   multiPolygon as turfMultiPolygon,
@@ -20,6 +19,7 @@ import VectorSource from 'ol/source/Vector';
 
 import { TAction } from '../../../../types/store.types';
 import {
+  booleanContainsSafe,
   calculateArea,
   featureToTurfGeometry,
   geojsonFormat,
@@ -77,7 +77,8 @@ export function additionDrawEndHandler(e: DrawEvent): TAction {
             featureToTurfGeometry(f),
             featureToTurfGeometry(e.feature),
           ) ||
-          turfBooleanContains(
+          // Use booleanContainsSafe to handle MultiPolygon inputs safely.
+          booleanContainsSafe(
             multiPolygonToPolygons(
               featureToTurfGeometry(e.feature) as GeojsonFeature<MultiPolygon>,
             )[0],
@@ -96,7 +97,9 @@ export function additionDrawEndHandler(e: DrawEvent): TAction {
           featureToTurfGeometry(f),
           featureToTurfGeometry(e.feature),
         ) ||
-        turfBooleanContains(
+        // Use booleanContainsSafe to avoid errors when either feature is a
+        // MultiPolygon.
+        booleanContainsSafe(
           multiPolygonToPolygons(
             featureToTurfGeometry(e.feature) as GeojsonFeature<MultiPolygon>,
           )[0],

@@ -1,4 +1,5 @@
 import { Point as ePoint, Polygon as ePolygon } from '@mathigon/euclid';
+import turfBooleanContains from '@turf/boolean-contains';
 import turfIntersects from '@turf/boolean-intersects';
 import {
   lineString as turfLine,
@@ -126,6 +127,41 @@ export const featureToTurLine = (
       .coordinates,
   );
 };
+
+/**
+ * Safe boolean-contains that supports GeoJSON MultiPolygon by splitting
+ * them into Polygon parts and checking containment across parts.
+ */
+export function booleanContainsSafe(
+  a: Feature<Polygon | MultiPolygon>,
+  b: Feature<Polygon | MultiPolygon>,
+): boolean {
+  if (!isGeoJsonMultiPolygon(a) && !isGeoJsonMultiPolygon(b)) {
+    try {
+      return turfBooleanContains(a as any, b as any);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  const partsA = isGeoJsonMultiPolygon(a)
+    ? multiPolygonToPolygons(a as Feature<MultiPolygon>)
+    : [a as Feature<Polygon>];
+  const partsB = isGeoJsonMultiPolygon(b)
+    ? multiPolygonToPolygons(b as Feature<MultiPolygon>)
+    : [b as Feature<Polygon>];
+
+  for (const pa of partsA) {
+    for (const pb of partsB) {
+      try {
+        if (turfBooleanContains(pa as any, pb as any)) return true;
+      } catch (e) {
+        // ignore
+      }
+    }
+  }
+  return false;
+}
 
 export const geojsonFormat = new OLGeoJSON();
 export const projection = new Projection({

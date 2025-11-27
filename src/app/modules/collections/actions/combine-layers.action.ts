@@ -1,10 +1,10 @@
-import turfBooleanContains from '@turf/boolean-contains';
 import turfBooleanOverlap from '@turf/boolean-overlap';
 import { Polygon } from '@turf/helpers';
 import turfUnion from '@turf/union';
 import { Feature, FeatureCollection, MultiPolygon, Point } from 'geojson';
 
 import { TAction } from '../../../../types/store.types';
+import { booleanContainsSafe } from '../../../../utils';
 import { setLayerDetails } from '../slices/editor.slice';
 import {
   setDeleteSelectRef,
@@ -137,8 +137,8 @@ function combineFutureCollections(
       for (let i = 0; i < result.length; i++) {
         if (
           turfBooleanOverlap(result[i], feature) ||
-          turfBooleanContains(result[i], feature) ||
-          turfBooleanContains(feature, result[i])
+          booleanContainsSafe(result[i] as any, feature as any) ||
+          booleanContainsSafe(feature as any, result[i] as any)
         ) {
           const unioned = turfUnion(
             result[i] as Feature<Polygon | MultiPolygon>,

@@ -1,4 +1,3 @@
-import turfBooleanContains from '@turf/boolean-contains';
 import turfBooleanOverlap from '@turf/boolean-overlap';
 import { MultiPolygon } from '@turf/helpers';
 import turfUnion from '@turf/union';
@@ -9,6 +8,7 @@ import { Fill, Stroke, Style } from 'ol/style';
 
 import { TAction } from '../../../../types/store.types';
 import {
+  booleanContainsSafe,
   featureToTurfGeometry,
   geojsonFormat,
   getFeaturesInFeatureExtent,
@@ -77,7 +77,7 @@ export function moveToLayer(targetLayerName: string): TAction {
             featureToTurfGeometry(f),
             featureToTurfGeometry(clonedFeature),
           ) ||
-          turfBooleanContains(
+          booleanContainsSafe(
             multiPolygonToPolygons(
               featureToTurfGeometry(clonedFeature) as Feature<MultiPolygon>,
             )[0],
