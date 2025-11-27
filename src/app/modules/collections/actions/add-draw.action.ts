@@ -79,10 +79,10 @@ export function additionDrawEndHandler(e: DrawEvent): TAction {
           ) ||
           // Use booleanContainsSafe to handle MultiPolygon inputs safely.
           booleanContainsSafe(
+            featureToTurfGeometry(f),
             multiPolygonToPolygons(
               featureToTurfGeometry(e.feature) as GeojsonFeature<MultiPolygon>,
             )[0],
-            featureToTurfGeometry(f),
           )
         );
       });
