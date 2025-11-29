@@ -2,13 +2,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface HotkeysState {
   ctrl: boolean;
-  panToggle: boolean;
+  alt: boolean;
   shift: boolean;
 }
 
 const initialState: HotkeysState = {
   ctrl: false,
-  panToggle: false,
+  alt: false,
   shift: false,
 };
 
@@ -19,8 +19,8 @@ export const hotkeysSlice = createSlice({
     setCtrl(state, action: PayloadAction<boolean>) {
       state.ctrl = action.payload;
     },
-    setPanToggle(state, action: PayloadAction<boolean>) {
-      state.panToggle = action.payload;
+    setAlt(state, action: PayloadAction<boolean>) {
+      state.alt = action.payload;
     },
     setShift(state, action: PayloadAction<boolean>) {
       state.shift = action.payload;
@@ -31,6 +31,5 @@ export const hotkeysSlice = createSlice({
   },
 });
 
-export const { setCtrl, setPanToggle, setShift, setHotkeys } =
-  hotkeysSlice.actions;
+export const { setCtrl, setAlt, setShift, setHotkeys } = hotkeysSlice.actions;
 export default hotkeysSlice.reducer;
