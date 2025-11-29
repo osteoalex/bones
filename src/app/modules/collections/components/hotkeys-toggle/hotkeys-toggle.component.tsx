@@ -6,26 +6,31 @@ import { AppDispatch } from '../../../../../types/store.types';
 import { RootState } from '../../../../store';
 import { redo } from '../../actions/redo.action';
 import { undo } from '../../actions/undo.action';
-import { setAlt, setCtrl, setShift } from '../../slices/hotkeys.slice';
-import Alt from './alt.svg';
+import { setCtrl, setPanToggle, setShift } from '../../slices/hotkeys.slice';
 import Ctrl from './ctrl.svg';
 import {
   HotKeysToggleImg,
   HotKeysToggleRow,
   HotKeysToggleWrapper,
 } from './hotkeys-toggle.styles';
+import P from './p.svg';
 import Shift from './shift.svg';
 
 const HotkeysToggle: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { ctrl, alt, shift } = useSelector((state: RootState) => state.hotkeys);
+  const { ctrl, panToggle, shift } = useSelector(
+    (state: RootState) => state.hotkeys,
+  );
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Control') dispatch(setCtrl(true));
-      if (e.key === 'Alt') {
+      // Toggle the 'p' hotkey state when the user presses the 'p' key.
+      // We keep the Redux flag name (`panToggle`) for compatibility but change the
+      // physical shortcut to 'p'. Use lowercase compare for robustness.
+      if (e.key.toLowerCase() === 'p') {
         e.preventDefault();
-        dispatch(setAlt(true));
+        dispatch(setPanToggle(true));
       }
       if (e.key === 'Shift') dispatch(setShift(true));
       // handle undo/redo when ctrl/meta is held
@@ -40,15 +45,15 @@ const HotkeysToggle: React.FC = () => {
     };
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === 'Control') dispatch(setCtrl(false));
-      if (e.key === 'Alt') {
+      if (e.key.toLowerCase() === 'p') {
         e.preventDefault();
-        dispatch(setAlt(false));
+        dispatch(setPanToggle(false));
       }
       if (e.key === 'Shift') dispatch(setShift(false));
     };
     const handleBlur = () => {
       dispatch(setCtrl(false));
-      dispatch(setAlt(false));
+      dispatch(setPanToggle(false));
       dispatch(setShift(false));
     };
     // attach to document in capture phase so we receive keys before other handlers
@@ -72,17 +77,17 @@ const HotkeysToggle: React.FC = () => {
         />
       </HotKeysToggleRow>
       <HotKeysToggleRow>
-        <HotKeysToggleImg src={Alt} alt="Alt" />
-        <Switch
-          checked={alt}
-          onChange={(_, checked) => dispatch(setAlt(checked))}
-        />
-      </HotKeysToggleRow>
-      <HotKeysToggleRow>
         <HotKeysToggleImg src={Shift} alt="Shift" />
         <Switch
           checked={shift}
           onChange={(_, checked) => dispatch(setShift(checked))}
+        />
+      </HotKeysToggleRow>
+      <HotKeysToggleRow>
+        <HotKeysToggleImg src={P} alt="Pan" />
+        <Switch
+          checked={panToggle}
+          onChange={(_, checked) => dispatch(setPanToggle(checked))}
         />
       </HotKeysToggleRow>
     </HotKeysToggleWrapper>

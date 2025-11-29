@@ -5,7 +5,7 @@ import type DragPanType from 'ol/interaction/DragPan';
 import type Interaction from 'ol/interaction/Interaction';
 import type MapBrowserEvent from 'ol/MapBrowserEvent';
 import { createMiddleMouseDragPan } from '../utils/middle-mouse-drag-pan';
-import { createAltLmbDragPan } from '../utils/alt-lmb-drag-pan';
+import { createPLmbDragPan } from '../utils/p-lmb-drag-pan';
 import { Projection } from 'ol/proj';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -44,7 +44,7 @@ export const useInitEditor = (
     (state: RootState) => state.layers.baseSourceRef,
   );
   const olMapRef = useSelector((state: RootState) => state.layers.olMapRef);
-  const altHotkey = useSelector((state: RootState) => state.hotkeys.alt);
+  const panToggle = useSelector((state: RootState) => state.hotkeys.panToggle);
 
   useEffect(() => {
     const abortDrawing = () => {
@@ -126,57 +126,53 @@ export const useInitEditor = (
     };
   }, []);
 
-  // Alt+LMB pan interaction that checks Redux state
+  // Pan (P)+LMB interaction that checks Redux state (uses `panToggle`)
   useEffect(() => {
     if (!olMapRef) return;
-    // Remove any previous custom Alt+LMB pan interaction
-    let prevAltPan: DragPanType | null = null;
+    // Remove any previous custom pan (P)+LMB pan interaction
+    let prevPLmbPan: DragPanType | null = null;
     olMapRef.getInteractions().forEach((interaction: Interaction) => {
       if (
         interaction &&
         typeof interaction.get === 'function' &&
-        interaction.get('isAltLmbPan')
+        interaction.get('isPLmbPan')
       ) {
         olMapRef.removeInteraction(interaction);
       }
     });
-    // Only add if Alt is toggled in state
-    if (altHotkey) {
-      const altLmbPan = new DragPan({
-        condition: (event: MapBrowserEvent<UIEvent>) => {
-          const originalEvent = event.originalEvent as MouseEvent;
-          return originalEvent && originalEvent.button === 0 && altHotkey;
-        },
-      });
-      altLmbPan.set('isAltLmbPan', true);
-      olMapRef.addInteraction(altLmbPan);
-      prevAltPan = altLmbPan;
+    // Only add if panToggle is enabled in state
+    if (panToggle) {
+      const pLmbPan = createPLmbDragPan(() => panToggle);
+      pLmbPan.set('isPLmbPan', true);
+      olMapRef.addInteraction(pLmbPan);
+      prevPLmbPan = pLmbPan;
     }
     // Cleanup
     return () => {
-      if (prevAltPan) {
-        olMapRef.removeInteraction(prevAltPan);
+      if (prevPLmbPan) {
+        olMapRef.removeInteraction(prevPLmbPan);
       }
     };
-  }, [olMapRef, altHotkey]);
+  }, [olMapRef, panToggle]);
 
   useEffect(() => {
     let pressed = false;
-    const altDownHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Alt' && !pressed) {
+    const pDownHandler = (e: KeyboardEvent) => {
+      // Use 'p' as the physical shortcut that toggles the `panToggle` flag.
+      if (e.key.toLowerCase() === 'p' && !pressed) {
         pressed = true;
       }
     };
-    const altUpHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Alt') {
+    const pUpHandler = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'p') {
         pressed = false;
       }
     };
-    document.addEventListener('keydown', altDownHandler);
-    document.addEventListener('keyup', altUpHandler);
+    document.addEventListener('keydown', pDownHandler);
+    document.addEventListener('keyup', pUpHandler);
     return () => {
-      document.removeEventListener('keydown', altDownHandler);
-      document.removeEventListener('keyup', altUpHandler);
+      document.removeEventListener('keydown', pDownHandler);
+      document.removeEventListener('keyup', pUpHandler);
     };
   }, [mode]);
 };
