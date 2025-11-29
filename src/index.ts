@@ -23,6 +23,7 @@ import { deleteBackground } from './services/deleteBackground';
 import { deleteItem } from './services/deleteItem';
 import { exportBoneSVG } from './services/exportBoneSVG';
 import { exportCollection } from './services/exportCollection';
+import { exportCollectionAsSVG } from './services/exportCollectionAsSVG';
 import { exportSVG } from './services/exportSVG';
 import { getAllItems } from './services/getAllItems';
 import { logErr } from './services/logger';
@@ -254,6 +255,11 @@ app.whenReady().then(() => {
   ipcMain.handle(
     'export-collection',
     async () => await exportCollection(mainWindow, store),
+  );
+
+  ipcMain.handle(
+    'export-collection-svg',
+    async () => await exportCollectionAsSVG(mainWindow, store),
   );
 
   ipcMain.handle(

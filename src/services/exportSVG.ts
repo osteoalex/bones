@@ -16,26 +16,17 @@ import {
   isGeoJsonPolygon,
 } from '../utils/type-guards';
 
-export async function exportSVG(
-  app: Electron.App,
-  mainWindow: BrowserWindow,
+export async function exportSvgDocument(
+  userDataPath: string[],
+  filePath: string,
   extent: Extent,
   geojson: Feature<MultiPolygon | Polygon>[],
+  back: string,
 ) {
   const {
     window: { document },
   } = new JSDOM();
-  const userDataPath = [app.getPath('appData'), app.getName()];
 
-  const file: SaveDialogReturnValue = await dialog.showSaveDialog(mainWindow, {
-    title: 'Export svg',
-    filters: [{ name: 'Scalable Vector Graphics', extensions: ['svg'] }],
-    properties: ['showOverwriteConfirmation'],
-    defaultPath: 'export.svg',
-  });
-  if (file.canceled || !file.filePath) {
-    return;
-  }
   const parser = new DOMParser();
   const svgElement = document.createElementNS(
     'http://www.w3.org/2000/svg',
@@ -49,13 +40,6 @@ export async function exportSVG(
   svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
   svgElement.setAttribute('viewBox', '0 0 350.28576 834.81352');
 
-  // parse background
-  const back = readFileSync(
-    normalize(join(...userDataPath, 'currentBackground')),
-    {
-      encoding: 'utf8',
-    },
-  );
   const backgroundContent: FeatureCollection<
     MultiPolygon | Polygon | MultiLineString
   > = JSON.parse(back);
@@ -152,9 +136,39 @@ export async function exportSVG(
     } ${Math.abs(extent[0] - extent[2])} ${Math.abs(extent[1] - extent[3])}`,
   );
 
-  writeFileSync(normalize(file.filePath), svgElement.outerHTML, {
+  writeFileSync(normalize(filePath), svgElement.outerHTML, {
     encoding: 'utf8',
   });
+}
+
+export async function exportSVG(
+  app: Electron.App,
+  mainWindow: BrowserWindow,
+  extent: Extent,
+  geojson: Feature<MultiPolygon | Polygon>[],
+) {
+  const userDataPath = [app.getPath('appData'), app.getName()];
+
+  const file: SaveDialogReturnValue = await dialog.showSaveDialog(mainWindow, {
+    title: 'Export svg',
+    filters: [{ name: 'Scalable Vector Graphics', extensions: ['svg'] }],
+    properties: ['showOverwriteConfirmation'],
+    defaultPath: 'export.svg',
+  });
+  if (file.canceled || !file.filePath) {
+    return;
+  }
+
+  // parse background
+  const back = readFileSync(
+    // move out of this function
+    normalize(join(...userDataPath, 'currentBackground')),
+    {
+      encoding: 'utf8',
+    },
+  );
+
+  await exportSvgDocument(userDataPath, file.filePath, extent, geojson, back);
 
   dialog.showMessageBox(mainWindow, {
     title: 'Success',

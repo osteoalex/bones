@@ -38,6 +38,7 @@ interface Window extends Window {
     onCollectionPageLeave: () => Promise<void>;
     collectionPageEscHandler: (callback: () => Promise<void>) => void;
     exportCollection: () => Promise<void>;
+    exportCollectionAsSVG: () => Promise<void>;
     exportSVG: (extent: Extent, fragment?: Feature) => Promise<void>;
     exportBoneSVG: (
       extent: Extent,

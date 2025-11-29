@@ -60,6 +60,8 @@ contextBridge.exposeInMainWorld('electron', {
     await ipcRenderer.on('collection-page-esc-handler', callback);
   },
   exportCollection: async () => await ipcRenderer.invoke('export-collection'),
+  exportCollectionAsSVG: async () =>
+    await ipcRenderer.invoke('export-collection-svg'),
   exportSVG: async (
     extent: Extent,
     geojson?: Feature<MultiPolygon | Polygon>,

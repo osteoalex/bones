@@ -5,7 +5,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import SaveIcon from '@mui/icons-material/Save';
-import { Box, IconButton, Tooltip } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,8 @@ import {
 } from '../../slices/ui.slice';
 
 const DrawerToolBox: React.FC = () => {
+  const exportMenuAnchorRef = React.useRef<HTMLButtonElement | null>(null);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [config, setConfig] = useState<CollectionConfigData>(null);
@@ -87,15 +89,39 @@ const DrawerToolBox: React.FC = () => {
       </Tooltip>
       <Tooltip title="Export collection">
         <IconButton
-          onClick={async () => {
-            dispatch(setLoading(true));
-            await window.electron.exportCollection();
-            dispatch(setLoading(false));
-          }}
+          ref={exportMenuAnchorRef}
+          onClick={() => setExportMenuOpen(!exportMenuOpen)}
+          tabIndex={-1}
         >
           <FileDownloadIcon />
         </IconButton>
       </Tooltip>
+      <Menu
+        anchorEl={exportMenuAnchorRef.current}
+        open={exportMenuOpen}
+        onClose={() => setExportMenuOpen(false)}
+      >
+        <MenuItem
+          onClick={async () => {
+            dispatch(setLoading(true));
+            await window.electron.exportCollection();
+            dispatch(setLoading(false));
+            setExportMenuOpen(false);
+          }}
+        >
+          Export CSV
+        </MenuItem>
+        <MenuItem
+          onClick={async () => {
+            dispatch(setLoading(true));
+            await window.electron.exportCollectionAsSVG();
+            dispatch(setLoading(false));
+            setExportMenuOpen(false);
+          }}
+        >
+          Export SVG
+        </MenuItem>
+      </Menu>
       <Tooltip title="Hide menu">
         <IconButton
           onClick={() => {
