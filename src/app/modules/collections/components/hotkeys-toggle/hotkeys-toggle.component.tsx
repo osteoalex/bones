@@ -6,7 +6,7 @@ import { AppDispatch } from '../../../../../types/store.types';
 import { RootState } from '../../../../store';
 import { redo } from '../../actions/redo.action';
 import { undo } from '../../actions/undo.action';
-import { setAlt, setCtrl, setShift } from '../../slices/hotkeys.slice';
+import { setAlt, setCtrl, setP, setShift } from '../../slices/hotkeys.slice';
 import Alt from './alt.svg';
 import Ctrl from './ctrl.svg';
 import {
@@ -14,11 +14,14 @@ import {
   HotKeysToggleRow,
   HotKeysToggleWrapper,
 } from './hotkeys-toggle.styles';
+import P from './p.svg';
 import Shift from './shift.svg';
 
 const HotkeysToggle: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { ctrl, alt, shift } = useSelector((state: RootState) => state.hotkeys);
+  const { ctrl, alt, shift, p } = useSelector(
+    (state: RootState) => state.hotkeys,
+  );
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -37,6 +40,10 @@ const HotkeysToggle: React.FC = () => {
         e.preventDefault();
         dispatch(redo());
       }
+      if (e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        dispatch(setP(true));
+      }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === 'Control') dispatch(setCtrl(false));
@@ -45,6 +52,10 @@ const HotkeysToggle: React.FC = () => {
         dispatch(setAlt(false));
       }
       if (e.key === 'Shift') dispatch(setShift(false));
+      if (e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        dispatch(setP(false));
+      }
     };
     const handleBlur = () => {
       dispatch(setCtrl(false));
@@ -83,6 +94,13 @@ const HotkeysToggle: React.FC = () => {
         <Switch
           checked={shift}
           onChange={(_, checked) => dispatch(setShift(checked))}
+        />
+      </HotKeysToggleRow>
+      <HotKeysToggleRow>
+        <HotKeysToggleImg src={P} alt="P" />
+        <Switch
+          checked={p}
+          onChange={(_, checked) => dispatch(setP(checked))}
         />
       </HotKeysToggleRow>
     </HotKeysToggleWrapper>

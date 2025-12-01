@@ -4,12 +4,14 @@ export interface HotkeysState {
   ctrl: boolean;
   alt: boolean;
   shift: boolean;
+  p: boolean;
 }
 
 const initialState: HotkeysState = {
   ctrl: false,
   alt: false,
   shift: false,
+  p: false,
 };
 
 export const hotkeysSlice = createSlice({
@@ -25,11 +27,11 @@ export const hotkeysSlice = createSlice({
     setShift(state, action: PayloadAction<boolean>) {
       state.shift = action.payload;
     },
-    setHotkeys(state, action: PayloadAction<Partial<HotkeysState>>) {
-      return { ...state, ...action.payload };
+    setP(state, action: PayloadAction<boolean>) {
+      state.p = action.payload;
     },
   },
 });
 
-export const { setCtrl, setAlt, setShift, setHotkeys } = hotkeysSlice.actions;
+export const { setCtrl, setAlt, setShift, setP } = hotkeysSlice.actions;
 export default hotkeysSlice.reducer;

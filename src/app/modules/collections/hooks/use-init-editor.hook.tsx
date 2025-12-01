@@ -5,7 +5,6 @@ import type DragPanType from 'ol/interaction/DragPan';
 import type Interaction from 'ol/interaction/Interaction';
 import type MapBrowserEvent from 'ol/MapBrowserEvent';
 import { createMiddleMouseDragPan } from '../utils/middle-mouse-drag-pan';
-import { createAltLmbDragPan } from '../utils/alt-lmb-drag-pan';
 import { Projection } from 'ol/proj';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,7 +26,6 @@ export const useInitEditor = (
   mapRef: React.MutableRefObject<HTMLDivElement>,
 ) => {
   const dispatch = useDispatch<AppDispatch>();
-  const mode = useSelector((state: RootState) => state.editor.mode);
   const drawFragmentRef = useSelector(
     (state: RootState) => state.interactions.drawFragmentRef,
   );
@@ -45,6 +43,7 @@ export const useInitEditor = (
   );
   const olMapRef = useSelector((state: RootState) => state.layers.olMapRef);
   const altHotkey = useSelector((state: RootState) => state.hotkeys.alt);
+  const pHotkey = useSelector((state: RootState) => state.hotkeys.p);
 
   useEffect(() => {
     const abortDrawing = () => {
@@ -143,8 +142,8 @@ export const useInitEditor = (
     // Only add if Alt is toggled in state
     if (altHotkey) {
       const altLmbPan = new DragPan({
-        condition: (event: MapBrowserEvent<UIEvent>) => {
-          const originalEvent = event.originalEvent as MouseEvent;
+        condition: (event: MapBrowserEvent<MouseEvent>) => {
+          const originalEvent = event.originalEvent;
           return originalEvent && originalEvent.button === 0 && altHotkey;
         },
       });
@@ -160,23 +159,37 @@ export const useInitEditor = (
     };
   }, [olMapRef, altHotkey]);
 
+  // P key interaction that checks Redux state
   useEffect(() => {
-    let pressed = false;
-    const altDownHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Alt' && !pressed) {
-        pressed = true;
+    if (!olMapRef) return;
+    // Remove any previous custom p+LMB pan interaction
+    let prevPPan: DragPanType | null = null;
+    olMapRef.getInteractions().forEach((interaction: Interaction) => {
+      if (
+        interaction &&
+        typeof interaction.get === 'function' &&
+        interaction.get('isPPan')
+      ) {
+        olMapRef.removeInteraction(interaction);
       }
-    };
-    const altUpHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Alt') {
-        pressed = false;
-      }
-    };
-    document.addEventListener('keydown', altDownHandler);
-    document.addEventListener('keyup', altUpHandler);
+    });
+    // Only add if P is toggled in state
+    if (pHotkey) {
+      const pLmbPan = new DragPan({
+        condition: (event: MapBrowserEvent<MouseEvent>) => {
+          const originalEvent = event.originalEvent;
+          return originalEvent && originalEvent.button === 0 && pHotkey;
+        },
+      });
+      pLmbPan.set('isPPan', true);
+      olMapRef.addInteraction(pLmbPan);
+      prevPPan = pLmbPan;
+    }
+    // Cleanup
     return () => {
-      document.removeEventListener('keydown', altDownHandler);
-      document.removeEventListener('keyup', altUpHandler);
+      if (prevPPan) {
+        olMapRef.removeInteraction(prevPPan);
+      }
     };
-  }, [mode]);
+  }, [olMapRef, pHotkey]);
 };
