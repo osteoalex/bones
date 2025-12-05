@@ -200,18 +200,18 @@ What gets saved
 ### Start Screen Shortcuts
 | Shortcut | Action |
 |----------|--------|
- **Ctrl+N**  Create a new collection 
- **Ctrl+O**  Open an existing collection 
+| **Ctrl+N** | Create a new collection |
+| **Ctrl+O** | Open an existing collection |
 
 ### Collection Editor Shortcuts
 | Shortcut | Action |
 |----------|--------|
- **Ctrl+N**  Create a new item (within a collection) 
- **Ctrl+S**  Save the current item 
- **Ctrl+Click**  Toggle bone selection (multi-select) in Bones list 
- **Shift+Click**  Range select bones in Bones list 
- **ESC**  Abort current drawing operation or cancel selection 
- **Shift + Left Mouse Button + Move**  Zoom in/out/rotation of skeleton 
+| **Ctrl+N** | Create a new item (within a collection) |
+| **Ctrl+S** | Save the current item |
+| **Ctrl+Click** | Toggle bone selection (multi-select) in Bones list |
+| **Shift+Click** | Range select bones in Bones list |
+| **ESC** | Abort current drawing operation or cancel selection |
+| **Shift + Left Mouse Button + Move** | Zoom in/out/rotation of skeleton |
 
 ## 8) Export your work
 
