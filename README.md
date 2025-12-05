@@ -22,7 +22,7 @@ Important
 ## 1) Bones – Install Guide
 
 Install it from GitHub Releases
-1. Go to the repository’s GitHub page and open the Releases section.
+1. Go to the repository's GitHub page and open the Releases section.
 2. Download the installer for your system:
    – Windows: bones-0.5.2-win-x64.rar
    – Linux (Debian/Ubuntu): bones_0.5.2_amd64.deb
@@ -54,7 +54,7 @@ Installing Linux (Fedora/RHEL/openSUSE)
 
 Launch the app
 – Windows: Use the desktop shortcut or find Bones in the Start menu.
-– Linux: Find Bones in the applications menu. If you need to find it, search for ‘Bones’.
+– Linux: Find Bones in the applications menu. If you need to find it, search for 'Bones'.
 
 
 ## 2) Get the skeleton SVG (background)
@@ -70,12 +70,23 @@ You will need to get the skeleton SVG file to use as a background.
 Note: When you download the SVG, it will first open in your browser (as an image).  
 To save it correctly on your computer:
 –  Right-click on the image
-– Select **“Save As…”**
+– Select **"Save As…"**
 -  Save it as `skeleton.svg` on your computer
 
 Click on the link below to open and download:
-<a href="https://raw.githubusercontent.com/osteoalex/bones/main/assets/skeleton.svg" download="skeleton.svg">⬇️ Download the SVG</a>
+<a href="https://raw.githubusercontent.com/osteoalex/bones/main/assets/skeleton.svg" download="skeleton.svg">Download the SVG</a>
 
+---
+
+### Get the Infant Skeleton SVG (background)
+
+<!-- Inline preview -->
+  <img src="assets/infant.png"
+       width="300" alt="Infant Skeleton PNG preview">
+
+Click on the link below to open and download:
+<a href="https://raw.githubusercontent.com/osteoalex/bones/main/assets/infant.svg" download="infant.svg">Download Infant Skeleton SVG</a>
+         
  ---
 
 – SVG requirements (important)
@@ -89,86 +100,152 @@ Click on the link below to open and download:
 When the app opens, you have two choices:
 
 A. Create a new collection (start from scratch)
-1. Click on ‘Create New Collection’.
+1. Click on 'Create New Collection'.
 2. Type in a name and a description.
 3. Click Save. You will be asked to choose where to save it (select your preferred folder).
-4. Continue to ‘Add a background’ below.
+4. Continue to 'Add a background' below.
 
 B. Open an existing collection
-1. Click on ‘Open Existing Collection’.
+1. Click on 'Open Existing Collection'.
 
 
 ## 4) Add a background (your SVG)
 
-1. Inside your collection, click on ‘Add Background’.
+1. Inside your collection, click on 'Add Background'.
 2. Select the skeleton SVG file you downloaded earlier.
 3. The app will convert it and add it to background folder for your collection.
-4. You’ll see a success message when it’s done.
+4. You'll see a success message when it's done.
 
 Now your collection has a valid background and you can start adding items and layers.
 
 
 ## 5) Add your first item
 
-1. Click on ‘Add New Item’.
+1. Click on 'Add New Item' or use the keyboard shortcut **Ctrl+N**.
 2. Give it a name (e.g., Skull_01) and confirm (Create).
-3. The app creates a .json file for this item inside your collection’s items folder 
+3. The app creates a .json file for this item inside your collection's items folder 
 4. You can now work on this item with layers and fragments.
 
 
 ## 6) Work with layers and fragments
 
 Create a layer
-1. In the layer controls, click on ‘Add Layer’.
+1. In the layer controls, click on 'Add Layer'.
 2. Give the layer a name.
 3. Choose a fill colour and a stroke colour.
 4. Choose a stroke width (the default is 2).
 5. Click Save. You can create as many layers as you need.
 
-Add and edit fragments
-– Select with Rectangle: quickly pick out elements inside a rectangular area.
-– Draw Fragment to Add: add new fragments to your selected layer.
-– Draw Fragment to Subtract: remove parts of a fragment (carve away).
-– Draw Line to Split: split a fragment by drawing a line across it.
-– Move to Layer: move selected fragments to another layer.
-– Layer Visibility: show/hide layers to focus on specific parts.
-– Hover/Info: see helpful info by hovering over the elements.
+### Editing Tools
+
+The toolbar provides the following tools for working with fragments:
+
+| Tool | Description |
+|------|-------------|
+| **Select with Rectangle** | Quickly select multiple bone elements inside a rectangular area. Click to set the top-left corner, move the mouse, and click again to set the bottom-right corner. All bones fully inside the rectangle will be added to the current layer. |
+| **Draw Fragment to Add** | Draw a custom outline to add fragments. Use points to draw the outline and double-click to finish drawing. The fragment will be added to the active layer. |
+| **Draw Fragment to Subtract** | Remove parts of existing fragments by drawing an outline. Use points to draw the area to remove and double-click to finish. |
+| **Draw Line to Split** | Split a fragment by drawing a line across it. Use points to draw the line and double-click to finish. The fragment will be divided along the line. |
+| **Delete Fragment** | Click on any fragment to delete it from the current layer. |
+| **Add Whole** | Click on bones to select or deselect them for adding entire bone elements. After selection, click the checkmark to add selected bones or X to cancel. Supports multi-select with Ctrl+Click and range select with Shift+Click. |
+| **Save as SVG** | Export the current item as an SVG file. |
+| **Get Info** | Click on any bone or fragment to display detailed information about it, including area calculations and properties. |
+| **Add Annotation** | Add point annotations with text comments to specific locations on fragments. | 
+
+### Layer Management
+
+– **Layer Visibility**: Show or hide layers using the eye icon to focus on specific parts.
+– **Edit Layer**: Modify layer name, colors, and stroke width.
+– **Delete Layer**: Remove a layer (at least one layer must remain).
+– **Layer Details**: View all fragments in a data grid with editable properties and color pickers.
+– **Combine Layers**: Merge multiple layers into one. Overlapping fragments will be automatically combined.
+– **Move to Layer**: Move selected fragments from one layer to another.
+
+### Bones List
+
+The Bones tab provides a searchable list of all bone elements:
+– **Search**: Filter bones by name (minimum 3 characters).
+– **Single Click**: Select a single bone for adding.
+– **Ctrl+Click**: Toggle selection to add or remove bones from multi-selection.
+– **Shift+Click**: Select a range of bones from the last selected to the clicked bone.
+
+### Fragment Properties
+
+When viewing fragment info, you can:
+– Edit custom properties defined in the layer configuration.
+– Change fill and stroke colors individually for each fragment.
+– Adjust stroke width.
+– View the fragment's area as a percentage of the total bone area.
+– Export the specific bone fragment as SVG.
+– Move the fragment to a different layer.
+– Delete the fragment.
+
+### Annotations
+
+Add text annotations to mark specific points on your documentation:
+1. Select the 'Add Annotation' tool.
+2. Click on the location where you want to add an annotation.
+3. Enter your annotation text in the dialog.
+4. Annotations are saved with the item and can be edited or deleted later.
 
 Save your work
-– Save Item: saves the current item from being changed (all layers, fragments, and styles).
-– Save and Close Item: saves and closes the current item.
+– **Save Item** (Ctrl+S): Saves the current item (all layers, fragments, annotations, and styles).
+– **Save and Close Item**: Saves and closes the current item.
 
 What gets saved
-– When you save, the app writes your item’s data to a JSON file (.json). 
+– When you save, the app writes your item's data to a JSON file (.json). 
 
-## 7) Export your work (optional)
+## 7) Keyboard Shortcuts
 
-– Export Collection (CSV)
-  – Export each item’s layers as CSV files with geometry and properties for analysis 
-  – You specify the output folder; the app will create an CSV file for each layer.
+### Start Screen Shortcuts
+| Shortcut | Action |
+|----------|--------|
+| **Ctrl+N** | Create a new collection |
+| **Ctrl+O** | Open an existing collection |
 
-– Export SVG (full)
-  – Export a combined SVG of the background and the fragments you selected.
+### Collection Editor Shortcuts
+| Shortcut | Action |
+|----------|--------|
+| **Ctrl+N** | Create a new item (within a collection) |
+| **Ctrl+S** | Save the current item |
+| **Ctrl+Click** | Toggle bone selection (multi-select) in Bones list |
+| **Shift+Click** | Range select bones in Bones list |
+| **ESC** | Abort current drawing operation or cancel selection |
+| **Shift + Left Mouse Button + Move** | Zoom in/out/rotation of skeleton |
 
-– Export Bone SVG (focused)
-  – Export a focused SVG of the specific bone fragments you select.
+## 8) Export your work
+
+– **Export Collection (CSV)**
+  – Export each item's layers as CSV files with geometry and properties for analysis.
+  – You specify the output folder; the app will create a CSV file for each layer.
+  – Includes fragment geometry, target bone geometry, and all custom properties.
+
+– **Export SVG (full)**
+  – Export a combined SVG of the background and all visible fragments.
+  – Preserves colors, styles, and layer information.
+
+– **Export Bone SVG (focused)**
+  – Export a focused SVG of a specific bone fragment you select.
+  – Useful for detailed documentation of individual elements.
 
 
-## 8) Navigation and tips
+## 9) Navigation and tips
 
-– Zoom: Hold Shift, press and hold the left mouse button (LMB), and move the mouse to zoom.
-– Window: You can maximize the app window to get more workspace.
-– ESC: In many contexts, Esc acts as a back/close shortcut inside collection pages.
+– **Zoom**: Hold Shift, press and hold the left mouse button (LMB), and move the mouse to zoom.
+– **Drag Rotate and Zoom**: The editor supports drag rotation and zoom for enhanced navigation.
+– **Window**: You can maximize the app window to get more workspace.
+– **ESC**: In many contexts, Esc acts as a back/close shortcut inside collection pages and aborts current drawing operations.
+– **Help/Hints**: Click the question mark icon in the bottom-right corner to toggle contextual hints for the current editing mode.
 
 
-## 9) Troubleshooting
+## 10) Troubleshooting
 
 Windows
-– The .rar won’t open:
+– The .rar won't open:
   – Install 7-Zip or WinRAR and then extract bones-0.5.2-win-x64.rar.
 – SmartScreen warning:
-  – Click ‘More info’ then ‘Run anyway’ if you trust the app’s source (this repository).
-– The app won’t start:
+  – Click 'More info' then 'Run anyway' if you trust the app's source (this repository).
+– The app won't start:
   – Try reinstalling it. If prompted by Windows Defender Firewall, click Allow.
 
 Linux (Debian/Ubuntu)
@@ -179,11 +256,14 @@ Linux (Debian/Ubuntu)
 
 Linux (RPM-based)
 – If rpm reports missing dependencies:
-  – Use your software centre to install the dependencies you need, or check the documentation for your distribution’s package manager.
+  – Use your software centre to install the dependencies you need, or check the documentation for your distribution's package manager.
 
 General
-– If you can’t see your background:
+– If you can't see your background:
   – Re-check the SVG rules (closed paths, unique ids, no groups). Re-add the background.
+– If drawing doesn't work:
+  – Make sure you have at least one layer created and selected.
+  – Check that the correct editing tool is active (highlighted in green).
 
 
 ---
@@ -204,7 +284,7 @@ General
 
 ## Requirements
 
-– Node.js >= 20.9.0 and npm >= 10.1.0 (this is enforced by [engines](bones/package.json:21))
+– Node.js >= 20.9.0 and npm >= 10.1.0 (this is enforced by [engines](package.json:21))
 – Git
 – Recommended: Visual Studio Code
 
@@ -223,7 +303,6 @@ If your versions are lower than required, upgrade Node/npm before continuing.
 ```
 git clone <repo-url>
 cd <repo-folder>
-cd bones
 ```
 
 2) Install the dependencies (disable the Git hooks during fresh installs):
@@ -242,7 +321,7 @@ npm run start
 ```
 
 What happens:
-– Electron Forge launches with Webpack via the start script in [bones/package.json](bones/package.json:7).
+– Electron Forge launches with Webpack via the start script in [package.json](package.json:7).
 – The app window opens and DevTools will open automatically in development mode.
 
 
@@ -255,13 +334,13 @@ npm run package
 
 Output:
 – Windows: out/Bones-win32-x64/bones.exe
-  – The executable name is configured as bones in [bones/forge.config.ts](bones/forge.config.ts:15).
+  – The executable name is configured as bones in [forge.config.ts](forge.config.ts:15).
 
 Create platform installers (optional):
 ```
 npm run make
 ```
-– Installers are generated under out/make using makers defined in [bones/forge.config.ts](bones/forge.config.ts:18).
+– Installers are generated under out/make using makers defined in [forge.config.ts](forge.config.ts:18).
 
 
 ## Command Reference
@@ -290,10 +369,10 @@ npm run make
 
 ## Troubleshooting
 
-– The app dwon’t start or the Electron window doesn’t appear
-  – Make sure you are inside the bones directory:
+– The app won't start or the Electron window doesn't appear
+  – Make sure you are inside the project directory:
     – Run: dir (you should see package.json and forge.config.ts)
-  – Confirm versions meet [engines](bones/package.json:21):
+  – Confirm versions meet [engines](package.json:21):
     – node -v, npm -v
 
 – Clean reinstall (this fixes most dependency issues)
@@ -332,24 +411,42 @@ These requirements reflect the original constraints described by the project and
 
 ## Usage Tips
 
-– Zooming:
+– **Zooming**:
   – Hold Shift and press the left mouse button (LMB), then move the mouse to zoom.
+
+– **Efficient Bone Selection**:
+  – Use the Bones list with Ctrl+Click for multi-select or Shift+Click for range selection.
+  – Use the Rectangle selection tool for quick area-based selection.
+
+– **Layer Organization**:
+  – Create separate layers for different types of documentation (e.g., preserved areas, damaged areas, reconstructions).
+  – Use distinct colors for each layer to easily distinguish them.
+
+– **Annotations**:
+  – Use annotations to mark specific features, pathologies, or points of interest.
+  – Annotations are preserved in exports.
 
 
 ## FAQ
 
 – Do I need an .env file?
-  – No. The app reads the name and version directly from [bones/package.json](bones/package.json:1) as seen in [bones/src/index.ts](bones/src/index.ts:17). The example file [bones/.env.example](bones/.env.example:1) is optional.
+  – No. The app reads the name and version directly from [package.json](package.json:1) as seen in [src/index.ts](src/index.ts:17). The example file [.env.example](.env.example:1) is optional.
 
 – Where is the built executable on Windows?
   – After npm run package:
     – out/Bones-win32-x64/bones.exe
-    – The executable name is set in [bones/forge.config.ts](bones/forge.config.ts:15).
+    – The executable name is set in [forge.config.ts](forge.config.ts:15).
 
 – Which script actually starts the development?
-  – npm run start calls Electron Forge as defined in [bones/package.json](bones/package.json:7).
+  – npm run start calls Electron Forge as defined in [package.json](package.json:7).
+
+– How do I add custom properties to fragments?
+  – When creating or editing a layer, you can define custom properties with default values. These properties will be available for each fragment in that layer.
+
+– Can I undo my changes?
+  – Currently, there is no undo feature. Save your work frequently and consider creating backups of your collection folder.
 
 
 ## License
 
-MIT License (see [bones/package.json](bones/package.json:25)).
+MIT License (see [package.json](package.json:25)).
