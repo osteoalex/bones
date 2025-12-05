@@ -142,15 +142,15 @@ The toolbar provides the following tools for working with fragments:
 
 | Tool | Description |
 |------|-------------|
- **Select with Rectangle**  Quickly select multiple bone elements inside a rectangular area. Click to set the top-left corner, move the mouse, and click again to set the bottom-right corner. All bones fully inside the rectangle will be added to the current layer. 
- **Draw Fragment to Add**  Draw a custom outline to add fragments. Use points to draw the outline and double-click to finish drawing. The fragment will be added to the active layer. 
- **Draw Fragment to Subtract**  Remove parts of existing fragments by drawing an outline. Use points to draw the area to remove and double-click to finish. 
- **Draw Line to Split**  Split a fragment by drawing a line across it. Use points to draw the line and double-click to finish. The fragment will be divided along the line. 
- **Delete Fragment**  Click on any fragment to delete it from the current layer. 
- **Add Whole**  Click on bones to select or deselect them for adding entire bone elements. After selection, click the checkmark to add selected bones or X to cancel. Supports multi-select with Ctrl+Click and range select with Shift+Click. 
- **Save as SVG**  Export the current item as an SVG file. 
- **Get Info**  Click on any bone or fragment to display detailed information about it, including area calculations and properties. 
- **Add Annotation**  Add point annotations with text comments to specific locations on fragments. 
+| **Select with Rectangle** | Quickly select multiple bone elements inside a rectangular area. Click to set the top-left corner, move the mouse, and click again to set the bottom-right corner. All bones fully inside the rectangle will be added to the current layer. |
+| **Draw Fragment to Add** | Draw a custom outline to add fragments. Use points to draw the outline and double-click to finish drawing. The fragment will be added to the active layer. |
+| **Draw Fragment to Subtract** | Remove parts of existing fragments by drawing an outline. Use points to draw the area to remove and double-click to finish. |
+| **Draw Line to Split** | Split a fragment by drawing a line across it. Use points to draw the line and double-click to finish. The fragment will be divided along the line. |
+| **Delete Fragment** | Click on any fragment to delete it from the current layer. |
+| **Add Whole** | Click on bones to select or deselect them for adding entire bone elements. After selection, click the checkmark to add selected bones or X to cancel. Supports multi-select with Ctrl+Click and range select with Shift+Click. |
+| **Save as SVG** | Export the current item as an SVG file. |
+| **Get Info** | Click on any bone or fragment to display detailed information about it, including area calculations and properties. |
+| **Add Annotation** | Add point annotations with text comments to specific locations on fragments. | 
 
 ### Layer Management
 
