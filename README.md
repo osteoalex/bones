@@ -85,7 +85,7 @@ Click on the link below to open and download:
        width="300" alt="Infant Skeleton PNG preview">
 
 Click on the link below to open and download:
-<a href="https://raw.githubusercontent.com/osteoalex/bones/add-assets-update-readme/assets/infant.svg" download="infant.svg">Download Infant Skeleton SVG</a>
+<a href="https://raw.githubusercontent.com/osteoalex/bones/main/assets/infant.svg" download="infant.svg">Download Infant Skeleton SVG</a>
          
  ---
 
