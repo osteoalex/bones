@@ -41,7 +41,6 @@ const HotkeysToggle: React.FC = () => {
         dispatch(redo());
       }
       if (e.key.toLowerCase() === 'p') {
-        e.preventDefault();
         dispatch(setP(true));
       }
     };

@@ -27,9 +27,15 @@ export function initializeAddByRectangleDraw(): TAction {
     const dragBox = new DragBox({
       condition: (event) => {
         const altToggle = getState().hotkeys.alt;
+        const pToggle = getState().hotkeys.p;
         const originalEvent = event.originalEvent as MouseEvent;
         // Only allow left mouse button (0)
-        if (altToggle || !originalEvent || originalEvent.button !== 0)
+        if (
+          altToggle ||
+          pToggle ||
+          !originalEvent ||
+          originalEvent.button !== 0
+        )
           return false;
         return true;
       },

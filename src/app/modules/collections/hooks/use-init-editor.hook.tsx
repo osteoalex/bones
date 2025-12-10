@@ -17,7 +17,6 @@ import { setCurrentItem } from '../slices/editor.slice';
 import { setOlMapRef } from '../slices/layers.slice';
 import { setInfoDetails, setMultipleAddIds } from '../slices/selected.slice';
 import { setShowPropsDialog } from '../slices/ui.slice';
-import { map } from 'leaflet';
 import { handleRightClick } from '../actions/right-click.action';
 import { setupClearBoneSelectionOnMapClick, setupClearFragmentSelectionOnMapClick } from '../actions/clear-selection-on-map-click';
 /* eslint-enable */
@@ -44,6 +43,7 @@ export const useInitEditor = (
   const olMapRef = useSelector((state: RootState) => state.layers.olMapRef);
   const altHotkey = useSelector((state: RootState) => state.hotkeys.alt);
   const pHotkey = useSelector((state: RootState) => state.hotkeys.p);
+  const ui = useSelector((state: RootState) => state.ui);
 
   useEffect(() => {
     const abortDrawing = () => {
@@ -178,7 +178,16 @@ export const useInitEditor = (
       const pLmbPan = new DragPan({
         condition: (event: MapBrowserEvent<MouseEvent>) => {
           const originalEvent = event.originalEvent;
-          return originalEvent && originalEvent.button === 0 && pHotkey;
+          const notInModal =
+            !ui.annotationDialog &&
+            !ui.manageBackgroundsDialogOpen &&
+            !ui.combineLayersDialogOpen &&
+            !ui.moveToLayerDialogOpen &&
+            !ui.copyToLayerDialogOpen &&
+            !ui.newItemNameDialogOpen;
+          return (
+            originalEvent && originalEvent.button === 0 && pHotkey && notInModal
+          );
         },
       });
       pLmbPan.set('isPPan', true);
