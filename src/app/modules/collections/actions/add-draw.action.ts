@@ -223,6 +223,76 @@ export function submitFragmentHandler(
     }
     olMapRef.render();
 
+    // Ensure there are no MultiPolygon features left in the layer: split them
+    // into separate Polygon features so each feature is a single Polygon.
+    const layerFeatures = layers[activeLayerIdx].source.getFeatures().slice();
+    for (const feat of layerFeatures) {
+      const geom = feat.getGeometry();
+      if (!geom) continue;
+      if (geom.getType && geom.getType() === 'MultiPolygon') {
+        const mp = geojsonFormat.writeFeatureObject(
+          feat,
+        ) as GeojsonFeature<MultiPolygon>;
+        const parts = multiPolygonToPolygons(mp);
+        if (parts.length <= 1) continue;
+
+        // Replace original feature geometry with first polygon
+        const firstRaw = geojsonFormat.readFeature(parts[0]);
+        const firstOl = Array.isArray(firstRaw) ? firstRaw[0] : firstRaw;
+        feat.setGeometry(firstOl.getGeometry());
+
+        // Add remaining parts as new features
+        for (let i = 1; i < parts.length; i++) {
+          const partRaw = geojsonFormat.readFeature(parts[i]);
+          const partOl = Array.isArray(partRaw) ? partRaw[0] : partRaw;
+          // Copy properties from original feature
+          partOl.setProperties({ ...feat.getProperties() });
+          partOl.setId(getNextId(layers[activeLayerIdx].source.getFeatures()));
+          resetFeatureStyle(partOl);
+          layers[activeLayerIdx].source.addFeature(partOl);
+        }
+      }
+    }
+
+    // Merge identical polygon geometries across the layer: if multiple features
+    // have the same polygon coordinates, merge their properties and remove
+    // duplicates so only one feature remains per unique geometry.
+    const allFeatures = layers[activeLayerIdx].source.getFeatures().slice();
+    const seen = new Map<string, Feature<Geometry>>();
+    for (const f of allFeatures) {
+      const g = f.getGeometry();
+      if (!g || (g.getType && g.getType() !== 'Polygon')) continue;
+      // Serialize coordinates for comparison
+      const obj = geojsonFormat.writeFeatureObject(
+        f,
+      ) as GeoJSONFeature<Polygon>;
+      const key = JSON.stringify(obj.geometry.coordinates);
+      if (!seen.has(key)) {
+        seen.set(key, f);
+        continue;
+      }
+      const existing = seen.get(key) as Feature<Geometry>;
+      const existingProps = existing.getProperties() || {};
+      const newProps = f.getProperties() || {};
+      const merged: Record<string, string | number> = { ...existingProps };
+      for (const [k, v] of Object.entries(newProps)) {
+        // Skip merging internal id fields
+        if (k === 'id' || k === 'targetId') continue;
+        const cur = merged[k];
+        const vs = String(v);
+        if (cur === undefined) {
+          merged[k] = v as string | number;
+        } else if (String(cur) !== vs) {
+          // Combine unique values with a separator
+          const partsVals = Array.from(new Set([String(cur), vs]));
+          merged[k] = partsVals.join(' | ');
+        }
+      }
+      existing.setProperties(merged);
+      // Remove the duplicate feature from the source
+      layers[activeLayerIdx].source.removeFeature(f);
+    }
+
     const geojson = geojsonFormat.writeFeaturesObject(
       layers[activeLayerIdx].source.getFeatures(),
     );

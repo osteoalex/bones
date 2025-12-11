@@ -1,9 +1,16 @@
 import { BrowserWindow, dialog } from 'electron';
 import { readFileSync, writeFileSync } from 'fs';
+import {
+  Feature as GeoJSONFeature,
+  Geometry,
+  MultiPolygon,
+  Polygon,
+} from 'geojson';
 import yaml from 'js-yaml';
 import { basename, join, normalize, relative, resolve } from 'path';
 
 import { CollectionConfigData } from '../types/collection-config-data.interface';
+import { multiPolygonToPolygons } from '../utils';
 import { isCollectionConfigData } from '../utils/type-guards';
 import { cleanConfigItems } from './cleanConfigItems';
 import { cleanItemContent } from './cleanItemContent';
@@ -90,7 +97,86 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
           encoding: 'utf8',
         });
         const itemContent = JSON.parse(itemContentString);
-        const cleanedContent = cleanItemContent(itemContent);
+        let cleanedContent = cleanItemContent(itemContent);
+
+        // Split MultiPolygon features into separate Polygon features and
+        // deduplicate identical polygons by merging their properties.
+        try {
+          cleanedContent = cleanedContent.map((layer) => {
+            if (!layer.fragments || !Array.isArray(layer.fragments.features))
+              return layer;
+            const expanded: GeoJSONFeature<Geometry>[] = [];
+            for (const feat of layer.fragments.features) {
+              if (
+                feat &&
+                feat.geometry &&
+                feat.geometry.type === 'MultiPolygon'
+              ) {
+                const parts = multiPolygonToPolygons(
+                  feat as GeoJSONFeature<MultiPolygon>,
+                );
+                for (const p of parts) {
+                  // copy properties
+                  expanded.push({
+                    type: 'Feature',
+                    geometry: p.geometry,
+                    properties: { ...(feat.properties || {}) },
+                  });
+                }
+              } else {
+                expanded.push(feat as GeoJSONFeature<Geometry>);
+              }
+            }
+
+            // Deduplicate identical polygon geometries by coordinates
+            const seen = new Map<string, GeoJSONFeature<Polygon>>();
+            const deduped: GeoJSONFeature<Geometry>[] = [];
+            for (const f of expanded) {
+              if (!f || !f.geometry || f.geometry.type !== 'Polygon') {
+                deduped.push(f);
+                continue;
+              }
+              const key = JSON.stringify((f.geometry as Polygon).coordinates);
+              if (!seen.has(key)) {
+                seen.set(key, f as GeoJSONFeature<Polygon>);
+                deduped.push(f);
+                continue;
+              }
+              const existing = seen.get(key) as GeoJSONFeature<Polygon>;
+              const existingProps = existing.properties || {};
+              const newProps = f.properties || {};
+              const merged: Record<string, string | number> = {
+                ...existingProps,
+              };
+              for (const [k, v] of Object.entries(newProps)) {
+                if (k === 'id' || k === 'targetId') continue;
+                const cur = merged[k];
+                const vs = String(v);
+                if (cur === undefined) {
+                  merged[k] = v as string | number;
+                } else if (String(cur) !== vs) {
+                  const parts = Array.from(new Set([String(cur), vs]));
+                  merged[k] = parts.join(' | ');
+                }
+              }
+              existing.properties = merged;
+            }
+
+            return {
+              ...layer,
+              fragments: {
+                ...layer.fragments,
+                features: deduped,
+              },
+            };
+          });
+        } catch (err) {
+          logErr(
+            `Error splitting multipolygons for item ${item.itemPath}`,
+            err,
+          );
+        }
+
         if (JSON.stringify(itemContent) !== JSON.stringify(cleanedContent)) {
           writeFileSync(item.itemPath, JSON.stringify(cleanedContent, null, 2));
         }
