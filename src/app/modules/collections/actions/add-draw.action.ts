@@ -112,21 +112,50 @@ export function additionDrawEndHandler(e: DrawEvent): TAction {
     const added: Feature<Geometry>[] = [];
 
     if (intersects.length) {
+      // Group intersecting fragments by their bone target id so that when
+      // multiple fragments belonging to the same bone are present we union
+      // them all with the drawn feature and replace them with a single
+      // combined feature. This prevents keeping only the first fragment's
+      // union and removing the rest.
+      const groups = new Map<
+        string | number | undefined,
+        Feature<Geometry>[]
+      >();
       for (const bone of intersects) {
-        const sum: Feature = e.feature.clone();
+        const key = bone.getProperties()?.targetId ?? bone.getId();
+        const arr = groups.get(key) || [];
+        arr.push(bone);
+        groups.set(key, arr);
+      }
+
+      for (const [, group] of groups) {
+        // Accumulate union of all fragment geometries in the group
+        let accumGeo = featureToTurfGeometry(group[0]);
+        for (let i = 1; i < group.length; i++) {
+          accumGeo = turfUnion(accumGeo, featureToTurfGeometry(group[i]));
+        }
+
+        // Union accumulated bone geometry with the drawn feature
         const summedGeoJSON = turfUnion(
-          featureToTurfGeometry(bone),
-          featureToTurfGeometry(sum),
+          accumGeo,
+          featureToTurfGeometry(e.feature),
         );
         const f = geojsonFormat.readFeature(summedGeoJSON);
-        sum.setProperties(bone.getProperties());
+
+        const sum: Feature = e.feature.clone();
+        sum.setProperties(group[0].getProperties());
         sum.setGeometry(
           Array.isArray(f) ? f[0].getGeometry() : f.getGeometry(),
         );
-        sum.setId(bone.getProperties().targetId);
-        layers[activeLayerIdx].source.removeFeature(bone);
+        sum.setId(group[0].getProperties().targetId);
+
+        // Remove all original fragments for this bone and record them
+        for (const b of group) {
+          layers[activeLayerIdx].source.removeFeature(b);
+          removed.push(b);
+        }
+
         layers[activeLayerIdx].source.addFeature(sum);
-        removed.push(bone);
         added.push(sum);
       }
     }
