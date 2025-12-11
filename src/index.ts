@@ -70,7 +70,7 @@ const createWindow = (): void => {
 
   store.set('currentlyOpenedItem', '');
 
-  mainWindow.on('close', () => {
+  mainWindow.on('close', (event) => {
     const userDataPath = [app.getPath('appData'), app.getName()];
     const currentlyOpen = store.get('currentlyOpenedItem');
     const config = store.get('currentCollectionConfig');
@@ -91,12 +91,16 @@ const createWindow = (): void => {
         const prompt = dialog.showMessageBoxSync(mainWindow, {
           title: 'Unsaved changes!',
           message: 'Do you want to save current file?',
-          buttons: ['Yes', 'No'],
+          buttons: ['Yes', 'No', 'Cancel'],
         });
         if (prompt === 0) {
           writeFileSync(normalize(join(config.path, currentlyOpen)), temp, {
             encoding: 'utf8',
           });
+        }
+        if (prompt === 2) {
+          event.preventDefault();
+          return;
         }
       }
       store.set('currentlyOpenedItem', '');
