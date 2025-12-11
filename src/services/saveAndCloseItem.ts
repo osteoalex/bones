@@ -24,7 +24,21 @@ export async function saveAndCloseItem(
       encoding: 'utf8',
     });
     try {
-      deepEqual(source, temp);
+      // First, try semantically comparing as JSON so formatting/line-endings
+      // won't cause a false positive difference.
+      try {
+        const parsedSource = JSON.parse(source);
+        const parsedTemp = JSON.parse(temp);
+        deepEqual(parsedSource, parsedTemp);
+      } catch (parseOrAssertErr) {
+        // Fallback: normalize text (remove BOM, unify line endings, trim)
+        const normalize = (s: string) =>
+          s
+            .replace(/^\uFEFF/, '')
+            .replace(/\r\n/g, '\n')
+            .trim();
+        deepEqual(normalize(source), normalize(temp));
+      }
     } catch (error) {
       const prompt = dialog.showMessageBoxSync(mainWindow, {
         title: 'Unsaved changes!',
