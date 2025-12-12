@@ -93,6 +93,9 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
         const filePath = normalize(
           join(cleanedConfig.path || '', item.itemPath),
         );
+        const backgroundPath = normalize(
+          join(cleanedConfig.path || '', item.background),
+        );
         const itemContentString = readFileSync(filePath, {
           encoding: 'utf8',
         });
@@ -178,11 +181,12 @@ export async function openCollection(mainWindow: BrowserWindow, store: Store) {
         }
 
         if (JSON.stringify(itemContent) !== JSON.stringify(cleanedContent)) {
-          writeFileSync(item.itemPath, JSON.stringify(cleanedContent, null, 2));
+          writeFileSync(filePath, JSON.stringify(cleanedContent, null, 2));
         }
         // Migrate annotations to ensure targetId
-        migrateAnnotations(item.itemPath, item.background);
+        migrateAnnotations(filePath, backgroundPath);
       } catch (e) {
+        console.log(e);
         logErr(`Error cleaning item file: ${item.itemPath}`, e);
       }
     }
