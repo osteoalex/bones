@@ -1,4 +1,5 @@
 import { Point as ePoint, Polygon as ePolygon } from '@mathigon/euclid';
+import turfBooleanContains from '@turf/boolean-contains';
 import turfIntersects from '@turf/boolean-intersects';
 import {
   lineString as turfLine,
@@ -45,14 +46,20 @@ export function getNextId(features: OlFeature[]): number {
   if (features.length === 0) {
     return 0;
   }
-  const arr = Array.from({ length: features.length }, (_value, index) => index);
-  const ids = features.map<number>((f) => Number(f.getId()));
-  const max = Math.max(...ids);
-  if (Math.max(...arr) === max) {
-    return max + 1;
-  } else {
-    return arr.find((num) => !ids.includes(num));
+  const ids = new Set<number>();
+  let max = -1;
+  for (const f of features) {
+    const id = Number(f.getId());
+    if (!isNaN(id)) {
+      ids.add(id);
+      if (id > max) max = id;
+    }
   }
+  // Find the smallest non-negative integer not in the set
+  for (let i = 0; i <= max; i++) {
+    if (!ids.has(i)) return i;
+  }
+  return max + 1;
 }
 
 export function getValidation(config: Layer['propertiesConfig']) {
@@ -121,6 +128,50 @@ export const featureToTurLine = (
   );
 };
 
+/**
+ * Safe boolean-contains that supports GeoJSON MultiPolygon by splitting
+ * them into Polygon parts and checking containment across parts.
+ */
+export function booleanContainsSafe(
+  a: Feature<Polygon | MultiPolygon>,
+  b: Feature<Polygon | MultiPolygon>,
+): boolean {
+  if (!isGeoJsonMultiPolygon(a) && !isGeoJsonMultiPolygon(b)) {
+    try {
+      return turfBooleanContains(
+        a as unknown as Feature<Polygon | MultiPolygon>,
+        b as unknown as Feature<Polygon | MultiPolygon>,
+      );
+    } catch (e) {
+      return false;
+    }
+  }
+
+  const partsA = isGeoJsonMultiPolygon(a)
+    ? multiPolygonToPolygons(a as Feature<MultiPolygon>)
+    : [a as Feature<Polygon>];
+  const partsB = isGeoJsonMultiPolygon(b)
+    ? multiPolygonToPolygons(b as Feature<MultiPolygon>)
+    : [b as Feature<Polygon>];
+
+  for (const pa of partsA) {
+    for (const pb of partsB) {
+      try {
+        if (
+          turfBooleanContains(
+            pa as unknown as Feature<Polygon>,
+            pb as unknown as Feature<Polygon>,
+          )
+        )
+          return true;
+      } catch (e) {
+        // ignore
+      }
+    }
+  }
+  return false;
+}
+
 export const geojsonFormat = new OLGeoJSON();
 export const projection = new Projection({
   code: 'EPSG:3395',
@@ -128,27 +179,32 @@ export const projection = new Projection({
 });
 
 export function getFeaturesInFeatureExtent(
-  extentFeature: OlFeature<Geometry>,
+  extentFeatures: OlFeature<Geometry>[] | OlFeature<Geometry>,
   source: VectorSource<OlFeature<Geometry>>,
 ): OlFeature<Geometry>[] {
-  const existingFeatures = source.getFeaturesInExtent(
-    extentFeature.getGeometry().getExtent(),
-  );
-  const extentTurfGeo = isLineString(extentFeature.getGeometry())
-    ? featureToTurLine(extentFeature)
-    : featureToTurfGeometry(extentFeature);
-  const featuresInExtent: OlFeature<Geometry>[] = [];
-  for (const feature of existingFeatures) {
-    const overlaps = turfIntersects(
-      extentTurfGeo,
-      featureToTurfGeometry(feature),
+  // Accept a single feature or an array
+  const featuresArr = Array.isArray(extentFeatures)
+    ? extentFeatures
+    : [extentFeatures];
+  const featuresInExtent: Set<OlFeature<Geometry>> = new Set();
+  for (const extentFeature of featuresArr) {
+    const existingFeatures = source.getFeaturesInExtent(
+      extentFeature.getGeometry().getExtent(),
     );
-    if (overlaps) {
-      featuresInExtent.push(feature);
+    const extentTurfGeo = isLineString(extentFeature.getGeometry())
+      ? featureToTurLine(extentFeature)
+      : featureToTurfGeometry(extentFeature);
+    for (const feature of existingFeatures) {
+      const overlaps = turfIntersects(
+        extentTurfGeo,
+        featureToTurfGeometry(feature),
+      );
+      if (overlaps) {
+        featuresInExtent.add(feature);
+      }
     }
   }
-
-  return featuresInExtent;
+  return Array.from(featuresInExtent);
 }
 
 export function getLayerDefaultName(layersLength: number): string {

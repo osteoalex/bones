@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import editorReducer from './modules/collections/slices/editor.slice';
+import historyReducer from './modules/collections/slices/history.slice';
+import hotkeysReducer from './modules/collections/slices/hotkeys.slice';
 import interactionsReducer from './modules/collections/slices/interactions.slice';
 import layersReducer from './modules/collections/slices/layers.slice';
-import selectedReducer from './modules/collections/slices/selected.splice';
+import selectedReducer from './modules/collections/slices/selected.slice';
 import uiReducer from './modules/collections/slices/ui.slice';
 
 export const store = configureStore({
@@ -12,7 +14,9 @@ export const store = configureStore({
     editor: editorReducer,
     selected: selectedReducer,
     layers: layersReducer,
+    history: historyReducer,
     interactions: interactionsReducer,
+    hotkeys: hotkeysReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

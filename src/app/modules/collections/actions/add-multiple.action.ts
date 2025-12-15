@@ -1,90 +1,21 @@
 import { Feature } from 'ol';
-import { singleClick } from 'ol/events/condition';
 import { Geometry } from 'ol/geom';
-import { Select } from 'ol/interaction';
-import { SelectEvent } from 'ol/interaction/Select';
 import { Fill, Stroke, Style } from 'ol/style';
 
 import { TAction } from '../../../../types/store.types';
 import { geojsonFormat, getNextId } from '../../../../utils';
-import {
-  baseStyle,
-  selectMultipleStyle,
-} from '../components/collection-home/editor-styles';
-import { setAddMultipleRef } from '../slices/interactions.slice';
+import { baseStyle } from '../components/collection-home/editor-styles';
 import { setLayersData } from '../slices/layers.slice';
-import { setMultipleAddIds } from '../slices/selected.splice';
+import { setSelectedBone } from '../slices/selected.slice';
 import { recalculateAreas } from './calculate-area.action';
-
-export function setupAddMultipleInteraction(): TAction {
-  return (dispatch, getState) => {
-    const { olMapRef, baseLayerRef } = getState().layers;
-    const { addMultipleRef } = getState().interactions;
-    if (addMultipleRef) {
-      olMapRef.removeInteraction(addMultipleRef);
-    }
-    const selectMultipleClick = new Select({
-      layers: [baseLayerRef],
-      condition: singleClick,
-      multi: true,
-      style: selectMultipleStyle,
-    });
-
-    selectMultipleClick.setActive(false);
-
-    selectMultipleClick.on('select', (e: SelectEvent) =>
-      dispatch(addMultipleHandler(e)),
-    );
-
-    olMapRef.addInteraction(selectMultipleClick);
-
-    dispatch(setAddMultipleRef(selectMultipleClick));
-  };
-}
-
-export function addMultipleHandler(e: SelectEvent): TAction {
-  return (dispatch, getState) => {
-    const { baseSourceRef } = getState().layers;
-    const { multipleAddIds } = getState().selected;
-    if (baseSourceRef) {
-      if (e.selected.length) {
-        const id = e.selected[0].getId().toString();
-        const ids = new Set(multipleAddIds).add(id);
-        dispatch(setMultipleAddIds([...ids]));
-        if (ids.size) {
-          ids.forEach((id) => {
-            const feature = baseSourceRef.getFeatureById(id);
-            feature.setStyle(selectMultipleStyle);
-          });
-        } else {
-          baseSourceRef.forEachFeature((feature) => {
-            feature.setStyle(baseStyle);
-          });
-        }
-        document.dispatchEvent(
-          new CustomEvent('updateSelection', {
-            detail: [...ids],
-          }),
-        );
-      } else {
-        dispatch(setMultipleAddIds([]));
-        baseSourceRef.forEachFeature((feature) => {
-          feature.setStyle(baseStyle);
-        });
-        document.dispatchEvent(new CustomEvent('resetSelection'));
-      }
-    }
-    e.selected = [];
-    e.deselected = [];
-  };
-}
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function addMultipleCommitHandler(): TAction {
   return async (dispatch, getState) => {
     const { baseSourceRef, layers, activeLayerIdx, layersData } =
       getState().layers;
-    const { multipleAddIds } = getState().selected;
-    if (!multipleAddIds.length) {
+    const selectedBones = getState().selected.selectedBone;
+    if (!selectedBones.length) {
       return;
     }
     const properties = layersData[activeLayerIdx].propertiesConfig.reduce<
@@ -98,8 +29,10 @@ export function addMultipleCommitHandler(): TAction {
     properties.strokeWidth = layersData[activeLayerIdx].strokeWidth;
     const overlapping: Feature<Geometry>[] = [];
 
-    for (const id of multipleAddIds) {
+    for (const bone of selectedBones) {
+      const id = bone.getId();
       const base = baseSourceRef.getFeatureById(id);
+      if (!base) continue;
       base.setStyle(baseStyle);
       const cloned = base.clone();
       cloned.setId(id);
@@ -136,6 +69,8 @@ export function addMultipleCommitHandler(): TAction {
     const geojson = geojsonFormat.writeFeaturesObject(
       layers[activeLayerIdx].source.getFeatures(),
     );
+    // save snapshot for undo
+    dispatch(saveSnapshot());
     const newLayersData = [...layersData];
 
     newLayersData[activeLayerIdx] = {
@@ -148,5 +83,6 @@ export function addMultipleCommitHandler(): TAction {
     await window.electron.saveFeaturesToTempFile(newLayersData);
 
     document.dispatchEvent(new CustomEvent('resetSelection'));
+    dispatch(setSelectedBone([]));
   };
 }

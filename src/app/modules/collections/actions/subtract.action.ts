@@ -21,11 +21,14 @@ import {
   isGeoJsonMultiPolygon,
   isGeoJsonPolygon,
 } from '../../../../utils/type-guards';
+import { setIsSubtracting } from '../slices/interactions.slice';
 import { setLayersData } from '../slices/layers.slice';
+import { setLoading } from '../slices/ui.slice';
 import {
   recalculateAreaByTargetId,
   recalculateAreas,
 } from './calculate-area.action';
+import { saveSnapshot } from './saveSnapshot.action';
 
 export function setupSubtractFragmentInteraction(
   source: VectorSource<Feature<Geometry>>,
@@ -44,6 +47,7 @@ export function setupSubtractFragmentInteraction(
     subtractDraw.setActive(false);
     olMapRef.addInteraction(subtractDraw);
 
+    subtractDraw.on('drawstart', () => dispatch(setIsSubtracting(true)));
     subtractDraw.on('drawend', (e: DrawEvent) =>
       dispatch(subtractDrawHandler(e)),
     );
@@ -53,14 +57,24 @@ export function setupSubtractFragmentInteraction(
 
 export function subtractDrawHandler(e: DrawEvent): TAction {
   return async (dispatch, getState) => {
+    dispatch(setIsSubtracting(false));
+    dispatch(setLoading(true));
     const { layers, activeLayerIdx, baseSourceRef, layersData } =
       getState().layers;
     if (layers[activeLayerIdx].source) {
       const toSubtractFeature = e.feature;
-      const features = getFeaturesInFeatureExtent(
+      // Restrict to fragments on selected bone(s) if any are selected
+      const selectedBones = getState().selected.selectedBone;
+      let features = getFeaturesInFeatureExtent(
         toSubtractFeature,
         layers[activeLayerIdx].source,
       );
+      if (selectedBones && selectedBones.length > 0) {
+        const selectedBoneIds = selectedBones.map((b) => b.getId());
+        features = features.filter((f) =>
+          selectedBoneIds.includes(f.getProperties().targetId),
+        );
+      }
 
       if (!features.length) {
         setTimeout(() => {
@@ -68,7 +82,8 @@ export function subtractDrawHandler(e: DrawEvent): TAction {
         }, 100);
         return;
       }
-      for await (const feature of features) {
+
+      for (const feature of features) {
         const current = baseSourceRef
           .getFeatures()
           .find((f) => f.getId() === feature.getProperties().targetId);
@@ -89,7 +104,16 @@ export function subtractDrawHandler(e: DrawEvent): TAction {
           toSubtract.geometry.coordinates,
         );
         const diff = turfDifference(mPoly, toSubtractMPoly);
-        if (isGeoJsonMultiPolygon(diff)) {
+        // If diff is null or has empty geometry, remove the feature entirely
+        if (
+          !diff ||
+          !diff.geometry ||
+          (Array.isArray(diff.geometry.coordinates) &&
+            diff.geometry.coordinates.length === 0)
+        ) {
+          // Remove the feature from the layer
+          layers[activeLayerIdx].source.removeFeature(feature);
+        } else if (isGeoJsonMultiPolygon(diff)) {
           const polys = diff.geometry.coordinates.map((p) => turfPolygon(p));
           const f = geojsonFormat.readFeature(polys.splice(0, 1)[0]);
           feature.setGeometry(
@@ -141,31 +165,42 @@ export function subtractDrawHandler(e: DrawEvent): TAction {
             }%`,
           });
         }
+        // schedule removal of the drawn subtract feature shortly after
         setTimeout(() => {
           layers[activeLayerIdx].source.removeFeature(toSubtractFeature);
         }, 100);
-        setTimeout(async () => {
-          const geojson = geojsonFormat.writeFeaturesObject(
-            layers[activeLayerIdx].source.getFeatures(),
-          );
-          const newLayersData = [...layersData];
-
-          newLayersData[activeLayerIdx] = {
-            ...layersData[activeLayerIdx],
-            fragments: geojson,
-          };
-
-          dispatch(setLayersData(newLayersData));
-          await window.electron.saveFeaturesToTempFile(newLayersData);
-
-          dispatch(recalculateAreas());
-          for (const feature of features) {
-            dispatch(
-              recalculateAreaByTargetId(feature.getProperties().targetId),
-            );
-          }
-        }, 200);
       }
+
+      // After processing all features, wait a short moment for OL to settle,
+      // then read the source once, save a single snapshot and update Redux.
+      setTimeout(async () => {
+        const geojson = geojsonFormat.writeFeaturesObject(
+          layers[activeLayerIdx].source.getFeatures(),
+        );
+        const newLayersData = [...layersData];
+
+        newLayersData[activeLayerIdx] = {
+          ...layersData[activeLayerIdx],
+          fragments: geojson,
+        };
+
+        // recalculate areas but avoid recalculateAreas saving a snapshot
+        dispatch(recalculateAreas({ saveSnapshot: false }));
+        // save a single snapshot for the entire subtract operation (after recalculation)
+        dispatch(saveSnapshot());
+
+        dispatch(setLayersData(newLayersData));
+        await window.electron.saveFeaturesToTempFile(newLayersData);
+
+        for (const feature of features) {
+          dispatch(
+            recalculateAreaByTargetId(feature.getProperties().targetId, {
+              saveSnapshot: false,
+            }),
+          );
+        }
+        dispatch(setLoading(false));
+      }, 200);
     }
   };
 }

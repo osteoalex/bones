@@ -1,10 +1,3 @@
-import turfContains from '@turf/boolean-contains';
-import {
-  multiPolygon as turfMultiPolygon,
-  point as turfPoint,
-  polygon as turfPolygon,
-} from '@turf/helpers';
-import { Feature as GeoJSONFeature, MultiPolygon, Polygon } from 'geojson';
 import { Feature } from 'ol';
 import { singleClick } from 'ol/events/condition';
 import { Geometry } from 'ol/geom';
@@ -14,10 +7,11 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 
 import { TAction } from '../../../../types/store.types';
-import { calculateArea, geojsonFormat } from '../../../../utils';
-import { isMultiPolygon, isPolygon } from '../../../../utils/type-guards';
+import { isPolygon } from '../../../../utils/type-guards';
 import { deleteStyle } from '../components/collection-home/editor-styles';
+import { setLayersData } from '../slices/layers.slice';
 import { recalculateAreas } from './calculate-area.action';
+import { saveSnapshot } from './saveSnapshot.action';
 export function setupDeleteSelectionInteraction(
   layer: VectorLayer<VectorSource<Feature<Geometry>>>,
 ): TAction<Select> {
@@ -47,52 +41,50 @@ export function setupDeleteSelectionInteraction(
 export function deleteSelectHandler(e: SelectEvent): TAction {
   return (dispatch, getState) => {
     const { deleteSelectRef } = getState().interactions;
-    const { layers, activeLayerIdx, baseSourceRef } = getState().layers;
+    const { layers, activeLayerIdx, layersData } = getState().layers;
+
+    // Prepare updated layersData and record whether anything changed
+    const updatedLayersData = [...layersData];
+    let didChange = false;
+
     for (const selected of e.selected) {
       if (!selected) {
         return;
       }
-      const current = baseSourceRef
-        .getFeatures()
-        .find((f) => f.getId() === selected.getProperties().targetId);
       if (isPolygon(selected.getGeometry())) {
-        layers[activeLayerIdx].source.removeFeature(
-          layers[activeLayerIdx].source.getFeatureById(selected.getId()),
+        const id = selected.getId();
+
+        // Remove from OL source
+        const olFeat = layers[activeLayerIdx].source.getFeatureById(id);
+        if (olFeat) {
+          layers[activeLayerIdx].source.removeFeature(olFeat);
+        }
+
+        // Remove from layersData fragments list
+        const currentLayerData = layersData[activeLayerIdx];
+        const filtered = currentLayerData.fragments.features.filter(
+          (f) => f.id !== id,
         );
-      } else if (isMultiPolygon(selected.getGeometry())) {
-        let geojson = geojsonFormat.writeFeatureObject(
-          selected,
-        ) as GeoJSONFeature<MultiPolygon, Record<string, string>>;
-        const point = turfPoint(e.mapBrowserEvent.coordinate);
-        const coordinates = geojson.geometry.coordinates.filter((poly) => {
-          return !turfContains(turfPolygon(poly), point);
+        updatedLayersData.splice(activeLayerIdx, 1, {
+          ...currentLayerData,
+          fragments: {
+            ...currentLayerData.fragments,
+            features: filtered,
+          },
         });
-        geojson = {
-          ...geojson,
-          properties: {
-            ...geojson.properties,
-            "Fragment's area": `${// eslint-disable-line
-              (
-              (calculateArea(turfMultiPolygon(coordinates)) * 100) / // eslint-disable-line
-                calculateArea(
-                  geojsonFormat.writeFeatureObject(current) as GeoJSONFeature<
-                    Polygon | MultiPolygon
-                  >,
-                )
-              ).toFixed(2)
-            }%`,
-          },
-          geometry: {
-            ...geojson.geometry,
-            coordinates,
-          },
-        };
-        const f = geojsonFormat.readFeature(geojson);
-        const feature = Array.isArray(f) ? f[0] : f;
-        selected.setGeometry(feature.getGeometry());
-        selected.setProperties(feature.getProperties());
+        didChange = true;
       }
     }
+
+    if (didChange) {
+      // save snapshot for undo (captures pre-change state)
+      dispatch(saveSnapshot());
+      dispatch(setLayersData(updatedLayersData));
+      // persist temp file (non-blocking)
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      window.electron.saveFeaturesToTempFile(updatedLayersData);
+    }
+
     deleteSelectRef.getFeatures().clear();
     dispatch(recalculateAreas());
   };

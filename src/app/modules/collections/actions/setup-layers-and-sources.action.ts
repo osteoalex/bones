@@ -28,7 +28,6 @@ import {
 import { setupAnnotationDraw } from './add-annotation.action';
 import { setupDrawFragment } from './add-draw.action';
 import { setupDeleteSelectionInteraction } from './delete.action';
-import { setupBoneHover } from './hover.action';
 import { setupSnapFragmentInteraction } from './snap.action';
 import { setupSubtractFragmentInteraction } from './subtract.action';
 
@@ -143,7 +142,6 @@ export function setupDrawLayers(
       const deleteFragment = dispatch(
         setupDeleteSelectionInteraction(layerLayer),
       );
-      const hover = dispatch(setupBoneHover(layerLayer));
       const subtract = dispatch(setupSubtractFragmentInteraction(layerSource));
 
       const annotationSource = new VectorSource<Feature<Point>>({
@@ -165,7 +163,6 @@ export function setupDrawLayers(
         source: layerSource,
         snap,
         delete: deleteFragment,
-        hover,
         draw,
         subtract,
         annotationSource,

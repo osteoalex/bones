@@ -1,7 +1,7 @@
 import { deepStrictEqual } from 'assert';
 import { BrowserWindow, dialog } from 'electron';
 import { readFileSync, writeFileSync } from 'fs';
-import { basename, join, resolve } from 'path';
+import { basename, join, normalize } from 'path';
 
 import {
   CollectionConfigData,
@@ -28,7 +28,6 @@ export async function openItem(
     try {
       deepStrictEqual(source, temp);
     } catch (error) {
-      // console.log(error);
       const prompt = dialog.showMessageBoxSync(mainWindow, {
         title: 'Unsaved changes!',
         message: 'Do you want to save current file?',
@@ -41,7 +40,7 @@ export async function openItem(
   }
   const config: CollectionConfigData = store.get('currentCollectionConfig');
   const item = config.items.find(
-    (item) => basename(item.itemPath) === filename,
+    (item) => basename(normalize(item.itemPath)) === filename,
   ) as Item;
   if (!item?.itemPath) {
     return {
@@ -52,17 +51,21 @@ export async function openItem(
       }),
     };
   }
-  const itemContentString = readFileSync(resolve(item?.itemPath || ''), {
-    encoding: 'utf8',
-  });
-  const backgroundJSONString = readFileSync(resolve(item.background), {
-    encoding: 'utf8',
-  });
-  writeFileSync(join(...userDataPath, 'currentItem'), itemContentString, {
+  const itemPath = normalize(join(config.path || '', item.itemPath));
+  const itemContentString = readFileSync(itemPath, { encoding: 'utf8' });
+  const backgroundPath = normalize(join(config.path || '', item.background));
+  const backgroundJSONString = readFileSync(backgroundPath, {
     encoding: 'utf8',
   });
   writeFileSync(
-    join(...userDataPath, 'currentBackground'),
+    normalize(join(...userDataPath, 'currentItem')),
+    itemContentString,
+    {
+      encoding: 'utf8',
+    },
+  );
+  writeFileSync(
+    normalize(join(...userDataPath, 'currentBackground')),
     backgroundJSONString,
     {
       encoding: 'utf8',

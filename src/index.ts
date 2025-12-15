@@ -12,18 +12,24 @@ import unhandled from 'electron-unhandled';
 import { readFileSync, rmSync, writeFileSync } from 'fs';
 import { Feature, GeoJSON, MultiPolygon, Polygon } from 'geojson';
 import { Extent } from 'ol/extent';
-import { join } from 'path';
+import { join, normalize } from 'path';
 
 import { name, version } from '../package.json';
 import { addNewBackground } from './services/addNewBackground';
+import { cancelNewItemIfEmpty } from './services/cancelNewItemIfEmpty';
 import { createCollection } from './services/createCollection';
 import { createNewItem } from './services/createNewItem';
+import { deleteBackground } from './services/deleteBackground';
+import { deleteItem } from './services/deleteItem';
 import { exportBoneSVG } from './services/exportBoneSVG';
 import { exportCollection } from './services/exportCollection';
+import { exportCollectionAsSVG } from './services/exportCollectionAsSVG';
 import { exportSVG } from './services/exportSVG';
 import { getAllItems } from './services/getAllItems';
+import { logErr } from './services/logger';
 import { openCollection } from './services/openCollection';
 import { openItem } from './services/openItem';
+import { renameItem } from './services/renameItem';
 import { saveAndCloseItem } from './services/saveAndCloseItem';
 import { saveFeaturesToTempFile } from './services/saveFeaturesToTempFile';
 import { saveItem } from './services/saveItem';
@@ -62,38 +68,46 @@ const createWindow = (): void => {
     mainWindow.webContents.openDevTools();
   }
 
-  console.log(name, version);
-
   store.set('currentlyOpenedItem', '');
 
-  mainWindow.on('close', () => {
+  mainWindow.on('close', (event) => {
     const userDataPath = [app.getPath('appData'), app.getName()];
     const currentlyOpen = store.get('currentlyOpenedItem');
+    const config = store.get('currentCollectionConfig');
     if (currentlyOpen) {
-      const temp = readFileSync(join(...userDataPath, 'currentItem'), {
-        encoding: 'utf8',
-      });
-      const source = readFileSync(currentlyOpen, {
+      const temp = readFileSync(
+        normalize(join(...userDataPath, 'currentItem')),
+        {
+          encoding: 'utf8',
+        },
+      );
+      const source = readFileSync(normalize(join(config.path, currentlyOpen)), {
         encoding: 'utf8',
       });
       try {
         deepEqual(source, temp);
       } catch (error) {
-        // console.log(error);
+        logErr('Error comparing source and temp files during close', error);
         const prompt = dialog.showMessageBoxSync(mainWindow, {
           title: 'Unsaved changes!',
           message: 'Do you want to save current file?',
-          buttons: ['Yes', 'No'],
+          buttons: ['Yes', 'No', 'Cancel'],
         });
         if (prompt === 0) {
-          writeFileSync(currentlyOpen, temp, { encoding: 'utf8' });
+          writeFileSync(normalize(join(config.path, currentlyOpen)), temp, {
+            encoding: 'utf8',
+          });
+        }
+        if (prompt === 2) {
+          event.preventDefault();
+          return;
         }
       }
       store.set('currentlyOpenedItem', '');
-      rmSync(join(...userDataPath, 'currentItem'));
-      rmSync(join(...userDataPath, 'currentBackground'));
+      rmSync(normalize(join(...userDataPath, 'currentItem')));
+      rmSync(normalize(join(...userDataPath, 'currentBackground')));
     }
-    rmSync(join(...userDataPath, 'user-data.json'));
+    rmSync(normalize(join(...userDataPath, 'user-data.json')));
   });
 };
 
@@ -121,6 +135,12 @@ menu.append(
         },
       },
     ],
+  }),
+);
+menu.append(
+  new MenuItem({
+    accelerator: 'Alt',
+    visible: false,
   }),
 );
 
@@ -200,6 +220,32 @@ app.whenReady().then(() => {
   );
 
   ipcMain.handle(
+    'rename-item',
+    async (_e, oldFilename: string, newName: string) =>
+      await renameItem(oldFilename, newName, mainWindow, store),
+  );
+
+  ipcMain.handle(
+    'delete-background',
+    async (_e, backgroundRel: string) =>
+      await (async () => {
+        return await deleteBackground(backgroundRel, mainWindow, store);
+      })(),
+  );
+
+  ipcMain.handle(
+    'delete-item',
+    async (_e, filename: string) =>
+      await deleteItem(filename, mainWindow, store),
+  );
+
+  ipcMain.handle(
+    'cancel-new-item-if-empty',
+    async (_e, filename: string) =>
+      await cancelNewItemIfEmpty(filename, mainWindow, store),
+  );
+
+  ipcMain.handle(
     'save-and-close-item',
     async () => await saveAndCloseItem(app, store, mainWindow),
   );
@@ -213,6 +259,11 @@ app.whenReady().then(() => {
   ipcMain.handle(
     'export-collection',
     async () => await exportCollection(mainWindow, store),
+  );
+
+  ipcMain.handle(
+    'export-collection-svg',
+    async () => await exportCollectionAsSVG(mainWindow, store),
   );
 
   ipcMain.handle(
@@ -238,6 +289,10 @@ app.whenReady().then(() => {
   ipcMain.handle('set-config', (_e, data: CollectionConfigData) =>
     store.set('currentCollectionConfig', data),
   );
+
+  ipcMain.handle('log-error', (_e, message: string, error?: unknown) => {
+    logErr(message, error);
+  });
 
   if (process.env.NODE_ENV === 'development') {
     ipcMain.on('InspectMeAtPos', (ev, cursorPos) => {

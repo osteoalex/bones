@@ -1,0 +1,74 @@
+import { Typography } from '@mui/material';
+import React from 'react';
+import { useSelector } from 'react-redux';
+
+import { EDIT_MODE_TYPE } from '../../../../../utils/enums';
+import { RootState } from '../../../../store';
+import { StyledBottomBar, StyledBottomBarSection } from './bottom-bar.styles';
+
+const MODE_LABELS: Record<string, string> = {
+  [EDIT_MODE_TYPE.ADDITION]: 'Draw fragments to add',
+  [EDIT_MODE_TYPE.SUBTRACTION]: 'Draw fragments to subtract',
+  [EDIT_MODE_TYPE.SPLIT]: 'Draw line to split by',
+  [EDIT_MODE_TYPE.DELETE]: 'Select fragments to delete',
+  [EDIT_MODE_TYPE.SELECT]: 'Select',
+  [EDIT_MODE_TYPE.ANNOTATION]: 'Add annotation',
+};
+
+const BottomBar: React.FC = () => {
+  const [selectedCount, setSelectedCount] = React.useState('0 items');
+  const mode = useSelector((state: RootState) => state.editor.mode);
+  const { infoDetails, selectedBone } = useSelector(
+    (state: RootState) => state.selected,
+  );
+  const modeLabel = MODE_LABELS[mode] || mode || 'None';
+
+  React.useEffect(() => {
+    if (selectedBone && selectedBone.length > 0) {
+      if (selectedBone.length < 4) {
+        const names = selectedBone
+          .map((f) => f.get('name') || f.getId())
+          .filter((n) => n)
+          .join(', ');
+        setSelectedCount(names);
+        return;
+      }
+      setSelectedCount(`${selectedBone.length} bones`);
+      return;
+    }
+    if (infoDetails && infoDetails.length > 0) {
+      setSelectedCount(
+        `${infoDetails.length} item${infoDetails.length > 1 ? 's' : ''}`,
+      );
+      return;
+    }
+    setSelectedCount(`${infoDetails?.length || 0} items`);
+  }, [infoDetails, selectedBone]);
+
+  return (
+    <StyledBottomBar>
+      <StyledBottomBarSection>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          component="span"
+          sx={{ lineHeight: 1 }}
+        >
+          Selected: {selectedCount}
+        </Typography>
+      </StyledBottomBarSection>
+      <StyledBottomBarSection>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          component="span"
+          sx={{ lineHeight: 1 }}
+        >
+          Current tool: {modeLabel}
+        </Typography>
+      </StyledBottomBarSection>
+    </StyledBottomBar>
+  );
+};
+
+export default BottomBar;

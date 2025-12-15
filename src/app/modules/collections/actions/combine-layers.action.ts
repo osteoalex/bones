@@ -1,13 +1,18 @@
-import turfBooleanContains from '@turf/boolean-contains';
 import turfBooleanOverlap from '@turf/boolean-overlap';
 import { Polygon } from '@turf/helpers';
 import turfUnion from '@turf/union';
-import { Feature, FeatureCollection, MultiPolygon } from 'geojson';
+import {
+  Feature,
+  FeatureCollection,
+  Geometry,
+  MultiPolygon,
+  Point,
+} from 'geojson';
 
 import { TAction } from '../../../../types/store.types';
+import { booleanContainsSafe } from '../../../../utils';
 import { setLayerDetails } from '../slices/editor.slice';
 import {
-  setBoneHoverRef,
   setDeleteSelectRef,
   setDrawFragmentRef,
   setSnapFragmentRef,
@@ -17,6 +22,7 @@ import { setLayers, setLayersData } from '../slices/layers.slice';
 import { setCombineLayersDialogOpen } from '../slices/ui.slice';
 import { recalculateAreas } from './calculate-area.action';
 import { changeLayer } from './change-layer.action';
+import { saveSnapshot } from './saveSnapshot.action';
 import { setupDrawLayers } from './setup-layers-and-sources.action';
 
 export function combineLayers(combinedLayers: string[]): TAction {
@@ -50,6 +56,8 @@ export function combineLayers(combinedLayers: string[]): TAction {
       };
     }, target);
 
+    // save snapshot for undo
+    dispatch(saveSnapshot());
     const updatedLayersData = [...layersData]
       .map((layer) => (layer.name === target.name ? resultLayer : layer))
       .filter((layer) => !layersToCombineNames.includes(layer.name));
@@ -73,10 +81,9 @@ export function combineLayers(combinedLayers: string[]): TAction {
     dispatch(changeLayer(targetLayerId));
     dispatch(setLayerDetails(null));
 
-    const { snap, hover, draw, subtract } = updatedLayers[targetLayerId];
+    const { snap, draw, subtract } = updatedLayers[targetLayerId];
     dispatch(setSnapFragmentRef(snap));
     dispatch(setDeleteSelectRef(updatedLayers[targetLayerId].delete));
-    dispatch(setBoneHoverRef(hover));
     dispatch(setDrawFragmentRef(draw));
     dispatch(setSubtractFragmentRef(subtract));
 
@@ -86,12 +93,16 @@ export function combineLayers(combinedLayers: string[]): TAction {
 }
 
 function combineFuturePointCollections(
-  a: FeatureCollection,
-  b: FeatureCollection,
-): FeatureCollection {
-  const merged = {
+  a: FeatureCollection<Point>,
+  b: FeatureCollection<Point>,
+): FeatureCollection<Point> {
+  // Only allow Point features
+  const allFeatures = [...a.features, ...b.features].filter(
+    (f) => f.geometry.type === 'Point',
+  );
+  const merged: FeatureCollection<Point> = {
     ...a,
-    features: [...a.features, ...b.features].map((f, i) => ({
+    features: allFeatures.map((f, i) => ({
       ...f,
       id: i,
       properties: {
@@ -106,10 +117,10 @@ function combineFuturePointCollections(
 }
 
 function combineFutureCollections(
-  a: FeatureCollection,
-  b: FeatureCollection,
-): FeatureCollection {
-  const merged = {
+  a: FeatureCollection<Geometry>,
+  b: FeatureCollection<Geometry>,
+): FeatureCollection<Geometry> {
+  const merged: FeatureCollection<Geometry> = {
     ...a,
     features: [...a.features, ...b.features].map((f, i) => ({
       ...f,
@@ -123,17 +134,38 @@ function combineFutureCollections(
     })),
   };
 
-  function mergeOverlapping(features: Feature[]): Feature[] {
-    const result: Feature[] = [];
+  function mergeOverlapping(
+    features: Feature<Geometry>[],
+  ): Feature<Geometry>[] {
+    const result: Feature<Geometry>[] = [];
 
     features.forEach((feature) => {
       let hasMerged = false;
 
       for (let i = 0; i < result.length; i++) {
+        // Only attempt geometric unions for polygonal geometries. If either
+        // side is not a Polygon/MultiPolygon, skip union checks for this pair.
+        const aIsPoly =
+          feature.geometry.type === 'Polygon' ||
+          feature.geometry.type === 'MultiPolygon';
+        const bIsPoly =
+          result[i].geometry.type === 'Polygon' ||
+          result[i].geometry.type === 'MultiPolygon';
+        if (!aIsPoly || !bIsPoly) continue;
+
         if (
-          turfBooleanOverlap(result[i], feature) ||
-          turfBooleanContains(result[i], feature) ||
-          turfBooleanContains(feature, result[i])
+          turfBooleanOverlap(
+            result[i] as Feature<Polygon | MultiPolygon>,
+            feature as Feature<Polygon | MultiPolygon>,
+          ) ||
+          booleanContainsSafe(
+            result[i] as Feature<Polygon | MultiPolygon>,
+            feature as Feature<Polygon | MultiPolygon>,
+          ) ||
+          booleanContainsSafe(
+            feature as Feature<Polygon | MultiPolygon>,
+            result[i] as Feature<Polygon | MultiPolygon>,
+          )
         ) {
           const unioned = turfUnion(
             result[i] as Feature<Polygon | MultiPolygon>,

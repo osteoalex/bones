@@ -1,7 +1,7 @@
 import { BrowserWindow, dialog } from 'electron';
 import { mkdirSync, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
-import { join, resolve } from 'path';
+import { join, normalize, resolve } from 'path';
 
 import { CollectionConfigData } from '../types/collection-config-data.interface';
 import { Store } from './store';
@@ -18,13 +18,12 @@ export async function createCollection(
   if (folder.canceled) {
     return false;
   }
-  const path = resolve(join(folder.filePaths[0], data.name));
+  const path = resolve(normalize(join(folder.filePaths[0], data.name)));
   const config = { ...data, path };
   const configYaml = yaml.dump(config);
   mkdirSync(path);
-  mkdirSync(join(path, 'items'));
-  writeFileSync(join(path, 'config.yml'), configYaml);
-  store.set('currentCollectionPath', path);
+  mkdirSync(normalize(join(path, 'items')));
+  writeFileSync(normalize(join(path, 'config.yml')), configYaml);
   store.set('currentCollectionConfig', config);
   return true;
 }

@@ -38,6 +38,14 @@ contextBridge.exposeInMainWorld('electron', {
   addNewBackground: async () => await ipcRenderer.invoke('add-new-background'),
   createNewItem: async (name: string, background: string) =>
     await ipcRenderer.invoke('create-new-item', name, background),
+  renameItem: async (oldFilename: string, newName: string) =>
+    await ipcRenderer.invoke('rename-item', oldFilename, newName),
+  deleteItem: async (filename: string) =>
+    await ipcRenderer.invoke('delete-item', filename),
+  cancelNewItemIfEmpty: async (filename: string) =>
+    await ipcRenderer.invoke('cancel-new-item-if-empty', filename),
+  deleteBackground: async (background: string) =>
+    await ipcRenderer.invoke('delete-background', background),
   openItem: async (filename: string) =>
     await ipcRenderer.invoke('open-item', filename),
   saveAndCloseItem: async () => await ipcRenderer.invoke('save-and-close-item'),
@@ -52,6 +60,8 @@ contextBridge.exposeInMainWorld('electron', {
     await ipcRenderer.on('collection-page-esc-handler', callback);
   },
   exportCollection: async () => await ipcRenderer.invoke('export-collection'),
+  exportCollectionAsSVG: async () =>
+    await ipcRenderer.invoke('export-collection-svg'),
   exportSVG: async (
     extent: Extent,
     geojson?: Feature<MultiPolygon | Polygon>,
@@ -66,6 +76,8 @@ contextBridge.exposeInMainWorld('electron', {
   getConfig: async () => await ipcRenderer.invoke('get-config'),
   setConfig: async (data: CollectionConfigData) =>
     await ipcRenderer.invoke('set-config', data),
+  logError: (message: string, error?: unknown) =>
+    ipcRenderer.invoke('log-error', message, error),
 });
 
 addEventListener('contextmenu', (ev) => {

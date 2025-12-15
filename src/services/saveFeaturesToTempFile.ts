@@ -1,6 +1,6 @@
 import { writeFileSync } from 'fs';
 import { GeoJSON } from 'geojson';
-import { join } from 'path';
+import { join, normalize } from 'path';
 
 export async function saveFeaturesToTempFile(
   app: Electron.App,
@@ -8,7 +8,7 @@ export async function saveFeaturesToTempFile(
 ) {
   const userDataPath = [app.getPath('appData'), app.getName()];
   await writeFileSync(
-    join(...userDataPath, 'currentItem'),
+    normalize(join(...userDataPath, 'currentItem')),
     JSON.stringify(geojson),
     {
       encoding: 'utf8',

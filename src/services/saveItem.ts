@@ -1,13 +1,16 @@
 import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { join, normalize } from 'path';
 
 import { Store } from './store';
 
 export function saveItem(app: Electron.App, store: Store) {
   const userDataPath = [app.getPath('appData'), app.getName()];
   const currentlyOpen = store.get('currentlyOpenedItem');
-  const temp = readFileSync(join(...userDataPath, 'currentItem'), {
+  const config = store.get('currentCollectionConfig');
+  const temp = readFileSync(normalize(join(...userDataPath, 'currentItem')), {
     encoding: 'utf8',
   });
-  writeFileSync(currentlyOpen, temp, { encoding: 'utf8' });
+  writeFileSync(normalize(join(config.path, currentlyOpen)), temp, {
+    encoding: 'utf8',
+  });
 }

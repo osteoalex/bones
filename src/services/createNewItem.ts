@@ -1,7 +1,7 @@
 import { BrowserWindow, dialog } from 'electron';
 import { accessSync, constants, writeFileSync } from 'fs';
 import yaml from 'js-yaml';
-import { join } from 'path';
+import { join, normalize } from 'path';
 
 import {
   CollectionConfigData,
@@ -19,7 +19,7 @@ export async function createNewItem(
   if (!config.path) {
     return false;
   }
-  const itemPath = join(config.path, 'items', `${name}.json`);
+  const itemPath = normalize(join(config.path, 'items', `${name}.json`));
   try {
     accessSync(itemPath, constants.F_OK);
     const prompt = dialog.showMessageBoxSync(mainWindow, {
@@ -31,19 +31,20 @@ export async function createNewItem(
       return false;
     }
   } catch (error) {
-    // console.log(error);
+    // File does not exist, continue
   }
   const itemContent: ItemContent = [];
   writeFileSync(itemPath, JSON.stringify(itemContent), { encoding: 'utf8' });
+  const relativeItemPath = join('items', `${name}.json`);
   const data = {
     ...config,
-    items: [...config.items, { itemPath, background }],
+    items: [...config.items, { itemPath: relativeItemPath, background }],
   };
   if (!data.path) {
     return false;
   }
   const configYaml = yaml.dump(data);
-  writeFileSync(join(data.path, 'config.yml'), configYaml);
+  writeFileSync(normalize(join(data.path, 'config.yml')), configYaml);
   store.set('currentCollectionConfig', data);
   dialog.showMessageBoxSync(mainWindow, {
     title: 'Success',

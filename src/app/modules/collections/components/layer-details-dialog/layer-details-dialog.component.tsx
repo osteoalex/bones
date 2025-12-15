@@ -16,9 +16,10 @@ import {
   setShowLayerColorPickerPosition,
   setShowLayerColorPickerType,
 } from '../../slices/editor.slice';
+import { pushSnapshot } from '../../slices/history.slice';
 import { setLayersData } from '../../slices/layers.slice';
 
-function generateColumns(layer: Layer, dispatch: AppDispatch): GridColDef[] {
+function generateColumns(layer: Layer): GridColDef[] {
   const columns: GridColDef[] = [
     {
       field: 'id',
@@ -31,18 +32,6 @@ function generateColumns(layer: Layer, dispatch: AppDispatch): GridColDef[] {
       width: 100,
       renderCell: (params) => (
         <div
-          onClick={(e) => {
-            const rect = (e.target as HTMLElement).getBoundingClientRect();
-            dispatch(setShowLayerColorPicker(Number(params.id)));
-            dispatch(
-              setShowLayerColorPickerPosition([
-                rect.top + rect.height,
-                rect.left,
-              ]),
-            );
-            dispatch(setShowLayerColorPickerType('fill'));
-            dispatch(setShowLayerColorPickerCurrentColor(params.value));
-          }}
           style={{
             backgroundColor: params.value,
             width: '100%',
@@ -57,18 +46,6 @@ function generateColumns(layer: Layer, dispatch: AppDispatch): GridColDef[] {
       width: 100,
       renderCell: (params) => (
         <div
-          onClick={(e) => {
-            const rect = (e.target as HTMLElement).getBoundingClientRect();
-            dispatch(setShowLayerColorPicker(Number(params.id)));
-            dispatch(
-              setShowLayerColorPickerPosition([
-                rect.top + rect.height,
-                rect.left,
-              ]),
-            );
-            dispatch(setShowLayerColorPickerType('stroke'));
-            dispatch(setShowLayerColorPickerCurrentColor(params.value));
-          }}
           style={{
             backgroundColor: params.value,
             width: '100%',
@@ -81,7 +58,6 @@ function generateColumns(layer: Layer, dispatch: AppDispatch): GridColDef[] {
       field: 'strokeWidth',
       headerName: 'Stroke Width (px)',
       width: 100,
-      editable: true,
     },
   ];
 
@@ -136,7 +112,7 @@ const LayerDetailsDialog: React.FC = () => {
           <DialogTitle>{layersData[showDialog].name}</DialogTitle>
           <DialogContent>
             <DataGrid
-              columns={generateColumns(layersData[showDialog], dispatch)}
+              columns={generateColumns(layersData[showDialog])}
               rows={layersData[showDialog].fragments.features.map((f) => ({
                 id: f.id,
                 ...(f.properties || {}),
@@ -170,12 +146,21 @@ const LayerDetailsDialog: React.FC = () => {
                 };
                 const updatedLayers = [...layersData];
                 updatedLayers.splice(showDialog, 1, updatedLayer);
+                // save snapshot for undo
+                dispatch(pushSnapshot(JSON.parse(JSON.stringify(layersData))));
                 dispatch(setLayersData(updatedLayers));
                 await window.electron.saveFeaturesToTempFile(updatedLayers);
                 return newRow;
               }}
               onProcessRowUpdateError={(error) => {
-                console.log(error);
+                window.electron.logError?.(
+                  'Error processing row update',
+                  error,
+                );
+                window.electron.logError?.(
+                  'Error processing row update',
+                  error,
+                );
               }}
               slots={{ toolbar: GridToolbar }}
             />
@@ -219,6 +204,10 @@ const LayerDetailsDialog: React.FC = () => {
                       dispatch(setShowLayerColorPickerPosition(null));
                       dispatch(setShowLayerColorPickerType(null));
                       dispatch(setShowLayerColorPickerCurrentColor(null));
+                      // save snapshot for undo
+                      dispatch(
+                        pushSnapshot(JSON.parse(JSON.stringify(layersData))),
+                      );
                       dispatch(setLayersData(updatedLayers));
                       const f =
                         layers[showDialog].source.getFeatureById(

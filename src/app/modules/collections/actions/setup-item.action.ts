@@ -1,47 +1,67 @@
-/* eslint-disable */
 import { Feature as GeoJSONFeature, MultiPolygon, Polygon } from 'geojson';
 
+import { ItemContent } from '../../../../types/collection-config-data.interface';
 import { TAction } from '../../../../types/store.types';
 import { calculateArea, geojsonFormat } from '../../../../utils';
 import { EDIT_MODE_TYPE } from '../../../../utils/enums';
 import { setItems, setMode } from '../slices/editor.slice';
+import { clearHistory, pushSnapshot } from '../slices/history.slice';
 import {
-  setBaseBoneHoverRef,
-  setBoneHoverRef,
+  setAddWholeRef,
+  setBoneSelectRef,
   setDeleteSelectRef,
   setDrawFragmentRef,
   setInfoSelectRef,
+  setMiddleMousePanRef,
   setSnapFragmentRef,
   setSubtractFragmentRef,
 } from '../slices/interactions.slice';
 import { setLayers, setLayersData } from '../slices/layers.slice';
-import { setFullArea } from '../slices/selected.splice';
-import {
-  abortDrawRectangle,
-  abortDrawing,
-  abortSplit,
-  abortSubtract,
-} from './abort.action';
-import { setupAddByRectangleDraw } from './add-by-rectangle.action';
-import { setupAddMultipleInteraction } from './add-multiple.action';
+import { setFullArea, setSelectedBone } from '../slices/selected.slice';
+import { createMiddleMouseDragPan } from '../utils/middle-mouse-drag-pan';
+import { abortDrawing, abortSplit, abortSubtract } from './abort.action';
+import { setupAddWholeInteraction } from './add-whole.action';
+import { setupBoneSelectInteraction } from './bone-select.action';
 import { recalculateAreas } from './calculate-area.action';
-import { setupBoneHover } from './hover.action';
-import { setupInfoClickInteraction } from './info-click.action';
+import { initializeAddByRectangleDraw } from './drag-select.action';
+import { setupFragmentSelectInteraction } from './fragment-select.action';
 import { changeEditMode } from './mode.action';
 import { setupLayersAndSources } from './setup-layers-and-sources.action';
 import { setupSplitFragmentInteraction } from './split.action';
-/* eslint-enable */
 
 export function getAndSetupItem(currentItem: string): TAction {
   return async (dispatch, getState) => {
     const { olMapRef } = getState().layers;
-    dispatch(setMode(EDIT_MODE_TYPE.INFO));
+    dispatch(setMode(EDIT_MODE_TYPE.SELECT));
     if (currentItem !== '') {
       const items = await window.electron.getAllItems();
       dispatch(setItems(items));
+
       const { itemContentString, backgroundJSONString } =
         await window.electron.openItem(currentItem);
-      const itemContent = JSON.parse(itemContentString);
+      let itemContent: ItemContent = JSON.parse(itemContentString);
+
+      // Remove fragments with empty properties
+      itemContent = itemContent.map((layer) => {
+        if (!layer.fragments || !Array.isArray(layer.fragments.features))
+          return layer;
+        const filteredFeatures = layer.fragments.features.filter(
+          (fragment) =>
+            fragment.properties && Object.keys(fragment.properties).length > 0,
+        );
+        return {
+          ...layer,
+          fragments: {
+            ...layer.fragments,
+            features: filteredFeatures,
+          },
+        };
+      });
+      // save snapshot of current state before replacing, then clear history
+      const { layersData: currentLayersData } = getState().layers;
+      dispatch(pushSnapshot(JSON.parse(JSON.stringify(currentLayersData))));
+      // Clear history to avoid carrying undo/redo entries across different items
+      dispatch(clearHistory());
       dispatch(setLayersData(itemContent));
 
       olMapRef.getLayers().forEach((layer) => {
@@ -83,32 +103,45 @@ export function getAndSetupItem(currentItem: string): TAction {
       }, 0);
       dispatch(setFullArea(area));
 
-      const baseBoneHoverRef = dispatch(setupBoneHover(vectorLayer));
-      dispatch(setupAddByRectangleDraw());
-      dispatch(setupAddMultipleInteraction());
+      dispatch(initializeAddByRectangleDraw());
       dispatch(setupSplitFragmentInteraction());
 
       dispatch(setLayers(layers));
-      dispatch(setBaseBoneHoverRef(baseBoneHoverRef));
       if (layers.length > 0) {
-        const { snap, hover, draw, subtract } = layers[0];
+        const { snap, draw, subtract } = layers[0];
         dispatch(setSnapFragmentRef(snap));
         dispatch(setDeleteSelectRef(layers[0].delete));
-        dispatch(setBoneHoverRef(hover));
         dispatch(setDrawFragmentRef(draw));
         dispatch(setSubtractFragmentRef(subtract));
       }
-      const infoClickRef = dispatch(setupInfoClickInteraction());
+      const infoClickRef = dispatch(setupFragmentSelectInteraction());
       dispatch(setInfoSelectRef(infoClickRef));
 
-      dispatch(changeEditMode(EDIT_MODE_TYPE.INFO));
+      const selectBoneRef = dispatch(setupBoneSelectInteraction());
+      dispatch(setBoneSelectRef(selectBoneRef));
+
+      const addWholeRef = dispatch(setupAddWholeInteraction());
+      dispatch(setAddWholeRef(addWholeRef));
+
+      let middleMousePan = getState().interactions.middleMousePanRef;
+
+      if (!middleMousePan) {
+        middleMousePan = createMiddleMouseDragPan();
+        dispatch(setMiddleMousePanRef(middleMousePan));
+        olMapRef.addInteraction(middleMousePan);
+      } else {
+        middleMousePan.setActive(true);
+      }
+
+      dispatch(setSelectedBone([]));
+
+      dispatch(changeEditMode(EDIT_MODE_TYPE.SELECT));
       olMapRef.render();
 
       await window.electron.collectionPageEscHandler(async () => {
         dispatch(abortDrawing());
         dispatch(abortSubtract());
         dispatch(abortSplit());
-        dispatch(abortDrawRectangle());
       });
     }
 

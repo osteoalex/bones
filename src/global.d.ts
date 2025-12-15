@@ -13,6 +13,15 @@ interface Window extends Window {
     getAllItems: () => Promise<string[]>;
     addNewBackground: () => Promise<CollectionConfigData>;
     createNewItem: (name: string, background: string) => Promise<string>;
+    renameItem: (
+      oldFilename: string,
+      newName: string,
+    ) => Promise<string | boolean>;
+    deleteItem: (filename: string) => Promise<boolean>;
+    cancelNewItemIfEmpty: (filename: string) => Promise<boolean>;
+    deleteBackground: (
+      background: string,
+    ) => Promise<{ ok: boolean; reason?: string }>;
     openItem: (filename: string) => Promise<{
       itemContentString: string;
       backgroundJSONString: string;
@@ -29,6 +38,7 @@ interface Window extends Window {
     onCollectionPageLeave: () => Promise<void>;
     collectionPageEscHandler: (callback: () => Promise<void>) => void;
     exportCollection: () => Promise<void>;
+    exportCollectionAsSVG: () => Promise<void>;
     exportSVG: (extent: Extent, fragment?: Feature) => Promise<void>;
     exportBoneSVG: (
       extent: Extent,
@@ -39,9 +49,18 @@ interface Window extends Window {
     toggleHint: (data: boolean) => void;
     getConfig: () => Promise<CollectionConfigData>;
     setConfig: (data: CollectionConfigData) => Promise<void>;
+    logError: (message: string, error?: unknown) => Promise<void>;
   };
 }
 
 declare module 'svg-path-to-polygons';
 declare module 'polygon-splitter';
 declare module 'geojson-to-svg';
+declare module '*.svg' {
+  import * as React from 'react';
+  export const ReactComponent: React.FunctionComponent<
+    React.SVGProps<SVGSVGElement>
+  >;
+  const src: string;
+  export default src;
+}

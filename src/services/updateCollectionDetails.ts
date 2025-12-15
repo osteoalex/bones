@@ -1,7 +1,7 @@
 import { BrowserWindow, dialog } from 'electron';
 import { writeFileSync } from 'fs';
 import yaml from 'js-yaml';
-import { join } from 'path';
+import { join, normalize } from 'path';
 
 import { CollectionConfigData } from '../types/collection-config-data.interface';
 import { Store } from './store';
@@ -16,7 +16,7 @@ export async function updateCollectionDetails(
     return;
   }
   const configYaml = yaml.dump(data);
-  writeFileSync(join(data.path, 'config.yml'), configYaml);
+  writeFileSync(normalize(join(data.path, 'config.yml')), configYaml);
   store.set('currentCollectionConfig', data);
   if (!mute) {
     dialog.showMessageBoxSync(mainWindow, {

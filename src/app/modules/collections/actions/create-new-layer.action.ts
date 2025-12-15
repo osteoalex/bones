@@ -11,7 +11,6 @@ import {
 import { TAction } from '../../../../types/store.types';
 import { annotationStyle } from '../components/collection-home/editor-styles';
 import {
-  setBoneHoverRef,
   setDeleteSelectRef,
   setDrawAnnotationRef,
   setDrawFragmentRef,
@@ -25,8 +24,8 @@ import { setupAnnotationDraw } from './add-annotation.action';
 import { setupDrawFragment } from './add-draw.action';
 import { changeLayer } from './change-layer.action';
 import { setupDeleteSelectionInteraction } from './delete.action';
-import { setupBoneHover } from './hover.action';
-import { setupInfoClickInteraction } from './info-click.action';
+import { setupFragmentSelectInteraction } from './fragment-select.action';
+import { saveSnapshot } from './saveSnapshot.action';
 import { setupSnapFragmentInteraction } from './snap.action';
 import { setupSubtractFragmentInteraction } from './subtract.action';
 
@@ -35,6 +34,8 @@ export function createNewLayer(config: Layer): TAction {
     const {
       layers: { layers, layersData, olMapRef },
     } = getState();
+    // save snapshot for undo
+    dispatch(saveSnapshot());
     const source = new VectorSource();
     const base = new VectorLayer({
       className: config.name,
@@ -53,13 +54,11 @@ export function createNewLayer(config: Layer): TAction {
 
     const snap = dispatch(setupSnapFragmentInteraction(source));
     const deleteFragment = dispatch(setupDeleteSelectionInteraction(base));
-    const hover = dispatch(setupBoneHover(base));
     const draw = dispatch(setupDrawFragment(source));
     const subtract = dispatch(setupSubtractFragmentInteraction(source));
 
     dispatch(setSnapFragmentRef(snap));
     dispatch(setDeleteSelectRef(deleteFragment));
-    dispatch(setBoneHoverRef(hover));
     dispatch(setDrawFragmentRef(draw));
     dispatch(setSubtractFragmentRef(subtract));
 
@@ -79,7 +78,6 @@ export function createNewLayer(config: Layer): TAction {
       source,
       snap,
       delete: deleteFragment,
-      hover,
       draw,
       subtract,
       annotationDraw,
@@ -92,7 +90,7 @@ export function createNewLayer(config: Layer): TAction {
     dispatch(changeLayer(updatedLayers.length - 1));
     dispatch(setLayers(updatedLayers));
     dispatch(setNewLayerPopupVisible(false));
-    const infoClickRef = dispatch(setupInfoClickInteraction());
+    const infoClickRef = dispatch(setupFragmentSelectInteraction());
     dispatch(setInfoSelectRef(infoClickRef));
     await window.electron.saveFeaturesToTempFile(newLayersData);
     await window.electron.saveItem();
