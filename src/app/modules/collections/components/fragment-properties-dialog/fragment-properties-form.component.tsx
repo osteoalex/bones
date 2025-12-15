@@ -8,7 +8,6 @@ import {
 } from '@mui/material';
 import { Formik } from 'formik';
 import React from 'react';
-import { SketchPicker } from 'react-color';
 import { useDispatch, useSelector } from 'react-redux';
 import { Form } from 'react-router-dom';
 
@@ -65,53 +64,21 @@ const FragmentPropertiesForm: React.FC = () => {
                 }
               />
             ))}
-            <TextField
-              sx={{ mb: 2 }}
-              name="strokeWidth"
-              label="Stroke width"
-              type="text"
-              fullWidth
-              variant="standard"
-              value={formik.values.strokeWidth}
-              onChange={formik.handleChange}
-              error={
-                formik.touched.strokeWidth && Boolean(formik.errors.strokeWidth)
-              }
-              helperText={
-                formik.touched.strokeWidth && Boolean(formik.errors.strokeWidth)
-                  ? (formik.errors.strokeWidth as string)
-                  : ''
-              }
-            />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography sx={{ pr: 3, fontWeight: 'bold' }}>fill: </Typography>
-              <SketchPicker
-                color={formik.values.fill}
-                onChangeComplete={(color) =>
-                  formik.setFieldValue(
-                    'fill',
-                    `rgba(${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b}, ${color.rgb.a || 1})`,
-                  )
-                }
-              />
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography sx={{ pr: 3, fontWeight: 'bold' }}>
-                stroke:{' '}
-              </Typography>
-              <SketchPicker
-                color={formik.values.stroke}
-                onChangeComplete={(color) =>
-                  formik.setFieldValue(
-                    'stroke',
-                    `rgba(${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b}, ${color.rgb.a || 1})`,
-                  )
-                }
-              />
-            </Box>
+            {layersData[activeLayerIdx].propertiesConfig.length === 0 && (
+              <Box sx={{ mt: 2 }}>
+                <Typography>No properties configured.</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  You can add properties in Layer Settings.
+                </Typography>
+              </Box>
+            )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => formik.submitForm()} type="submit">
+            <Button
+              onClick={() => formik.submitForm()}
+              type="submit"
+              disabled={!(formik.isValid && formik.dirty)}
+            >
               Save
             </Button>
           </DialogActions>

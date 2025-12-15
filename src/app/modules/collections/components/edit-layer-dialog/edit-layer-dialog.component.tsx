@@ -26,6 +26,7 @@ const EditLayerDialog: React.FC = () => {
         // update layer
         dispatch(setEditedLayer(null));
       }}
+      isEdit={true}
     />
   );
 };

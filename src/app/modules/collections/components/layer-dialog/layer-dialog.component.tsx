@@ -26,6 +26,7 @@ type Props = {
   initialValues: Layer;
   closeHandler: () => void;
   submitHandler: (values: Layer) => void;
+  isEdit?: boolean;
 };
 
 const LayerDialog: React.FC<Props> = ({
@@ -34,6 +35,7 @@ const LayerDialog: React.FC<Props> = ({
   initialValues,
   closeHandler,
   submitHandler,
+  isEdit = false,
 }) => {
   return (
     <Dialog open={showDialog} maxWidth="lg">
@@ -49,7 +51,7 @@ const LayerDialog: React.FC<Props> = ({
       >
         <CloseIcon />
       </IconButton>
-      <DialogTitle>Add new layer</DialogTitle>
+      <DialogTitle>{isEdit ? 'Edit layer' : 'Add new layer'}</DialogTitle>
       <Formik<Layer>
         initialValues={initialValues}
         onSubmit={submitHandler}
